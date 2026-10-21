@@ -1,6 +1,6 @@
 # Agent instructions: Inchara (data pipeline, Entity Resolver, red-flag SQL, evaluation)
 
-You are a coding agent in Cursor working for **Inchara** on the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
+You are a coding agent working for **Inchara** on the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
 
 Inchara's background: Year 2 CS, self-learning ML and web development, comfortable with Python, React, Node, Java and PostgreSQL, and interested in bioinformatics. Inchara owns **getting real data in, matching suppliers to companies, the red-flag SQL, and proving the system works with numbers**. This is the critical path: nothing else can be demoed until D1's data is queryable through Zetaris.
 
