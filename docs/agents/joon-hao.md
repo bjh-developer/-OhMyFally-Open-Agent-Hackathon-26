@@ -2,7 +2,7 @@
 
 You are Claude Code working for **Joon Hao**, team lead and submission owner of the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
 
-Joon Hao's background: full-stack (Python, FastAPI, Next.js, TypeScript, Tailwind, Supabase), Docker, CI/CD with GitHub Actions, Grafana/Loki observability, security (CSP, secret scanning), and OSINT/forensics from CTFs. He owns **the agent graph, the sponsor adapters, tracing, the API, the main UI, Docker Compose, integration, and the final submission**.
+Joon Hao's background: full-stack (Python, FastAPI, Next.js, TypeScript, Tailwind, Supabase), Docker, CI/CD with GitHub Actions, Grafana/Loki observability, security (CSP, secret scanning), and OSINT/forensics from CTFs. He owns **the agent graph, the sponsor adapters, tracing, the API, the UI, Docker Compose, integration, and the final submission**. **Since 22 Oct he also owns everything that was Rae's** (Rae is unavailable): the H-MEM TypeScript service, the red-flag rules and wording, AGO excerpts, planted cases (with Inchara), UI components, and the deck and demo script. See §8.
 
 ---
 
@@ -20,7 +20,6 @@ Joon Hao's background: full-stack (Python, FastAPI, Next.js, TypeScript, Tailwin
   - Never put the NVIDIA key in `.env`; it lives in Nightshift.
 - **Verify before claiming.** Every "done" needs proof: a test run, a Zetaris `SELECT` result, a Nightshift receipt or the conformance output. If something fails, say so with the output.
 - **Teammates' areas:**
-  - Rae owns `services/hmem/`, `data/rules/`, `data/ago/`, `web/components/` and `docs/pitch/`.
   - Inchara owns `scripts/fetch_*`, `scripts/seed.py`, `app/resolver/`, `sql/checks/`, `data/eval/` and `scripts/eval.py`.
   - Don't rewrite their files. Propose changes, or fix only what blocks integration and tell Joon Hao.
 - **Contracts:** don't change CONTRACTS.md on your own. Propose the change, and when it's agreed, update the doc in the same commit as the code.
@@ -58,7 +57,7 @@ Joon Hao's background: full-stack (Python, FastAPI, Next.js, TypeScript, Tailwin
 | Agent graph | `app/orchestration/`, `app/agents/` | LangGraph with the loops below, bounded |
 | API and CLI | `app/api.py`, `run.py` | `python run.py --input input_examples/example_1.json` and `POST /run` both produce a memo and a trace |
 | Zetaris registration and USL | `scripts/register_zetaris.py` plus `sql/register/` (with Inchara) | Idempotent: it drops and recreates our objects only, and creates the USL model `procurement_usl` |
-| Web UI | `web/` (Next.js, port 3100) | Request bar, live timeline (SSE from the API), memo using Rae's components, Confirm and Dismiss buttons calling `/auditor-decision` |
+| Web UI | `web/` (Next.js, port 3100) | Request bar, live timeline (SSE from the API), memo and evidence drawer, human-review queue, Confirm and Dismiss buttons calling `/auditor-decision` |
 | Submission | `README.md`, `metadata.json`, `output_examples/`, `logs/`, video, HackOS form | Every item on the plan's submission checklist ticked |
 
 ## 4. Agent graph (LangGraph)
@@ -77,7 +76,7 @@ State holds the request, plan, matches, findings, critiques, retries, memory_ref
    - Queries H-MEM: an exact dismiss memory means `suppressed` with `memory_refs`.
    - Sends `helpful` / `not_helpful` feedback to H-MEM about the memories it used.
 6. **Risk (deep):**
-   - Applies Rae's `wording.yaml`; a banned term sends the finding back to the Reporter.
+   - Applies `data/rules/wording.yaml`; a banned term sends the finding back to the Reporter.
    - Escalates low-confidence or should-have flags (R5) to human review.
    - Can request **one** replan when coverage is missing.
 7. **Reporter (deep):**
@@ -97,9 +96,10 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
     - commit the skeleton, Compose, `.env.example`, `scripts/smoke_test.py` and `scripts/zsql.py`;
     - write the Zetaris and Nightshift adapters, with tests against recorded fixtures;
     - register S1 and S2 with Inchara;
-    - get `pi-hmem` into Compose with Rae.
+    - **in a parallel session:** H-MEM reference into `services/hmem/` with conformance passing (§8.1).
+  - Quick wins with the agent: `red_flags.yaml`, `mof_thresholds.yaml` and `wording.yaml` (§8.2), so Inchara's SQL has definitions by midday.
   - Afternoon: walking skeleton (request → Planner → Analyst runs R1 → Reporter JSON, written to `logs/`), then the LangGraph state and the first Critic loop.
-  - Evening: the Resolver agent around `resolve()`; R2, R3, R4 and R8 through the Analyst; `POST /run` and `run.py`.
+  - Evening: the Resolver agent around `resolve()`; R2, R3, R4 and R8 through the Analyst; `POST /run` and `run.py`. In parallel: the H-MEM HTTP API, Docker and tests (§8.1); AGO chunks; `planted.json` with Inchara (§8.2).
 - [ ] **D2, Fri 23 (feature freeze 23:59):**
   - Agents:
     - Critic retries and evidence re-checks;
@@ -112,7 +112,9 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
     - masking roles (`auditor` / `public`). Research the syntax first; if it isn't feasible, pseudonymise in the API and say so honestly.
   - Measure tokens with Zetaris pushdown against a naive baseline.
   - Replay mode: re-serve recorded Zetaris and Nightshift responses from `logs/` when `SAMPLE_MODE` is set and a service is down, clearly labelled.
-  - Web UI: timeline (SSE) and memo using Rae's components, with Confirm and Dismiss.
+  - Web UI: timeline (SSE), memo, evidence drawer and human-review queue, with Confirm and Dismiss (§8.3).
+  - Deck v1 and demo script (§8.3).
+  - Evening: hand-review the top 30 real flags with Inchara.
 - [ ] **D3, Sat 24 (submit by 20:00):**
   - 09:00–13:00:
     - clean-setup test on a fresh clone, and fixes;
@@ -120,7 +122,7 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
     - `metadata.json` saying where Zetaris sits and which Meterless engines are used where;
     - 3 or more `input_examples/` with their real `output_examples/`;
     - TruffleHog in CI.
-  - 13:00–17:00: record and edit the video with Rae. Follow the demo script and keep it to 2:30–3:30.
+  - 13:00–17:00: final deck, then record and edit the video (Inchara helps with the metrics segment). Follow the demo script and keep it to 2:30–3:30.
   - 17:00–20:00:
     - final pass over the submission checklist;
     - confirm the roster first, because the team locks when the submission is created;
@@ -142,3 +144,93 @@ A judge with Zetaris and Nightshift running can:
 3. run `python run.py --input input_examples/example_1.json` and get a ranked memo in under 10 minutes;
 4. find `logs/<run_id>.jsonl` showing the Critic rejecting something, a retry, an escalation, Zetaris query IDs and Nemotron receipts;
 5. confirm that a second run after a dismissal suppresses the dismissed finding and cites H-MEM.
+
+## 8. Scope taken over from Rae (22 Oct)
+
+### 8.1 H-MEM service: build guide
+
+**Goal:** a memory service that the Python agents call over HTTP and that passes the official Meterless H-MEM conformance suite. That suite only runs TypeScript, which is why this service is in TypeScript.
+
+#### D1 morning (Thu 22). Best run as a separate parallel session, since it's independent of the agent graph
+1. Pull the reference into the repo:
+   ```bash
+   npx degit meterless/meterless/engines/hmem services/hmem-upstream
+   ```
+   Copy `reference/` into `services/hmem/` and keep `services/hmem-upstream/conformance/` for testing. Keep the Apache-2.0 `LICENSE` and add a `NOTICE` saying it was adapted from Meterless.
+2. Run the suite against the unmodified copy and confirm it is green **before changing anything**:
+   ```bash
+   cd services/hmem && npm install
+   HMEM_IMPL="$(pwd)/src/index.ts" npx tsx ../hmem-upstream/conformance/runner.ts
+   ```
+   Save the output to `logs/evidence/hmem-conformance-d1.txt`.
+3. Read `engines/hmem/AGENTS.md` §2 (memory record), §8 (reinjection) and §11 (trust ledger). Ignore dreaming and sleep for now.
+4. Find how the reference stores data. If it is in-memory only, add file-backed persistence (a JSON or SQLite file under `services/hmem/state/`, mounted as a Docker volume). Memory **must survive a restart**, because the demo relies on run 2 remembering run 1.
+
+#### D1 afternoon to midnight (Thu 22)
+5. Add `src/server.ts`, a small HTTP server (Hono or Express) that imports the `HMEM` class from `src/index.ts`. `src/index.ts` must keep exporting `HMEM` unchanged, so the conformance suite keeps working.
+6. Implement every endpoint in CONTRACTS §6. Map them like this:
+   - `/add` → `hmem.add(...)`, with `agentId`, `runId` and `meta` stored on the record (tags or fields).
+   - `/query` → `hmem.query(...)`, then apply the `filters` and return the trace metadata.
+   - `/feedback` → `hmem.feedback(...)`.
+   - `/auditor-decision` → a **long_term** memory with provenance `origin: "auditor"`, the reason as content, and `meta` holding uen, flag_id, agency, pattern_tag and scope.
+   - `/ledger` → stream the trust ledger, and also append every ledger event to `logs/hmem-ledger.jsonl`.
+7. Add `Dockerfile` plus a `docker-compose.yml` service `pi-hmem` on port 7070, on network `zetaris_default`, with a volume for `state/`.
+8. Re-run conformance after your changes and save `logs/evidence/hmem-conformance-d1-final.txt`. **It must stay green.**
+9. Write `services/hmem/test/http.test.ts`. Cover:
+   - add, then query returns it;
+   - an auditor-decision dismiss is recalled by an exact (uen, flag_id, agency) filter;
+   - a memory from another agency is **not** returned unless `scope=global`;
+   - the memory survives a restart.
+
+#### D2 (Fri 23)
+10. Wire `app/adapters/hmem_client.py` to the API. Fix any contract mismatches, and update CONTRACTS.md in the same commit.
+11. Prove the demo moment end to end: run 1 flags X → the auditor dismisses it with a reason → run 2 suppresses X and cites the memory ID.
+
+**Using the Meterless prompt:** at meterless.ai/engines.html, choose IMPLEMENT → **"Give my agent memory"**, paste it into your coding agent, and add: *"Target is `services/hmem/` (already adapted from the reference). Keep `src/index.ts` exporting `HMEM` so the conformance suite still runs. Expose it via the HTTP contract in `docs/agents/CONTRACTS.md` §6."*
+
+### 8.2 Domain outputs
+
+#### Red-flag definitions (draft tonight, final on D1)
+For each of R1–R9 (CONTRACTS §9), write it in `red_flags.yaml`:
+
+```yaml
+- flag_id: R4
+  name: Possible contract splitting
+  logic: Same agency and supplier; >=2 awards each < 90000 SGD within 90 days, summing > 90000
+  params: {threshold_sgd: 90000, window_days: 90, min_awards: 2}
+  priority: must
+  limitation: Needs GeBIZ quotation records; tenders-only data under-detects
+  why_it_matters: AGO FY2024/25 found ... (cite)
+  source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
+```
+
+Also put the MOF thresholds (S$6k / S$90k) in `mof_thresholds.yaml`, with the source URL.
+
+#### Wording rules (D1)
+`wording.yaml` lists:
+- banned terms: fraud, corrupt, illegal, criminal, guilty, scam;
+- required phrasing: "anomaly for review", "may indicate", "requires auditor judgement";
+- a one-line disclaimer for the UI and the memo.
+
+The Risk agent rejects any finding text containing a banned term.
+
+#### AGO excerpts (tonight and D1)
+Take procurement chapters from 3–5 AGO annual reports (FY2021/22 to FY2024/25). Chunk them into roughly 150–300-word sections. In `index.csv`, record `chunk_id, report, fy, section, page, url`. Quote only; don't paraphrase into new claims.
+
+#### Planted cases (D1, with Inchara)
+Write `planted.json` entries like this:
+
+```json
+{"case_id":"P1","flags":["R1"],"agency":"<sample agency>","supplier":"ZYLOQ TEST ENGINEERING PTE. LTD.",
+ "uen":"T99ZZ0001A","award":{"tender_no":"PLT000ETT25000001","awarded_amt":400000,"award_date":"2025-06-20"},
+ "acra":{"incorporation_date":"2025-05-30","status":"Live Company","postal_code":"999001"},"expected":"flag R1"}
+```
+
+Inchara's seed script injects them.
+
+### 8.3 Product, UX and pitch
+
+- **Figma (tonight):** one screen with a request bar, a live run timeline and a review memo with evidence drawer, plus a human-review queue tab. Use shadcn defaults; a quick sketch is enough, or skip Figma and build straight in code.
+- **UI (D2):** build the components in `web/components/` against the `Finding` schema in CONTRACTS §7.4, using mock JSON from `output_examples/` until the API is live. The web UI runs on **port 3100**.
+- **Deck (v1 on D2, final on D3):** problem and users, solution, architecture (reuse the plan diagram), stack, Zetaris and Meterless use, what was unique (the Critic re-queries Zetaris to verify every claim, the USL crosswalk, auditor memory in H-MEM), product visuals, future work.
+- **Demo script (D2):** follow the 6 segments in the plan doc. Keep it to 2:30–3:30.

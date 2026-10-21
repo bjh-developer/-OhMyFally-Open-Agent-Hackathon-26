@@ -25,7 +25,7 @@ Inchara's background: Year 2 CS, self-learning ML and web development, comfortab
 - **Data rules:**
   - Keep only what the demo needs: 2–3 agencies, FY21–FY25 awards, and ACRA rows that are candidates for those suppliers.
   - Never commit full raw dumps. `data/raw/` is gitignored and `data/sample/` is committed.
-  - Planted cases use **fictional** suppliers only (Rae and Inchara write them together); never alter a real company's row.
+  - Planted cases use **fictional** suppliers only (Joon Hao and Inchara write them together); never alter a real company's row.
   - Sole proprietorships stay in for matching, but their names are masked in the UI.
 - **Zetaris rules:**
   - One SQL statement per REST call.
@@ -69,7 +69,7 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
 2. `fetch_acra.py`: build the candidate subset. Normalise names (upper case, strip punctuation, drop PTE/LTD/PRIVATE/LIMITED/LLP). Keep every ACRA entity that shares the first 1–2 significant tokens with any supplier, by current or former name. Write `data/sample/acra_entities.parquet` (pyarrow), with a CSV copy as fallback.
 3. `seed.py`:
    - create DBs `gebiz` and `agency_internal` in `pi-postgres`;
-   - load `awards`, `rules` (from Rae's YAML) and `ago_chunks` (from Rae's files);
+   - load `awards`, `rules` (from `data/rules/` YAML) and `ago_chunks` (from `data/ago/`);
    - create an empty `supplier_xwalk`;
    - upload the ACRA file to `s3://pi-acra/acra/`.
    It must be **idempotent**: running it twice gives the same state.
@@ -85,12 +85,12 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
 
    Write the results to `supplier_xwalk`. Expose `resolve(names) -> list[Match]` (CONTRACTS §7.4) so the Resolver agent can call it and retry a different strategy when the Critic rejects a match.
 6. `entity_labels.csv`: hand-check about 100 pairs (supplier_name, correct uen or NONE). Include hard cases: punctuation, "PRIVATE LIMITED" against "PTE LTD", renamed companies, and branches.
-7. Red-flag SQL, R1, R2, R3, R4 and R8 (definitions are in Rae's `red_flags.yaml`):
+7. Red-flag SQL, R1, R2, R3, R4 and R8 (definitions are in `data/rules/red_flags.yaml`):
    - `awards` joins to `supplier_xwalk` on supplier_name, and `supplier_xwalk` joins to `entities` on uen;
    - output columns exactly as in CONTRACTS §7.3;
    - use `{{agency}}`, `{{date_from}}` and `{{date_to}}` placeholders;
    - Spark SQL functions: `datediff`, `date_add`, window functions for R4.
-8. With Rae, write `planted.json`, and make `seed.py` inject the fictional rows into awards, entities and (for R9) agency_internal. Then run each check and confirm its planted case appears.
+8. With Joon Hao, write `planted.json`, and make `seed.py` inject the fictional rows into awards, entities and (for R9) agency_internal. Then run each check and confirm its planted case appears.
 
 ### D2 (Fri 23): evaluation and the rest of the flags
 9. `scripts/eval.py`:
@@ -102,11 +102,11 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
     - first check whether Nightshift answers `POST /v1/embeddings`;
     - if not, use a small local `sentence-transformers` model (cached, no runtime download);
     - R5 findings are always low-confidence and escalated;
-    - for R6, cluster tender descriptions into about 10 categories (embeddings, or Rae's keyword taxonomy), then write `sql/checks/R6.sql`.
+    - for R6, cluster tender descriptions into about 10 categories (embeddings, or a keyword taxonomy), then write `sql/checks/R6.sql`.
 11. Generate the S5 synthetic internal DB (bids, evaluation scores and COI declarations for the ~30 planted tenders only) and write `sql/checks/R9.sql`.
 
 ### D2 evening (Fri 23): numbers and freeze
-12. Hand-review the top 30 non-planted flags with Rae into `precision_review.csv` (`plausible` / `explained` / `unclear`).
+12. Hand-review the top 30 non-planted flags with Joon Hao into `precision_review.csv` (`plausible` / `explained` / `unclear`).
 13. Final `metrics.json`; `data/README.md`. **Feature freeze 23:59.**
 
 ### D3 (Sat 24): ship
@@ -115,7 +115,7 @@ Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27
 
 ## 5. Interfaces you consume and provide
 
-- **Consume:** Rae's `data/rules/*.yaml`, `data/ago/*`, `planted.json`; Joon Hao's `app/adapters/zetaris.py`, `app/adapters/nightshift.py` (fast lane) and `app/schemas.py`.
+- **Consume:** Joon Hao's `data/rules/*.yaml`, `data/ago/*`, `planted.json`, `app/adapters/zetaris.py`, `app/adapters/nightshift.py` (fast lane) and `app/schemas.py`.
 - **Provide:** the Postgres and S3 data and Zetaris objects (CONTRACTS §7.1); `resolve()`; `sql/checks/*.sql`; `metrics.json`.
 
 ## 6. When to stop and ask Joon Hao

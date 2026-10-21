@@ -41,8 +41,8 @@ data/
   sample/                 # small curated CSV/Parquet + seed SQL (a few MB)
   eval/planted.json       # ground truth; agents NEVER read this
   eval/entity_labels.csv  # ~100 hand-labelled GeBIZ-to-ACRA pairs
-  rules/                  # red_flags.yaml, mof_thresholds.yaml (owner: Rae)
-  ago/                    # AGO excerpts as text chunks (owner: Rae)
+  rules/                  # red_flags.yaml, mof_thresholds.yaml (owner: Joon Hao)
+  ago/                    # AGO excerpts as text chunks (owner: Joon Hao)
   README.md               # sources, SODL licence, subset, counts, how to regenerate
 scripts/                  # fetch_*.py, seed.py, register_zetaris.py, eval.py, smoke_test.py
 web/                      # Next.js + shadcn UI
@@ -166,7 +166,7 @@ One line per agent step:
 
 `status` is one of `success | needs_revision | retrying | escalated | partial_success | failed`.
 
-## 9. Red flags (definitions are owned by Rae in `data/rules/red_flags.yaml`)
+## 9. Red flags (definitions are owned by Joon Hao in `data/rules/red_flags.yaml`)
 
 | ID | Priority | Flag |
 |---|---|---|
