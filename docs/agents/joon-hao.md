@@ -90,21 +90,41 @@ Log every agent hop as a trace line. Put the Zetaris `query_id`s and the Meterle
 
 **Tonight (21 Oct):** no product code. Prep only: read CONTRACTS.md, confirm `.env` names, and draft the Compose file and adapter design in your head or in notes.
 
-- [ ] **D1, 22 Oct (from 08:00).** Commit the skeleton, Compose, `.env.example`, `scripts/smoke_test.py` and `scripts/zsql.py`. Write the Zetaris and Nightshift adapters with tests against recorded fixtures. Register S1 and S2 with Inchara. **Walking skeleton:** request → Planner → Analyst runs R1 → Reporter JSON, written to `logs/`. Help Rae get `pi-hmem` into Compose.
-- [ ] **D2, 23 Oct.** The Critic loop with real retries; the Resolver agent around `resolve()`; R2–R4 via the Analyst; `POST /run` and `run.py`; replay mode, which re-serves recorded Zetaris and Nightshift responses from `logs/` when `SAMPLE_MODE` and a service is down, clearly labelled.
-- [ ] **D3, 24 Oct.** The Risk agent and replan; the H-MEM client wired in, with the Planner and Critic using recall; the `/auditor-decision` flow; the demo memory moment working end to end. The USL model. The web UI timeline and memo.
-- [ ] **D4, 25 Oct.** AGO citations in the Reporter. Measure tokens with Zetaris pushdown against a naive baseline that dumps raw rows into the prompt. Zetaris masking roles (`auditor` / `public`); research the syntax first, and if it's not feasible, pseudonymise in the API and say so honestly. **Feature freeze 23:59.**
-- [ ] **D5, 26 Oct.**
-  - Clean-setup test on a fresh clone.
-  - `README.md` covering setup, usage, dependencies, Track 02, the sponsor explanation and limitations.
-  - `metadata.json` saying where Zetaris sits and which Meterless engines are used where.
-  - 3 or more `input_examples/` and their real `output_examples/`.
-  - TruffleHog in CI.
-- [ ] **D6, 27 Oct.**
-  - Record and edit the video with Rae; follow the demo script in the plan and keep it to 2:30–3:30.
-  - Final pass over the submission checklist.
-  - **Submit on HackOS by 22:00 SGT.**
-  - Confirm the roster before creating the submission, since the team locks then.
+Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27 are buffer only. Run work in parallel with subagents or extra sessions where the pieces are independent.
+
+- [ ] **D1, Thu 22 (08:00 to midnight):**
+  - Morning:
+    - commit the skeleton, Compose, `.env.example`, `scripts/smoke_test.py` and `scripts/zsql.py`;
+    - write the Zetaris and Nightshift adapters, with tests against recorded fixtures;
+    - register S1 and S2 with Inchara;
+    - get `pi-hmem` into Compose with Rae.
+  - Afternoon: walking skeleton (request → Planner → Analyst runs R1 → Reporter JSON, written to `logs/`), then the LangGraph state and the first Critic loop.
+  - Evening: the Resolver agent around `resolve()`; R2, R3, R4 and R8 through the Analyst; `POST /run` and `run.py`.
+- [ ] **D2, Fri 23 (feature freeze 23:59):**
+  - Agents:
+    - Critic retries and evidence re-checks;
+    - the Risk agent, with `wording.yaml` and one replan;
+    - the H-MEM client wired in, with the Planner and Critic using recall;
+    - the `/auditor-decision` flow and the demo memory moment end to end;
+    - Reporter AGO citations.
+  - Zetaris:
+    - the USL model `procurement_usl`;
+    - masking roles (`auditor` / `public`). Research the syntax first; if it isn't feasible, pseudonymise in the API and say so honestly.
+  - Measure tokens with Zetaris pushdown against a naive baseline.
+  - Replay mode: re-serve recorded Zetaris and Nightshift responses from `logs/` when `SAMPLE_MODE` is set and a service is down, clearly labelled.
+  - Web UI: timeline (SSE) and memo using Rae's components, with Confirm and Dismiss.
+- [ ] **D3, Sat 24 (submit by 20:00):**
+  - 09:00–13:00:
+    - clean-setup test on a fresh clone, and fixes;
+    - `README.md` covering setup, usage, dependencies, Track 02, the sponsor explanation and limitations;
+    - `metadata.json` saying where Zetaris sits and which Meterless engines are used where;
+    - 3 or more `input_examples/` with their real `output_examples/`;
+    - TruffleHog in CI.
+  - 13:00–17:00: record and edit the video with Rae. Follow the demo script and keep it to 2:30–3:30.
+  - 17:00–20:00:
+    - final pass over the submission checklist;
+    - confirm the roster first, because the team locks when the submission is created;
+    - **submit on HackOS by 20:00 SGT**.
 
 ## 6. Known gaps and decisions to remember
 

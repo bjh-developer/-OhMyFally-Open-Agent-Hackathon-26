@@ -182,6 +182,14 @@ One line per agent step:
 
 ## 10. Timeline (SGT) and cut order
 
-- **Build window:** 22 Oct 08:00 to 28 Oct 07:45. **Our submit target is 27 Oct, 22:00.** Feature freeze at the end of D4 (25 Oct, 23:59).
-- **Cut order:** R9 and S5, then R6, then R5, then Scout Intent, then World Model.
+**Everything ships in three days, with full scope.** Our coding agents carry the volume.
+
+| Day | Date (SGT) | By the end of the day |
+|---|---|---|
+| D1 | Thu 22 Oct, 08:00–24:00 | Real data queryable through Zetaris; an R1 memo produced end to end; H-MEM API up with conformance passing |
+| D2 | Fri 23 Oct | Full system: all loops, H-MEM memory moment, all red flags, UI, evaluation numbers. **Feature freeze 23:59** |
+| D3 | Sat 24 Oct | Clean-setup test, README, `metadata.json`, examples, video, deck. **Submit on HackOS by 20:00** |
+| Buffer | Sun 25 to Tue 27 | Fixes and resubmits only. The hard deadline is 28 Oct, 07:45 SGT |
+
+- **Cut order, only if a day slips:** R9 and S5, then R6, then R5, then Scout Intent, then World Model.
 - **Never cut:** the Critic loop, H-MEM, Zetaris federation, the Nightshift-to-Nemotron path, or the evidence drawer.

@@ -62,7 +62,9 @@ Inchara's background: Year 2 CS, self-learning ML and web development, comfortab
 - [ ] Pick 2–3 agencies with enough awards, a mix of values, and some sub-S$90k repeat suppliers. Share the shortlist.
 - [ ] Download the raw GeBIZ and ACRA CSVs into `data/raw/` (gitignored; data only, no code).
 
-### D1 (22 Oct): data queryable through Zetaris (**blocks everyone**)
+Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27 are buffer only.
+
+### D1 morning (Thu 22, target 13:00): data queryable through Zetaris (**blocks everyone**)
 1. `fetch_gebiz.py`: pull awards for the chosen agencies, parse dates, and write `data/sample/awards.csv`.
 2. `fetch_acra.py`: build the candidate subset. Normalise names (upper case, strip punctuation, drop PTE/LTD/PRIVATE/LIMITED/LLP). Keep every ACRA entity that shares the first 1–2 significant tokens with any supplier, by current or former name. Write `data/sample/acra_entities.parquet` (pyarrow), with a CSV copy as fallback.
 3. `seed.py`:
@@ -73,7 +75,7 @@ Inchara's background: Year 2 CS, self-learning ML and web development, comfortab
    It must be **idempotent**: running it twice gives the same state.
 4. With Joon Hao, write `sql/register/` and register the sources. Confirm both `SELECT count(*)` queries through Zetaris.
 
-### D2 (23 Oct): Resolver, red-flag SQL, planted cases
+### D1 afternoon to midnight (Thu 22): Resolver, red-flag SQL, planted cases
 5. Resolver `app/resolver/match.py`. Apply these layers in order and record the `method`:
    1. `exact` on the normalised name
    2. `former_name` match
@@ -90,25 +92,26 @@ Inchara's background: Year 2 CS, self-learning ML and web development, comfortab
    - Spark SQL functions: `datediff`, `date_add`, window functions for R4.
 8. With Rae, write `planted.json`, and make `seed.py` inject the fictional rows into awards, entities and (for R9) agency_internal. Then run each check and confirm its planted case appears.
 
-### D3 (24 Oct): evaluation and should-haves
+### D2 (Fri 23): evaluation and the rest of the flags
 9. `scripts/eval.py`:
    - run the pipeline (or just the checks) on 3 sample requests;
    - compute recall on planted cases and Resolver accuracy against `entity_labels.csv`;
    - read the precision labels from `data/eval/precision_review.csv`;
    - write `output_examples/metrics.json`.
-10. R8 edge cases, then R5:
+10. R8 edge cases, then R5 and R6:
     - first check whether Nightshift answers `POST /v1/embeddings`;
     - if not, use a small local `sentence-transformers` model (cached, no runtime download);
-    - R5 findings are always low-confidence and escalated.
-11. If time allows, generate the S5 synthetic internal DB: bids, evaluation scores and COI declarations for the ~30 planted tenders only.
+    - R5 findings are always low-confidence and escalated;
+    - for R6, cluster tender descriptions into about 10 categories (embeddings, or Rae's keyword taxonomy), then write `sql/checks/R6.sql`.
+11. Generate the S5 synthetic internal DB (bids, evaluation scores and COI declarations for the ~30 planted tenders only) and write `sql/checks/R9.sql`.
 
-### D4 (25 Oct): numbers and freeze
+### D2 evening (Fri 23): numbers and freeze
 12. Hand-review the top 30 non-planted flags with Rae into `precision_review.csv` (`plausible` / `explained` / `unclear`).
 13. Final `metrics.json`; `data/README.md`. **Feature freeze 23:59.**
 
-### D5–D6
-14. Clean-setup test: fresh clone, `docker compose up`, `seed.py`, run. Fix anything that needs a manual step.
-15. Support the video: the metrics slide and the "Resolver retried with a former name" moment in the trace.
+### D3 (Sat 24): ship
+14. 09:00–13:00: clean-setup test (fresh clone, `docker compose up`, `seed.py`, run). Fix anything that needs a manual step, and save the final `metrics.json`.
+15. 13:00–20:00: support the video (the metrics slide and the "Resolver retried with a former name" moment in the trace) and the final submission check.
 
 ## 5. Interfaces you consume and provide
 

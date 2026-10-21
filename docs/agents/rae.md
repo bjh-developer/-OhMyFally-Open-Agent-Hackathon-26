@@ -32,7 +32,7 @@ Rae's background: SMU CS, Tech Associate at SMU Legal Innovation & Technology, a
 
 **Goal:** a memory service that the Python agents call over HTTP and that passes the official Meterless H-MEM conformance suite. That suite only runs TypeScript, which is why this service is in TypeScript.
 
-### D1 (22 Oct)
+### D1 morning (Thu 22)
 1. Pull the reference into the repo:
    ```bash
    npx degit meterless/meterless/engines/hmem services/hmem-upstream
@@ -47,7 +47,7 @@ Rae's background: SMU CS, Tech Associate at SMU Legal Innovation & Technology, a
 3. Read `engines/hmem/AGENTS.md` §2 (memory record), §8 (reinjection) and §11 (trust ledger). Ignore dreaming and sleep for now.
 4. Find how the reference stores data. If it is in-memory only, add file-backed persistence (a JSON or SQLite file under `services/hmem/state/`, mounted as a Docker volume). Memory **must survive a restart**, because the demo relies on run 2 remembering run 1.
 
-### D2 (23 Oct)
+### D1 afternoon to midnight (Thu 22)
 5. Add `src/server.ts`, a small HTTP server (Hono or Express) that imports the `HMEM` class from `src/index.ts`. `src/index.ts` must keep exporting `HMEM` unchanged, so the conformance suite keeps working.
 6. Implement every endpoint in CONTRACTS §6. Map them like this:
    - `/add` → `hmem.add(...)`, with `agentId`, `runId` and `meta` stored on the record (tags or fields).
@@ -56,18 +56,18 @@ Rae's background: SMU CS, Tech Associate at SMU Legal Innovation & Technology, a
    - `/auditor-decision` → a **long_term** memory with provenance `origin: "auditor"`, the reason as content, and `meta` holding uen, flag_id, agency, pattern_tag and scope.
    - `/ledger` → stream the trust ledger, and also append every ledger event to `logs/hmem-ledger.jsonl`.
 7. Add `Dockerfile` plus a `docker-compose.yml` service `pi-hmem` on port 7070, on network `zetaris_default`, with a volume for `state/`.
-8. Re-run conformance after your changes and save `logs/evidence/hmem-conformance-d2.txt`. **It must stay green.**
+8. Re-run conformance after your changes and save `logs/evidence/hmem-conformance-d1-final.txt`. **It must stay green.**
 9. Write `services/hmem/test/http.test.ts`. Cover:
    - add, then query returns it;
    - an auditor-decision dismiss is recalled by an exact (uen, flag_id, agency) filter;
    - a memory from another agency is **not** returned unless `scope=global`;
    - the memory survives a restart.
 
-### D3 (24 Oct)
+### D2 (Fri 23)
 10. Pair with Joon Hao while he wires `app/adapters/hmem_client.py` to your API. Fix any contract mismatches together and update CONTRACTS.md in the same commit.
 11. Prove the demo moment end to end: run 1 flags X → the auditor dismisses it with a reason → run 2 suppresses X and cites the memory ID.
 
-**Using the Meterless prompt:** at meterless.ai/engines.html, choose IMPLEMENT → **"Give my agent memory"**, paste it into Cursor, and add: *"Target is `services/hmem/` (already adapted from the reference). Keep `src/index.ts` exporting `HMEM` so the conformance suite still runs. Expose it via the HTTP contract in `docs/agents/CONTRACTS.md` §6."*
+**Using the Meterless prompt:** at meterless.ai/engines.html, choose IMPLEMENT → **"Give my agent memory"**, paste it into your coding agent, and add: *"Target is `services/hmem/` (already adapted from the reference). Keep `src/index.ts` exporting `HMEM` so the conformance suite still runs. Expose it via the HTTP contract in `docs/agents/CONTRACTS.md` §6."*
 
 ## 4. Domain outputs
 
@@ -87,7 +87,7 @@ For each of R1–R9 (CONTRACTS §9), write it in `red_flags.yaml`:
 
 Also put the MOF thresholds (S$6k / S$90k) in `mof_thresholds.yaml`, with the source URL.
 
-### Wording rules (D2)
+### Wording rules (D1)
 `wording.yaml` lists:
 - banned terms: fraud, corrupt, illegal, criminal, guilty, scam;
 - required phrasing: "anomaly for review", "may indicate", "requires auditor judgement";
@@ -98,7 +98,7 @@ The Risk agent rejects any finding text containing a banned term.
 ### AGO excerpts (tonight and D1)
 Take procurement chapters from 3–5 AGO annual reports (FY2021/22 to FY2024/25). Chunk them into roughly 150–300-word sections. In `index.csv`, record `chunk_id, report, fy, section, page, url`. Quote only; don't paraphrase into new claims.
 
-### Planted cases (D2, with Inchara)
+### Planted cases (D1, with Inchara)
 Write `planted.json` entries like this:
 
 ```json
@@ -112,21 +112,30 @@ Inchara's seed script injects them.
 ## 5. Product, UX and pitch
 
 - **Figma (tonight):** one screen with a request bar, a live run timeline and a review memo with evidence drawer, plus a human-review queue tab. Use the colours and type of shadcn defaults.
-- **UI (D3–D4):** build the components in `web/components/` against the `Finding` schema in CONTRACTS §7.4, using mock JSON from `output_examples/` until the API is live. The web UI runs on **port 3100**.
-- **Deck (D4–D6):** problem and users, solution, architecture (reuse the plan diagram), stack, Zetaris and Meterless use, what was unique (the Critic re-queries Zetaris to verify every claim, the USL crosswalk, auditor memory in H-MEM), product visuals, future work.
-- **Demo script (D4):** follow the 6 segments in the plan doc. Keep it to 2:30–3:30.
+- **UI (D2):** build the components in `web/components/` against the `Finding` schema in CONTRACTS §7.4, using mock JSON from `output_examples/` until the API is live. The web UI runs on **port 3100**.
+- **Deck (v1 on D2, final on D3):** problem and users, solution, architecture (reuse the plan diagram), stack, Zetaris and Meterless use, what was unique (the Critic re-queries Zetaris to verify every claim, the USL crosswalk, auditor memory in H-MEM), product visuals, future work.
+- **Demo script (D2):** follow the 6 segments in the plan doc. Keep it to 2:30–3:30.
 
 ## 6. Daily checklist
 
-- [ ] D1: H-MEM reference in the repo, conformance green and saved; red_flags.yaml final; AGO chunks drafted
-- [ ] D2: HTTP server and Docker done; conformance still green; HTTP tests pass; wording.yaml; planted.json with Inchara
-- [ ] D3: H-MEM wired to the agents with Joon Hao; demo memory moment works; UI components started
-- [ ] D4: hand-review the top 30 real flags with Inchara (`plausible` / `explained` / `unclear`); deck v1; demo script; **feature freeze 23:59**
-- [ ] D5: README pitch and sponsor sections; deck v2; rehearsal
-- [ ] D6: record the video with Joon Hao; final deck; check the submission checklist
+Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27 are buffer only.
+
+- [ ] **D1, Thu 22:**
+    - H-MEM reference in the repo with conformance passing; HTTP server, Docker and HTTP tests done; conformance still passing and saved.
+    - `red_flags.yaml`, `mof_thresholds.yaml` and `wording.yaml` final.
+    - AGO chunks; `planted.json` with Inchara.
+- [ ] **D2, Fri 23:**
+    - H-MEM wired to the agents with Joon Hao, and the demo memory moment works.
+    - UI components; deck v1; demo script.
+    - Evening: hand-review the top 30 real flags with Inchara (`plausible` / `explained` / `unclear`).
+    - **Feature freeze 23:59.**
+- [ ] **D3, Sat 24:**
+    - Morning: README pitch and sponsor sections.
+    - 13:00–17:00: record the video with Joon Hao; final deck.
+    - 17:00–20:00: check the submission checklist; **submit by 20:00**.
 
 ## 7. When to stop and ask Joon Hao
 
 - Any change to CONTRACTS.md.
-- The conformance suite goes red and you can't make it green within 1 hour.
+- The conformance suite goes red and you can't make it pass within 1 hour.
 - Anything that would put a real company's name next to a fabricated fact.
