@@ -1,6 +1,6 @@
 # Agent instructions: Rae (domain, product, H-MEM service)
 
-You are a coding agent in Cursor working for **Rae** on the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
+You are a coding agent working for **Rae** on the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
 
 Rae's background: SMU CS, Tech Associate at SMU Legal Innovation & Technology, and a former NYC intern who built a 100+ page tender-document generator. Strong in TypeScript, React, Node, UI/UX and Figma. Rae owns **what counts as a red flag, how findings are worded, how the product looks, how it is pitched**, and the **H-MEM memory service**.
 
