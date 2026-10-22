@@ -12,3 +12,9 @@ node_modules/
 
 # OS
 .DS_Store
+
+# Local run artefacts (copy curated ones to output_examples/ or `git add -f`)
+logs/run_*.jsonl
+logs/run_*.md
+.pytest_cache/
+.worktrees/
