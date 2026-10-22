@@ -170,6 +170,7 @@ export function whyFlagged(f: Finding): string {
 // ---------- Groups (R3 shared address) ----------
 
 export function groupTitle(g: FindingGroup): string {
+  g = { ...g, title: g.title.replace(/\s*#na-na/gi, "") };
   const m = /^(\d+) winning suppliers share (.+)$/.exec(g.title);
   return m ? `${m[1]} suppliers share ${m[2]}` : g.title.replace("winning suppliers", "suppliers");
 }
