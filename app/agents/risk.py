@@ -25,8 +25,21 @@ class Scores(BaseModel):
 
 
 def _fallback_score(f) -> float:
+    """Deterministic 0-100 priority: match confidence, award size, flag priority, and how far past its threshold."""
     amt = f.awarded_amt or 0
-    return round(min(100.0, 40 * f.confidence + 10 * math.log10(amt + 1) + (10 if red_flags().get(f.flag_id, {}).get("priority") == "must" else 0)), 1)
+    must = red_flags().get(f.flag_id, {}).get("priority") == "must"
+    score = 30 * f.confidence + 8 * math.log10(amt + 1) + (10 if must else 0)
+    try:
+        m, t = float(f.metric_value), float(f.threshold)
+        if f.flag_id == "R1" and t > 0:
+            score += 12 * max(0.0, (t - m) / t)  # newer supplier = higher
+        elif f.flag_id == "R4" and t > 0:
+            score += 12 * min(1.0, max(0.0, (m - t) / t))
+        elif f.flag_id == "R3":
+            score += min(12.0, 3.0 * (m - t + 1))
+    except (TypeError, ValueError):
+        pass
+    return round(min(100.0, score), 1)
 
 
 def make(deps: Deps):
@@ -45,18 +58,20 @@ def make(deps: Deps):
                 escalated.append(f.finding_id)
         # scoring
         scores = {f.finding_id: _fallback_score(f) for f in live}
+        base = dict(scores)
         res = None
+        ranked = sorted(live, key=lambda f: -base[f.finding_id])[:20]  # the model scores the top 20 by the deterministic score
         if live:
             try:
                 res = deps.llm("deep", [
                     {"role": "system", "content": "You triage procurement anomalies for an agency auditor. Score each finding's review priority 0-100 "
                      "from the evidence only (amount, strength of the metric versus its threshold, confidence). These are anomalies for review, not conclusions."},
-                    {"role": "user", "content": dumps({"findings": [compact_finding(f) for f in live[:20]],
+                    {"role": "user", "content": dumps({"findings": [compact_finding(f) for f in ranked],
                                                        "answer_format": {"scores": [{"finding_id": "...", "priority": 50, "reason": "short"}]}})},
                 ], json_schema=Scores, max_tokens=6000)
                 for s in res.parsed.scores:
-                    if s.finding_id in scores:
-                        scores[s.finding_id] = max(0.0, min(100.0, s.priority))
+                    if s.finding_id in scores:  # blend so the model can reorder but not saturate the scale
+                        scores[s.finding_id] = round(0.6 * base[s.finding_id] + 0.4 * max(0.0, min(100.0, s.priority)), 1)
             except Exception:
                 pass
         # replan: planned must-have coverage missing, once

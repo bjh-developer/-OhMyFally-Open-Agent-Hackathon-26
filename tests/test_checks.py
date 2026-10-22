@@ -11,3 +11,9 @@ def test_render_spark_escaping_and_validation():
         render("{{date_from}}", agency="HDB", date_from="2024-1-1", date_to="2024-12-31")
     with pytest.raises(ValueError):
         render("{{other}}", agency="HDB", date_from="2024-01-01", date_to="2024-12-31")
+
+
+def test_tidy_number():
+    from app.checks.runner import tidy_number
+    assert tidy_number("113597.500000000000000000") == "113597.5" and tidy_number("90000.000") == "90000" and tidy_number("21") == "21"
+    assert tidy_number("Live") == "Live" and tidy_number(None) is None

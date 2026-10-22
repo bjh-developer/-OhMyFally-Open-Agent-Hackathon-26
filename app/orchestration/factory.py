@@ -30,7 +30,12 @@ def resolver_adapter():
         tb = None
         if "llm_tiebreak" in _STRATEGY_LAYERS.get(strategy, ()):
             tb = importlib.import_module("app.resolver.llm").nightshift_tiebreak
-        return match.resolve(list(names), _INDEX, strategies=_STRATEGY_LAYERS.get(strategy, _STRATEGY_LAYERS["default"]), tiebreak=tb)
+        layers = _STRATEGY_LAYERS.get(strategy, _STRATEGY_LAYERS["default"])
+        try:
+            return match.resolve(list(names), _INDEX, strategies=layers, tiebreak=tb)
+        except Exception as e:  # tie-break (LLM) down: keep the deterministic layers rather than losing the whole batch
+            log.warning("resolver tie-break failed (%s); falling back to deterministic layers", type(e).__name__)
+            return match.resolve(list(names), _INDEX, strategies=_STRATEGY_LAYERS["fuzzy"], tiebreak=None)
 
     return resolve
 

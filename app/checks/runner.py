@@ -6,6 +6,7 @@ import os
 import re
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Callable
 
@@ -89,6 +90,17 @@ def run_check(flag_id: str, *, agency: str, date_from: str | date, date_to: str 
     return CheckRun(flag_id, sql, res, rows)
 
 
+def tidy_number(v: Any) -> str | None:
+    """'113597.500000000000000000' -> '113597.5'; non-numeric strings pass through."""
+    if v is None:
+        return None
+    try:
+        d = Decimal(str(v))
+        return format(d.quantize(Decimal(1)) if d == d.to_integral() else d.normalize(), "f")
+    except InvalidOperation:
+        return str(v)
+
+
 def _fmt_amt(v: float | None) -> str:
     return "n/a" if v is None else f"{v:,.0f}"
 
@@ -122,7 +134,7 @@ def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None
             uen=r.get("uen") if r.get("uen") not in ("", "null", None) else None,
             summary=summarise(r), confidence=confidence(r) if confidence else 1.0, evidence=[ev],
             awarded_amt=r.get("awarded_amt"), award_date=r.get("award_date"), metric_name=r.get("metric_name"),
-            metric_value=None if r.get("metric_value") is None else str(r["metric_value"]),
+            metric_value=tidy_number(r.get("metric_value")),
             threshold=None if r.get("threshold") is None else str(r["threshold"]), detail=r.get("detail"),
         ))
     return out
