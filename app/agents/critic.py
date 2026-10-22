@@ -110,7 +110,7 @@ def make(deps: Deps):
                         except Exception:
                             pass
                         break
-                    if meta.get("pattern_tag") and meta.get("agency") == f.agency and meta.get("decision") == "dismiss":
+                    if meta.get("pattern_tag") and meta.get("decision") == "dismiss" and (meta.get("agency") == f.agency or meta.get("scope") == "global"):
                         f.confidence = round(f.confidence * 0.7, 3)
                         f.memory_refs.append(m["id"])
                         memory_refs.append(m["id"])
