@@ -1,0 +1,9 @@
+{
+  "show_datasources": {"headers": ["name"], "data": [["gebiz_pg"], ["internal_pg"]]},
+  "names": {"headers": ["supplier_name"], "data": [["ZYLOQ TEST ENGINEERING PTE. LTD."], ["TGG PTE. LTD."]]},
+  "xwalk": {"headers": ["supplier_name", "uen", "confidence", "method"],
+            "data": [["ZYLOQ TEST ENGINEERING PTE. LTD.", "T99ZZ0001A", "1.0", "exact"], ["TGG PTE. LTD.", "201234567A", "1.0", "exact"]]},
+  "R1": {"headers": ["flag_id", "tender_no", "agency", "supplier_name", "uen", "award_date", "awarded_amt", "metric_name", "metric_value", "threshold", "detail"],
+         "data": [["R1", "PLT000ETT25000001", "Housing and Development Board", "ZYLOQ TEST ENGINEERING PTE. LTD.", "T99ZZ0001A", "2025-06-20", "400000.0",
+                   "age_days", "21", "183", "Supplier was incorporated 21 days before the award date."]]}
+}
