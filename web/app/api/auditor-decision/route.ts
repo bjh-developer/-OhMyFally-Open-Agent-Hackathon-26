@@ -6,7 +6,25 @@ const HMEM_URL = (process.env.HMEM_URL ?? "http://127.0.0.1:7070").replace(/\/$/
 
 const REQUIRED = ["runId", "finding_id", "uen", "flag_id", "agency", "decision", "reason", "scope"] as const;
 
+// A decision is a durable write to the auditor's memory (global scope reaches every agency), so a page on another
+// origin must not be able to trigger it through the user's browser. Require a same-origin Origin header, and a JSON
+// content type: a cross-origin JSON POST needs a CORS preflight, which this route never answers.
+function sameOrigin(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("host");
+  if (!origin || !host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(req.headers.get("content-type") ?? "").toLowerCase().startsWith("application/json")) {
+    return NextResponse.json({ error: "content-type must be application/json" }, { status: 415 });
+  }
   let body: Record<string, unknown>;
   try {
     body = await req.json();
