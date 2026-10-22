@@ -25,7 +25,7 @@ import pyarrow.parquet as pq
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fetch_common import ROOT, SAMPLE, pg_conn, s3_client  # noqa: E402
+from fetch_common import LOCAL, ROOT, SAMPLE, pg_conn, s3_client  # noqa: E402
 
 RULES_DIR = ROOT / "data" / "rules"
 AGO_DIR = ROOT / "data" / "ago"
@@ -146,8 +146,11 @@ def seed_internal(planted: list[dict]) -> dict:
     return counts
 
 
-def entity_table(planted: list[dict]) -> pa.Table:
-    df = pd.read_parquet(SAMPLE / "acra_entities.parquet").astype(str).replace({"nan": "", "None": ""})
+def entity_table(planted: list[dict], sample_only: bool = False) -> pa.Table:
+    full = LOCAL / "acra_entities_full.parquet"  # gitignored full candidate set, preferred when present
+    src = full if full.exists() and not sample_only else SAMPLE / "acra_entities.parquet"
+    print(f"ACRA entities source: {src.relative_to(ROOT)}")
+    df = pd.read_parquet(src).astype(str).replace({"nan": "", "None": ""})
     extra = []
     for case in planted:
         for e in case.get("entities", []):
@@ -163,8 +166,8 @@ def entity_table(planted: list[dict]) -> pa.Table:
     return pa.Table.from_pandas(df, schema=schema, preserve_index=False)
 
 
-def seed_s3(planted: list[dict]) -> int:
-    t = entity_table(planted)
+def seed_s3(planted: list[dict], sample_only: bool = False) -> int:
+    t = entity_table(planted, sample_only)
     s3 = s3_client()
     if BUCKET not in [b["Name"] for b in s3.list_buckets()["Buckets"]]:
         s3.create_bucket(Bucket=BUCKET)
@@ -180,12 +183,13 @@ def seed_s3(planted: list[dict]) -> int:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-planted", action="store_true", help="skip fictional planted cases")
+    ap.add_argument("--sample-only", action="store_true", help="ignore data/local/ and use the committed minimised ACRA sample")
     a = ap.parse_args()
     planted = load_planted(not a.no_planted)
     print(f"planted cases injected: {len(planted)}")
     print("gebiz:", seed_gebiz(planted))
     print("agency_internal:", seed_internal(planted))
-    print("s3 entities rows:", seed_s3(planted))
+    print("s3 entities rows:", seed_s3(planted, a.sample_only))
 
 
 if __name__ == "__main__":
