@@ -1,0 +1,17 @@
+# Singapore government procurement value bands (MOF). Used by R4 (contract splitting) and the Reporter.
+source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
+currency: SGD
+bands:
+  - name: small_value
+    max_sgd: 6000
+    method: Direct purchase / small-value procurement
+  - name: quotation
+    min_sgd: 6000
+    max_sgd: 90000
+    method: Quotation (written quotes)
+  - name: tender
+    min_sgd: 90000
+    method: Open or limited tender
+notes: >
+  Thresholds as used by this project for goods and services procurement by public agencies.
+  Verify against the current MOF circular before relying on them outside the hackathon demo.

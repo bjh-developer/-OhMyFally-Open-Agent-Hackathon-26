@@ -1,0 +1,1 @@
+CREATE LIGHTNING FILESTORE TABLE entities FROM ACRA_FILES FORMAT csv OPTIONS (PATH "s3a://${S3_BUCKET}/acra_csv/entities.csv", header "true", s3Endpoint "${S3_ZETARIS_ENDPOINT}", useS3PathStyleAccess "true", inferSchema "true", AWSACCESSKEYID "${S3_ACCESS_KEY}", AWSSECRETACCESSKEY "${S3_SECRET_KEY}")

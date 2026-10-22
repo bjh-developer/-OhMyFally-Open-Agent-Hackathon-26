@@ -1,0 +1,1 @@
+REGISTER DATASOURCE TABLE "ago_chunks" FROM gebiz_pg
