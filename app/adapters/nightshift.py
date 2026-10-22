@@ -178,7 +178,8 @@ def _post(client: httpx.Client, lane: Lane, payload: dict, retries: int) -> dict
         current_budget().take()
         try:
             r = client.post(f"{s.meterless_url}/chat/completions", json=payload, headers=headers, timeout=TIMEOUT_S)
-            if r.status_code in (408, 425, 429, 500, 502, 503, 504):
+            # 499 = Nightshift/provider aborted the request mid-flight (seen on the fast lane); transient, so retry.
+            if r.status_code in (408, 425, 429, 499, 500, 502, 503, 504):
                 raise NightshiftError(f"HTTP {r.status_code}: {r.text[:200]}")
             if r.status_code >= 400:
                 raise NightshiftClientError(f"HTTP {r.status_code}: {r.text[:300]}")

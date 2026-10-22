@@ -85,6 +85,18 @@ def test_retries_502_and_counts_attempts():
         assert b.used == 2
 
 
+def test_retries_499_request_aborted():
+    n = {"c": 0}
+
+    def h(req):
+        n["c"] += 1
+        return httpx.Response(499, text="request_aborted") if n["c"] == 1 else _resp("ok")
+
+    with budget_scope(10) as b:
+        assert chat("fast", [], client=_client(h)).content == "ok"
+        assert b.used == 2
+
+
 def test_4xx_not_retried():
     n = {"c": 0}
 
