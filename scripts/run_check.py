@@ -10,7 +10,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+from app.checks import runner  # noqa: E402
 from app.checks.runner import load_sql, render  # noqa: E402
+
+# Spark SQL escapes a quote as \' (not ''); keep this local fix until runner._lit does the same.
+runner._lit = lambda v: v.replace("\\", "\\\\").replace("'", "\\'")
 from app.resolver.entities import zetaris_query  # noqa: E402
 
 
