@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from app.resolver.entities import EntityIndex, zetaris_query  # noqa: E402
-from app.resolver.match import pass1, resolve
+from app.resolver.match import LLM_ERRORS, pass1, resolve
 from app.schemas import Match  # noqa: E402
 
 
@@ -65,6 +65,8 @@ def main() -> None:
         write_xwalk(ms)
         if tb:
             print("nightshift receipts:", json.dumps(RECEIPTS))
+            if LLM_ERRORS:
+                print("LLM errors (affected suppliers stay unresolved/out_of_scope):", LLM_ERRORS)
     print("methods:", dict(Counter(m.method for m in ms)))
 
 

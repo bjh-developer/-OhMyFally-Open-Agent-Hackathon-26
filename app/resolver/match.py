@@ -25,11 +25,12 @@ def M(name: str, uen: str | None, conf: float, method: str, cands: list[dict] | 
 
 FUZZY_MATCH = 92.0
 FUZZY_AMBIGUOUS = 80.0
-LLM_BATCH = 20
+LLM_BATCH = 8  # spec says ~20; 10 keeps each fast-lane call well under the 180 s timeout
 LLM_MAX_CONF = 0.85
 STRATEGIES = ("exact", "former_name", "fuzzy", "llm_tiebreak")
 PLACEHOLDER_NAMES = {"UNKNOWN", "NIL", "NA", "N A", "NONE", "TBC", "TBA", ""}
 
+LLM_ERRORS: list[str] = []
 TieBreak = Callable[[list[dict]], dict[str, dict]]
 
 
@@ -111,7 +112,10 @@ def _fuzzy_one(name: str, index: EntityIndex) -> tuple[Match | None, list[dict]]
 def _llm_batch(items: list[dict], tiebreak: TieBreak) -> dict[str, dict]:
     out: dict[str, dict] = {}
     for i in range(0, len(items), LLM_BATCH):
-        out.update(tiebreak(items[i:i + LLM_BATCH]))
+        try:
+            out.update(tiebreak(items[i:i + LLM_BATCH]))
+        except Exception as e:  # noqa: BLE001 - an LLM outage must not lose the deterministic results
+            LLM_ERRORS.append(f"batch {i // LLM_BATCH}: {e}")
     return out
 
 
