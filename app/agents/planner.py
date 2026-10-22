@@ -71,6 +71,6 @@ def make(deps: Deps):
             deps.tracer.llm(NAME, "plan", res, **ev)
         else:
             deps.tracer.emit(NAME, "plan", **ev)
-        return {"plan": plan, "replan_requested": False, "coverage_gaps": [], "check_errors": {}}
+        return {"plan": plan, "replan_requested": False, "coverage_gaps": [f for f in req.flags if f not in have], "check_errors": {}}
 
     return planner

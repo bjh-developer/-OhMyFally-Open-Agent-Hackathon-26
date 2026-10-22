@@ -151,3 +151,9 @@ def test_unverifiable_claim_escalates_after_retries(tmp_path):
     f = final["memo"].findings[0]
     assert f.status == "escalated" and final["memo"].escalated == [fid]
     assert sql.counts["R1"] == 6 and [e["status"] for e in trace(tmp_path) if e["agent_name"] == "CriticAgent"] == ["needs_revision", "needs_revision", "success"]
+
+
+def test_requested_flag_without_sql_is_a_reported_gap(tmp_path):
+    req = REQ.model_copy(update={"flags": ["R1", "R4"]})
+    final = run_investigation(req, deps(tmp_path))
+    assert "R4" in final["coverage_gaps"] and any("R4: not run" in x for x in final["memo"].limitations)
