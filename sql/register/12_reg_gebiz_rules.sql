@@ -1,0 +1,1 @@
+REGISTER DATASOURCE TABLE "rules" FROM gebiz_pg

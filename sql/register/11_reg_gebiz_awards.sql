@@ -1,0 +1,1 @@
+REGISTER DATASOURCE TABLE "awards" FROM gebiz_pg

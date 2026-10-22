@@ -1,0 +1,1 @@
+REGISTER DATASOURCE TABLE "bids" FROM internal_pg
