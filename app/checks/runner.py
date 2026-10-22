@@ -40,7 +40,8 @@ def load_sql(flag_id: str) -> str:
 
 
 def _lit(v: str) -> str:
-    return v.replace("'", "''")
+    """Escape for a Spark SQL string literal: backslash and quote are backslash-escaped (``''`` is not an escape)."""
+    return v.replace("\\", "\\\\").replace("'", "\\'")
 
 
 def render(sql: str, *, agency: str, date_from: str | date, date_to: str | date) -> str:

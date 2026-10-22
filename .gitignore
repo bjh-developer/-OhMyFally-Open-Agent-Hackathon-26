@@ -16,5 +16,6 @@ node_modules/
 # Local run artefacts (copy curated ones to output_examples/ or `git add -f`)
 logs/run_*.jsonl
 logs/run_*.md
+logs/run_*.memo.json
 .pytest_cache/
 .worktrees/
