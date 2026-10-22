@@ -1,0 +1,537 @@
+{
+ "run_id": "run_mock_demo",
+ "events": [
+  {
+   "timestamp": "2025-10-22T03:00:01.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "Orchestrator",
+   "action": "start_run",
+   "input_summary": "{\"agency\":\"Sample Agency\",\"date_from\":\"2025-01-01\",\"date_to\":\"2025-12-31\"}",
+   "output_summary": "run run_mock_demo",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": []
+  },
+  {
+   "timestamp": "2025-10-22T03:00:02.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "GateAgent",
+   "action": "scope_check",
+   "input_summary": "Which of Sample Agency's 2025 procurement awards need review, and why?",
+   "output_summary": "in scope",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": []
+  },
+  {
+   "timestamp": "2025-10-22T03:00:04.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "PlannerAgent",
+   "action": "plan",
+   "input_summary": "catalog + rules + H-MEM recall for Sample Agency",
+   "output_summary": "checks R1, R2, R4, R5; 1 prior auditor memory recalled",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [],
+   "confidence": 0.86,
+   "meterless_receipt_id": "rcpt_mock_0001",
+   "meterless_receipt_ids": [
+    "rcpt_mock_0001"
+   ],
+   "routed_model": "nvidia/nemotron-3.5-super",
+   "latency_ms": 13120
+  },
+  {
+   "timestamp": "2025-10-22T03:00:06.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "ResolverAgent",
+   "action": "resolve_suppliers",
+   "input_summary": "212 distinct supplier names",
+   "output_summary": "exact 171, former_name 9, fuzzy 18, ambiguous 6, unresolved 8",
+   "retry_count": 0,
+   "status": "partial_success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:08.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "ResolverAgent",
+   "action": "llm_tiebreak",
+   "input_summary": "6 ambiguous names",
+   "output_summary": "4 resolved, 2 left unresolved",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [],
+   "confidence": 0.74,
+   "meterless_receipt_id": "rcpt_mock_0002",
+   "meterless_receipt_ids": [
+    "rcpt_mock_0002"
+   ],
+   "routed_model": "nvidia/nemotron-lightning",
+   "latency_ms": 2310
+  },
+  {
+   "timestamp": "2025-10-22T03:00:10.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "AnalystAgent",
+   "action": "run_check:R1",
+   "input_summary": "sql/checks/R1.sql",
+   "output_summary": "3 candidate rows",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000002"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:11.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "AnalystAgent",
+   "action": "run_check:R2",
+   "input_summary": "sql/checks/R2.sql",
+   "output_summary": "1 candidate row",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000003"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:12.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "AnalystAgent",
+   "action": "run_check:R4",
+   "input_summary": "sql/checks/R4.sql",
+   "output_summary": "2 candidate rows",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000004"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:13.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "AnalystAgent",
+   "action": "run_check:R5",
+   "input_summary": "sql/checks/R5.sql",
+   "output_summary": "1 candidate row",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000005"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:16.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "CriticAgent",
+   "action": "validate_claims",
+   "input_summary": "re-running SQL behind 5 findings",
+   "output_summary": "F-0002: cited row count 3, re-run returned 2. Sent back to AnalystAgent.",
+   "retry_count": 0,
+   "status": "needs_revision",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000006",
+    "00000000-0000-4000-8000-000000000007"
+   ],
+   "target_agent": "AnalystAgent",
+   "confidence": 0.41
+  },
+  {
+   "timestamp": "2025-10-22T03:00:18.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "AnalystAgent",
+   "action": "rerun_check:R4",
+   "input_summary": "Critic: row count mismatch",
+   "output_summary": "window corrected; 2 rows",
+   "retry_count": 1,
+   "status": "retrying",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000008"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:20.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "CriticAgent",
+   "action": "validate_claims",
+   "input_summary": "re-running SQL behind F-0002",
+   "output_summary": "rows match the evidence",
+   "retry_count": 1,
+   "status": "success",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000009"
+   ],
+   "confidence": 0.9
+  },
+  {
+   "timestamp": "2025-10-22T03:00:22.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "CriticAgent",
+   "action": "reject_match",
+   "input_summary": "F-0004 supplier match confidence 0.71",
+   "output_summary": "below 0.92 threshold; sent back to ResolverAgent with a different strategy",
+   "retry_count": 0,
+   "status": "needs_revision",
+   "zetaris_query_ids": [],
+   "target_agent": "ResolverAgent",
+   "confidence": 0.71
+  },
+  {
+   "timestamp": "2025-10-22T03:00:24.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "ResolverAgent",
+   "action": "resolve_suppliers",
+   "input_summary": "retry with former-name strategy",
+   "output_summary": "no registry match; labelled unresolved",
+   "retry_count": 1,
+   "status": "retrying",
+   "zetaris_query_ids": [
+    "00000000-0000-4000-8000-000000000010"
+   ]
+  },
+  {
+   "timestamp": "2025-10-22T03:00:27.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "CriticAgent",
+   "action": "hmem_recall",
+   "input_summary": "uen T99ZZ0002B, flag R1, agency Sample Agency",
+   "output_summary": "exact dismiss memory mem-1 found: F-0005 suppressed, memory cited",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [],
+   "confidence": 0.95
+  },
+  {
+   "timestamp": "2025-10-22T03:00:30.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "RiskAgent",
+   "action": "wording_check",
+   "input_summary": "5 finding summaries",
+   "output_summary": "F-0001 contained a banned term; returned to ReporterAgent for rewrite",
+   "retry_count": 0,
+   "status": "needs_revision",
+   "zetaris_query_ids": [],
+   "target_agent": "ReporterAgent",
+   "meterless_receipt_id": "rcpt_mock_0003",
+   "meterless_receipt_ids": [
+    "rcpt_mock_0003"
+   ],
+   "routed_model": "nvidia/nemotron-3.5-super",
+   "latency_ms": 11840
+  },
+  {
+   "timestamp": "2025-10-22T03:00:33.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "RiskAgent",
+   "action": "escalate",
+   "input_summary": "F-0004 confidence 0.52",
+   "output_summary": "escalated to human review",
+   "retry_count": 0,
+   "status": "escalated",
+   "zetaris_query_ids": [],
+   "confidence": 0.52
+  },
+  {
+   "timestamp": "2025-10-22T03:00:36.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "ReporterAgent",
+   "action": "build_memo",
+   "input_summary": "5 findings, 4 AGO refs",
+   "output_summary": "memo ready: 3 accepted, 1 escalated, 1 suppressed",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": [],
+   "meterless_receipt_id": "rcpt_mock_0004",
+   "meterless_receipt_ids": [
+    "rcpt_mock_0004"
+   ],
+   "routed_model": "nvidia/nemotron-3.5-super",
+   "latency_ms": 14020
+  },
+  {
+   "timestamp": "2025-10-22T03:00:37.000Z",
+   "trace_id": "run_mock_demo",
+   "agent_name": "Orchestrator",
+   "action": "end_run",
+   "input_summary": "",
+   "output_summary": "llm_calls=4; memo ready",
+   "retry_count": 0,
+   "status": "success",
+   "zetaris_query_ids": []
+  }
+ ],
+ "memo": {
+  "run_id": "run_mock_demo",
+  "agency": "Sample Agency",
+  "date_from": "2025-01-01",
+  "date_to": "2025-12-31",
+  "summary": "4 anomalies for review at Sample Agency in 2025 (3 accepted, 1 escalated to a human); 1 further item was suppressed because an auditor dismissed it earlier. This is mock data for the UI, using fictional suppliers only.",
+  "findings": [
+   {
+    "wording_checked": true,
+    "ago_refs": [
+     "ago-fy2425-edb-evaluation",
+     "ago-fy2324-sportsg-evaluation"
+    ],
+    "memory_refs": [],
+    "notes": [],
+    "evidence": [
+     {
+      "query_id": "00000000-0000-4000-8000-000000000002",
+      "sql": "SELECT 'R1' AS flag_id, a.tender_no, a.agency, a.supplier_name, x.uen, a.award_date, a.awarded_amt,\n       'months_since_incorporation' AS metric_name,\n       CAST(months_between(a.award_date, e.registration_incorporation_date) AS STRING) AS metric_value,\n       '6' AS threshold, 'incorporated shortly before award' AS detail\nFROM awards a\nJOIN supplier_xwalk x ON x.supplier_name = a.supplier_name\nJOIN entities e ON e.uen = x.uen\nWHERE a.agency = 'Sample Agency'\n  AND a.award_date BETWEEN DATE '2025-01-01' AND DATE '2025-12-31'\n  AND months_between(a.award_date, e.registration_incorporation_date) < 6",
+      "row_count": 1,
+      "rows": [
+       {
+        "flag_id": "R1",
+        "tender_no": "PLT000ETT25000001",
+        "supplier_name": "ZYLOQ TEST ENGINEERING PTE. LTD.",
+        "uen": "T99ZZ0001A",
+        "award_date": "2025-06-20",
+        "awarded_amt": "400000",
+        "metric_name": "months_since_incorporation",
+        "metric_value": "0.7",
+        "threshold": "6"
+       }
+      ],
+      "source_objects": [
+       "gebiz_pg.awards",
+       "gebiz_pg.supplier_xwalk",
+       "ACRA_FILES.entities"
+      ]
+     }
+    ],
+    "finding_id": "F-0001",
+    "flag_id": "R1",
+    "tender_no": "PLT000ETT25000001",
+    "agency": "Sample Agency",
+    "supplier_name": "ZYLOQ TEST ENGINEERING PTE. LTD.",
+    "uen": "T99ZZ0001A",
+    "summary": "Possible newly incorporated supplier: ZYLOQ TEST ENGINEERING PTE. LTD. was awarded PLT000ETT25000001 by Sample Agency (S$400,000, 2025-06-20), 0.7 months after incorporation. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+    "confidence": 0.91,
+    "status": "accepted",
+    "awarded_amt": 400000,
+    "award_date": "2025-06-20",
+    "metric_name": "months_since_incorporation",
+    "metric_value": "0.7",
+    "threshold": "6",
+    "detail": "Incorporated 2025-05-30; awarded 2025-06-20."
+   },
+   {
+    "wording_checked": true,
+    "ago_refs": [
+     "ago-fy2324-sportsg-variation"
+    ],
+    "memory_refs": [],
+    "notes": [
+     "Critic sent this back once: first count was 3 rows, re-run returned 2."
+    ],
+    "evidence": [
+     {
+      "query_id": "00000000-0000-4000-8000-000000000008",
+      "sql": "SELECT 'R4' AS flag_id, a.tender_no, a.agency, a.supplier_name, x.uen, a.award_date, a.awarded_amt,\n       'sum_of_awards_90d' AS metric_name, CAST(SUM(a.awarded_amt) OVER (PARTITION BY a.supplier_name ORDER BY a.award_date\n         RANGE BETWEEN INTERVAL 90 DAYS PRECEDING AND CURRENT ROW) AS STRING) AS metric_value,\n       '90000' AS threshold, 'repeat sub-threshold awards' AS detail\nFROM awards a JOIN supplier_xwalk x ON x.supplier_name = a.supplier_name\nWHERE a.agency = 'Sample Agency' AND a.awarded_amt < 90000",
+      "row_count": 2,
+      "rows": [
+       {
+        "flag_id": "R4",
+        "tender_no": "PLT000ETT25000014",
+        "supplier_name": "BRIGHTWELL SAMPLE SUPPLIES PTE. LTD.",
+        "award_date": "2025-03-11",
+        "awarded_amt": "58000",
+        "metric_value": "58000"
+       },
+       {
+        "flag_id": "R4",
+        "tender_no": "PLT000ETT25000022",
+        "supplier_name": "BRIGHTWELL SAMPLE SUPPLIES PTE. LTD.",
+        "award_date": "2025-04-29",
+        "awarded_amt": "51000",
+        "metric_value": "109000"
+       }
+      ],
+      "source_objects": [
+       "gebiz_pg.awards",
+       "gebiz_pg.supplier_xwalk"
+      ]
+     }
+    ],
+    "finding_id": "F-0002",
+    "flag_id": "R4",
+    "tender_no": "PLT000ETT25000014",
+    "agency": "Sample Agency",
+    "supplier_name": "BRIGHTWELL SAMPLE SUPPLIES PTE. LTD.",
+    "uen": "T99ZZ0003C",
+    "summary": "Repeat sub-threshold awards: BRIGHTWELL SAMPLE SUPPLIES PTE. LTD. received two awards under S$90,000 within 90 days that together exceed S$90,000. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+    "confidence": 0.84,
+    "status": "accepted",
+    "awarded_amt": 58000,
+    "award_date": "2025-03-11",
+    "metric_name": "sum_of_awards_90d",
+    "metric_value": "109000",
+    "threshold": "90000",
+    "detail": "2 awards: S$58,000 (2025-03-11) and S$51,000 (2025-04-29)."
+   },
+   {
+    "wording_checked": true,
+    "ago_refs": [
+     "ago-fy2223-pa-debarred"
+    ],
+    "memory_refs": [],
+    "notes": [],
+    "evidence": [
+     {
+      "query_id": "00000000-0000-4000-8000-000000000003",
+      "sql": "SELECT 'R2' AS flag_id, a.tender_no, a.agency, a.supplier_name, x.uen, a.award_date, a.awarded_amt,\n       'entity_status' AS metric_name, e.entity_status_description AS metric_value, 'Live Company' AS threshold,\n       'registry status is not live' AS detail\nFROM awards a JOIN supplier_xwalk x ON x.supplier_name = a.supplier_name JOIN entities e ON e.uen = x.uen\nWHERE a.agency = 'Sample Agency' AND e.entity_status_description <> 'Live Company'",
+      "row_count": 1,
+      "rows": [
+       {
+        "flag_id": "R2",
+        "tender_no": "PLT000ETT25000031",
+        "supplier_name": "MERIDIAN SAMPLE LOGISTICS PTE. LTD.",
+        "uen": "T99ZZ0004D",
+        "award_date": "2025-08-04",
+        "awarded_amt": "120000",
+        "metric_value": "Struck Off"
+       }
+      ],
+      "source_objects": [
+       "gebiz_pg.awards",
+       "gebiz_pg.supplier_xwalk",
+       "ACRA_FILES.entities"
+      ]
+     }
+    ],
+    "finding_id": "F-0003",
+    "flag_id": "R2",
+    "tender_no": "PLT000ETT25000031",
+    "agency": "Sample Agency",
+    "supplier_name": "MERIDIAN SAMPLE LOGISTICS PTE. LTD.",
+    "uen": "T99ZZ0004D",
+    "summary": "Registry status is not live: MERIDIAN SAMPLE LOGISTICS PTE. LTD. is recorded as struck off in the ACRA extract (current status, not status at award). This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+    "confidence": 0.8,
+    "status": "accepted",
+    "awarded_amt": 120000,
+    "award_date": "2025-08-04",
+    "metric_name": "entity_status",
+    "metric_value": "Struck Off",
+    "threshold": "Live Company",
+    "detail": "Status reflects the extract date, not the award date."
+   },
+   {
+    "wording_checked": true,
+    "ago_refs": [],
+    "memory_refs": [],
+    "notes": [
+     "Escalated by RiskAgent: R5 findings always go to a human.",
+     "Registry match was fuzzy (0.78), so confidence is capped at 0.52."
+    ],
+    "evidence": [
+     {
+      "query_id": "00000000-0000-4000-8000-000000000010",
+      "sql": "SELECT 'R5' AS flag_id, a.tender_no, a.agency, a.supplier_name, x.uen, a.award_date, a.awarded_amt,\n       'ssic_similarity' AS metric_name, CAST(cosine_sim(a.tender_embedding, e.ssic_embedding) AS STRING) AS metric_value,\n       '0.35' AS threshold, 'registered activity far from tender description' AS detail\nFROM awards a JOIN supplier_xwalk x ON x.supplier_name = a.supplier_name JOIN entities e ON e.uen = x.uen\nWHERE a.agency = 'Sample Agency' AND cosine_sim(a.tender_embedding, e.ssic_embedding) < 0.35",
+      "row_count": 1,
+      "rows": [
+       {
+        "flag_id": "R5",
+        "tender_no": "PLT000ETT25000040",
+        "supplier_name": "QUILLON PLACEHOLDER TRADING PTE. LTD.",
+        "uen": "T99ZZ0005E",
+        "award_date": "2025-09-17",
+        "awarded_amt": "76500",
+        "metric_value": "0.18",
+        "threshold": "0.35"
+       }
+      ],
+      "source_objects": [
+       "gebiz_pg.awards",
+       "gebiz_pg.supplier_xwalk",
+       "ACRA_FILES.entities"
+      ]
+     }
+    ],
+    "finding_id": "F-0004",
+    "flag_id": "R5",
+    "tender_no": "PLT000ETT25000040",
+    "agency": "Sample Agency",
+    "supplier_name": "QUILLON PLACEHOLDER TRADING PTE. LTD.",
+    "uen": "T99ZZ0005E",
+    "summary": "Supplier's registered activity looks far from the tender description (embedding similarity 0.18 against a 0.35 threshold). R5 findings are always escalated. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+    "confidence": 0.52,
+    "status": "escalated",
+    "awarded_amt": 76500,
+    "award_date": "2025-09-17",
+    "metric_name": "ssic_similarity",
+    "metric_value": "0.18",
+    "threshold": "0.35",
+    "detail": "Primary SSIC: retail of household goods; tender: structural steel works."
+   },
+   {
+    "wording_checked": true,
+    "ago_refs": [],
+    "memory_refs": [
+     "mem-1"
+    ],
+    "notes": [],
+    "evidence": [
+     {
+      "query_id": "00000000-0000-4000-8000-000000000002",
+      "sql": "SELECT 'R1' AS flag_id, a.tender_no, a.agency, a.supplier_name, x.uen, a.award_date, a.awarded_amt,\n       'months_since_incorporation' AS metric_name,\n       CAST(months_between(a.award_date, e.registration_incorporation_date) AS STRING) AS metric_value,\n       '6' AS threshold, 'incorporated shortly before award' AS detail\nFROM awards a\nJOIN supplier_xwalk x ON x.supplier_name = a.supplier_name\nJOIN entities e ON e.uen = x.uen\nWHERE a.agency = 'Sample Agency'\n  AND a.award_date BETWEEN DATE '2025-01-01' AND DATE '2025-12-31'\n  AND months_between(a.award_date, e.registration_incorporation_date) < 6",
+      "row_count": 1,
+      "rows": [
+       {
+        "flag_id": "R1",
+        "tender_no": "PLT000ETT25000009",
+        "supplier_name": "NOVAKERN FICTIONAL SERVICES PTE. LTD.",
+        "uen": "T99ZZ0002B",
+        "award_date": "2025-05-12",
+        "awarded_amt": "210000",
+        "metric_value": "2.1",
+        "threshold": "6"
+       }
+      ],
+      "source_objects": [
+       "gebiz_pg.awards",
+       "gebiz_pg.supplier_xwalk",
+       "ACRA_FILES.entities"
+      ]
+     }
+    ],
+    "finding_id": "F-0005",
+    "flag_id": "R1",
+    "tender_no": "PLT000ETT25000009",
+    "agency": "Sample Agency",
+    "supplier_name": "NOVAKERN FICTIONAL SERVICES PTE. LTD.",
+    "uen": "T99ZZ0002B",
+    "summary": "Suppressed: an auditor dismissed this exact (supplier, flag, agency) in an earlier run. Reason recorded in H-MEM: the vendor is a spin-off of the incumbent under an existing framework agreement.",
+    "confidence": 0.88,
+    "status": "suppressed",
+    "awarded_amt": 210000,
+    "award_date": "2025-05-12",
+    "metric_name": "months_since_incorporation",
+    "metric_value": "2.1",
+    "threshold": "6",
+    "detail": "Previously dismissed by an auditor."
+   }
+  ],
+  "limitations": [
+   "R4 needs GeBIZ quotation records; tenders-only data under-detects.",
+   "R2 uses the current registry status, not the status at award time.",
+   "Supplier matching to ACRA is probabilistic; 2 names stayed unresolved."
+  ],
+  "disclaimer": "Automated screening output. Each item is an anomaly for review that may indicate a procurement-integrity concern, and requires auditor judgement. It is not a finding of wrongdoing.",
+  "escalated": [
+   "F-0004"
+  ],
+  "stats": {
+   "candidates": 7,
+   "shown": 5,
+   "suppressed": 1,
+   "rejected": 1,
+   "llm_calls": 4
+  },
+  "markdown": ""
+ }
+}
