@@ -1,0 +1,11 @@
+H-MEM service (services/hmem)
+Copyright 2026 Team OhMyFally
+
+This product includes software adapted from the H-MEM reference implementation
+(engines/hmem/reference) in https://github.com/Meterless/Meterless,
+Copyright Meterless, licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Modifications: file-backed persistence under state/, an HTTP server
+(src/server.ts) implementing the Procurement Integrity Investigator memory
+contract, a Dockerfile, and HTTP tests. src/index.ts still exports HMEM so the
+official conformance suite runs unchanged.
