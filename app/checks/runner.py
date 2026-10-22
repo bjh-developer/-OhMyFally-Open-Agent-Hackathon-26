@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import Any, Callable
 
 from ..adapters.config import ROOT
@@ -12,7 +14,7 @@ from ..adapters.zetaris import Result, to_date, to_float
 from ..schemas import Evidence, Finding
 from .rules import red_flags, wording
 
-CHECKS_DIR = ROOT / "sql" / "checks"
+CHECKS_DIR = Path(os.environ.get("PI_CHECKS_DIR") or ROOT / "sql" / "checks")  # env override for dev/tests
 CHECK_COLUMNS = ["flag_id", "tender_no", "agency", "supplier_name", "uen", "award_date", "awarded_amt",
                  "metric_name", "metric_value", "threshold", "detail"]
 SOURCE_OBJECTS = {
@@ -96,10 +98,15 @@ def summarise(row: dict[str, Any]) -> str:
     detail = (row.get("detail") or "").strip()
     if not detail and row.get("metric_name"):
         detail = f"{row['metric_name']} = {row.get('metric_value')} (threshold {row.get('threshold')})."
-    return " ".join(wording()["summary_template"].format(
+    facts = " ".join(wording()["summary_template"].format(
         flag_name=flag.get("name", row["flag_id"]), supplier=row.get("supplier_name"), tender_no=row.get("tender_no"),
         agency=row.get("agency"), amt=_fmt_amt(row.get("awarded_amt")), date=row.get("award_date"), detail=detail,
     ).split())
+    return f"{facts} {wording()['summary_suffix']}"
+
+
+def facts_only(summary: str) -> str:
+    return summary.removesuffix(wording()["summary_suffix"]).strip()
 
 
 def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None) -> list[Finding]:
