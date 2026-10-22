@@ -1,0 +1,312 @@
+{
+ "_note": "FICTIONAL suppliers only. Injected by scripts/seed.py. Agents never read this file; it is ground truth for evaluation.",
+ "cases": [
+  {
+   "case_id": "P1",
+   "flags": [
+    "R1"
+   ],
+   "agency": "Housing and Development Board",
+   "description": "Supplier incorporated 21 days before a S$400k award",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT25000001",
+     "supplier_name": "ZYLOQ TEST ENGINEERING PTE. LTD.",
+     "awarded_amt": 400000,
+     "award_date": "2025-06-20",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0001A",
+     "entity_name": "ZYLOQ TEST ENGINEERING PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2025-05-30",
+     "block": "99",
+     "street_name": "TESTVILLE ROAD",
+     "level_no": "01",
+     "unit_no": "01",
+     "building_name": "na",
+     "postal_code": "999001",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected": "flag R1 on PLT000ETT25000001"
+  },
+  {
+   "case_id": "P2",
+   "flags": [
+    "R2"
+   ],
+   "agency": "National Parks Board",
+   "description": "Supplier now struck off in ACRA",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT24000002",
+     "supplier_name": "QUORVEX TEST SERVICES PTE. LTD.",
+     "awarded_amt": 250000,
+     "award_date": "2024-03-12",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0002B",
+     "entity_name": "QUORVEX TEST SERVICES PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Struck Off",
+     "registration_incorporation_date": "2018-02-01",
+     "block": "99",
+     "street_name": "TESTVILLE ROAD",
+     "level_no": "01",
+     "unit_no": "01",
+     "building_name": "na",
+     "postal_code": "999002",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected": "flag R2 on PLT000ETT24000002"
+  },
+  {
+   "case_id": "P3",
+   "flags": [
+    "R3"
+   ],
+   "agency": "Housing and Development Board",
+   "description": "Two winning suppliers share an exact registered address",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT24000003",
+     "supplier_name": "BRAXTON TEST TRADING PTE. LTD.",
+     "awarded_amt": 150000,
+     "award_date": "2024-05-10",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    },
+    {
+     "tender_no": "PLT000ETT24000013",
+     "supplier_name": "KELVARO TEST SUPPLIES PTE. LTD.",
+     "awarded_amt": 160000,
+     "award_date": "2024-06-14",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0003C",
+     "entity_name": "BRAXTON TEST TRADING PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2020-01-15",
+     "block": "77",
+     "street_name": "SHARED TEST AVENUE",
+     "level_no": "05",
+     "unit_no": "12",
+     "building_name": "na",
+     "postal_code": "999003",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    },
+    {
+     "uen": "T99ZZ0013D",
+     "entity_name": "KELVARO TEST SUPPLIES PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2020-01-15",
+     "block": "77",
+     "street_name": "SHARED TEST AVENUE",
+     "level_no": "05",
+     "unit_no": "12",
+     "building_name": "na",
+     "postal_code": "999003",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected": "flag R3 on PLT000ETT24000003 and PLT000ETT24000013"
+  },
+  {
+   "case_id": "P4",
+   "flags": [
+    "R4"
+   ],
+   "agency": "People's Association",
+   "description": "Three sub-S$90k awards within 60 days totalling S$105k",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT24000004",
+     "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+     "awarded_amt": 40000,
+     "award_date": "2024-07-01",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    },
+    {
+     "tender_no": "PLT000ETT24000014",
+     "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+     "awarded_amt": 35000,
+     "award_date": "2024-07-20",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    },
+    {
+     "tender_no": "PLT000ETT24000024",
+     "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+     "awarded_amt": 30000,
+     "award_date": "2024-08-30",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0004E",
+     "entity_name": "NEBULON TEST WORKS PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2015-09-09",
+     "block": "99",
+     "street_name": "TESTVILLE ROAD",
+     "level_no": "01",
+     "unit_no": "01",
+     "building_name": "na",
+     "postal_code": "999004",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected": "flag R4 on all three tenders"
+  },
+  {
+   "case_id": "P5",
+   "flags": [
+    "R8"
+   ],
+   "agency": "National Parks Board",
+   "description": "Local-looking supplier name with no ACRA entity",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT25000005",
+     "supplier_name": "VORTEXA TEST HOLDINGS PTE. LTD.",
+     "awarded_amt": 320000,
+     "award_date": "2025-02-18",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [],
+   "expected": "flag R8 on PLT000ETT25000005"
+  },
+  {
+   "case_id": "P6",
+   "flags": [
+    "R9"
+   ],
+   "agency": "Housing and Development Board",
+   "description": "Winner ranked 2nd under published criteria (synthetic internal records)",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT25000006",
+     "supplier_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+     "awarded_amt": 500000,
+     "award_date": "2025-04-08",
+     "tender_description": "PLANTED TEST TENDER (FICTIONAL)"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0006F",
+     "entity_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2012-04-04",
+     "block": "99",
+     "street_name": "TESTVILLE ROAD",
+     "level_no": "01",
+     "unit_no": "01",
+     "building_name": "na",
+     "postal_code": "999006",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    },
+    {
+     "uen": "T99ZZ0016G",
+     "entity_name": "ALTAIRA TEST CONSULTING PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2014-06-06",
+     "block": "99",
+     "street_name": "TESTVILLE ROAD",
+     "level_no": "01",
+     "unit_no": "01",
+     "building_name": "na",
+     "postal_code": "999016",
+     "primary_ssic_code": "62019",
+     "primary_ssic_description": "OTHER INFORMATION TECHNOLOGY SERVICE ACTIVITIES",
+     "no_of_officers": "2"
+    }
+   ],
+   "internal": {
+    "bids": [
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ALTAIRA TEST CONSULTING PTE. LTD.",
+      "bid_amt": 480000,
+      "bid_rank": 1
+     },
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+      "bid_amt": 500000,
+      "bid_rank": 2
+     }
+    ],
+    "evaluations": [
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ALTAIRA TEST CONSULTING PTE. LTD.",
+      "criterion": "price",
+      "weight": 0.4,
+      "score": 92
+     },
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ALTAIRA TEST CONSULTING PTE. LTD.",
+      "criterion": "quality",
+      "weight": 0.6,
+      "score": 88
+     },
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+      "criterion": "price",
+      "weight": 0.4,
+      "score": 80
+     },
+     {
+      "tender_no": "PLT000ETT25000006",
+      "supplier_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+      "criterion": "quality",
+      "weight": 0.6,
+      "score": 84
+     }
+    ],
+    "coi_declarations": [
+     {
+      "tender_no": "PLT000ETT25000006",
+      "evaluator_id": "EVAL-TEST-01",
+      "supplier_name": "ZENTRIX TEST ENGINEERING PTE. LTD.",
+      "declared_conflict": false,
+      "note": "synthetic"
+     }
+    ]
+   },
+   "expected": "flag R9 on PLT000ETT25000006 (check owned by Inchara, D2)"
+  }
+ ]
+}

@@ -156,7 +156,10 @@ def resolve(names: Sequence[str], index: EntityIndex, strategies: Sequence[str] 
                 results[name] = m
                 continue
             cands = (cands + fc)[:3] or fc
-        if "llm_tiebreak" in strategies and tiebreak is not None and cands:
+        # Privacy: names without a local legal suffix are mostly individuals/sole traders; never send those to an LLM
+        # unless pass 1 already found several same-name entities.
+        sendable = bool(prior and prior.candidates) or has_local_suffix(name)
+        if "llm_tiebreak" in strategies and tiebreak is not None and cands and sendable:
             to_llm.append({"id": name, "name": name, "candidates": cands[:3]})
             results[name] = M(name, None, 0.0, _finish(name), cands)
         else:

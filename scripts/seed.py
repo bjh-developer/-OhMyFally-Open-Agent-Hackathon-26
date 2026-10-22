@@ -93,13 +93,11 @@ def seed_gebiz(planted: list[dict]) -> dict:
         for r in yaml.safe_load(f.read_text()):
             rules.append([r["flag_id"], r["name"], json.dumps(r.get("params", {})), r.get("source_url")])
     ago = []
-    ago_file = AGO_DIR / "chunks.jsonl"
-    if ago_file.exists():
-        for line in ago_file.read_text().splitlines():
-            if line.strip():
-                c = json.loads(line)
-                ago.append([c["chunk_id"], c.get("report"), c.get("fy"), c.get("section"), c.get("text"),
-                            json.dumps(c["embedding"]) if c.get("embedding") is not None else None])
+    index_csv = AGO_DIR / "index.csv"
+    if index_csv.exists():  # index.csv + <chunk_id>.txt; embeddings are added later (R5), NULL until then
+        for c in pd.read_csv(index_csv, dtype=str, keep_default_na=False).to_dict("records"):
+            txt = AGO_DIR / f"{c['chunk_id']}.txt"
+            ago.append([c["chunk_id"], c["report"], c["fy"], c["section"], txt.read_text().strip(), None])
     conn = pg_conn("gebiz")
     with conn, conn.cursor() as cur:
         for ddl in GEBIZ_DDL:
