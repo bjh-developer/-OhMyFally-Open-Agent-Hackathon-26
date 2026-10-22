@@ -53,7 +53,7 @@ def make(deps: Deps):
                      "from the evidence only (amount, strength of the metric versus its threshold, confidence). These are anomalies for review, not conclusions."},
                     {"role": "user", "content": dumps({"findings": [compact_finding(f) for f in live[:20]],
                                                        "answer_format": {"scores": [{"finding_id": "...", "priority": 50, "reason": "short"}]}})},
-                ], json_schema=Scores, max_tokens=3000)
+                ], json_schema=Scores, max_tokens=6000)
                 for s in res.parsed.scores:
                     if s.finding_id in scores:
                         scores[s.finding_id] = max(0.0, min(100.0, s.priority))

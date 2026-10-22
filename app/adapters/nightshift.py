@@ -232,10 +232,11 @@ def chat(
                 parsed = _validate(extract_json(content), json_schema)
             except (ValueError, ValidationError) as err:
                 log.warning("nightshift json invalid lane=%s: %s; repair retry", lane, str(err)[:200])
-                payload["messages"] = msgs + [
-                    {"role": "assistant", "content": content[:4000]},
-                    {"role": "user", "content": f"That was not valid ({str(err)[:300]}). Return ONLY the corrected JSON."},
+                prior = [{"role": "assistant", "content": content[:4000]}] if content.strip() else []  # empty assistant turns are rejected (400)
+                payload["messages"] = msgs + prior + [
+                    {"role": "user", "content": f"Your previous reply was not valid ({str(err)[:300]}). Return ONLY the corrected JSON."},
                 ]
+                payload["max_tokens"] = int(payload["max_tokens"] * 1.5)  # empty replies usually mean reasoning used the budget
                 body = _post(client, lane, payload, retries); calls += 1
                 rc = _receipt(body)
                 if rc["receipt_id"]:

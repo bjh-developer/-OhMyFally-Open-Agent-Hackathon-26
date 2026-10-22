@@ -51,7 +51,7 @@ def make(deps: Deps):
         ]
         status, rationale, checks, res = "success", "", [], None
         try:
-            res = deps.llm("deep", msgs, json_schema=PlanOut, max_tokens=2500)
+            res = deps.llm("deep", msgs, json_schema=PlanOut, max_tokens=3000)
             out: PlanOut = res.parsed
             checks = [c for c in dict.fromkeys(out.checks) if c in have]
             rationale = out.rationale

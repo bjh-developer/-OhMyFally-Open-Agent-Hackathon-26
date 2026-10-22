@@ -127,7 +127,7 @@ def make(deps: Deps):
                      "metric values) agree with its evidence_rows. A summary is supported unless it states a fact that contradicts or is absent from the rows. "
                      "Do not judge whether the finding is a real problem, and do not object to tone."},
                     {"role": "user", "content": dumps({"findings": batch, "answer_format": {"checks": [{"finding_id": "...", "supported": True, "reason": "short"}]}})},
-                ], json_schema=ClaimChecks, max_tokens=2500)
+                ], json_schema=ClaimChecks, max_tokens=6000)
                 for c in receipt_res.parsed.checks:
                     if not c.supported:
                         critiques.append(Critique(finding_id=c.finding_id, verdict="revise", target="AnalystAgent", reason=f"claim not supported: {c.reason}"))
@@ -135,7 +135,7 @@ def make(deps: Deps):
                         if fl and fl not in revise_checks:
                             revise_checks.append(fl)
             except Exception as e:
-                deps.tracer.emit(NAME, "claim_support_check", input=f"{len(live)} findings", output=f"skipped: {type(e).__name__}", status="partial_success")
+                deps.tracer.emit(NAME, "claim_support_check", input=f"{len(live)} findings", output=f"skipped: {type(e).__name__}: {str(e)[:150]}", status="partial_success")
 
         # bounded loops: flags over the retry limit are given up on, not looped
         give_up = [fl for fl in revise_checks if retries.get(fl, 0) >= deps.max_retries]

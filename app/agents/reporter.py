@@ -77,7 +77,7 @@ def make(deps: Deps):
                 {"role": "user", "content": dumps({"agency": req.agency, "period": [str(req.date_from), str(req.date_to)], "top_findings": [compact_finding(f) for f in shown[:8]],
                                                    "counts": {"shown": len(shown), "suppressed": len(suppressed), "rejected": len(rejected)},
                                                    "answer_format": {"headline": "one sentence", "overview": "2-3 sentences"}})},
-            ], json_schema=Narrative, max_tokens=2500)
+            ], json_schema=Narrative, max_tokens=4000)
             n: Narrative = res.parsed
             if banned_hits(n.headline + " " + n.overview):
                 n = Narrative(headline=sanitise(n.headline), overview=sanitise(n.overview))
