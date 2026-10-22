@@ -39,4 +39,5 @@ disclaimer: >-
 # Template for deterministic per-finding summaries (fields: supplier, tender_no, agency, amt, date, flag_name, detail)
 summary_template: >-
   {flag_name}: {supplier} was awarded {tender_no} by {agency} (S${amt}, {date}). {detail}
-  This is an anomaly for review and may indicate a concern that requires auditor judgement.
+# Fixed closing sentence on every finding summary (mandated wording, not a factual claim; the Critic ignores it).
+summary_suffix: "This is an anomaly for review and may indicate a concern that requires auditor judgement."

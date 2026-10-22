@@ -96,10 +96,15 @@ def summarise(row: dict[str, Any]) -> str:
     detail = (row.get("detail") or "").strip()
     if not detail and row.get("metric_name"):
         detail = f"{row['metric_name']} = {row.get('metric_value')} (threshold {row.get('threshold')})."
-    return " ".join(wording()["summary_template"].format(
+    facts = " ".join(wording()["summary_template"].format(
         flag_name=flag.get("name", row["flag_id"]), supplier=row.get("supplier_name"), tender_no=row.get("tender_no"),
         agency=row.get("agency"), amt=_fmt_amt(row.get("awarded_amt")), date=row.get("award_date"), detail=detail,
     ).split())
+    return f"{facts} {wording()['summary_suffix']}"
+
+
+def facts_only(summary: str) -> str:
+    return summary.removesuffix(wording()["summary_suffix"]).strip()
 
 
 def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None) -> list[Finding]:

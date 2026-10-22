@@ -65,7 +65,7 @@ def make(deps: Deps):
                 lim.append(f"{fid}: {t}")
         for g in state.get("coverage_gaps") or []:
             lim.append(f"{g}: not run (no SQL available or the check failed).")
-        res, status = None, "success"
+        res, status, err = None, "success", ""
         headline = f"{len(shown)} award(s) at {req.agency} flagged as anomalies for review"
         overview = ""
         try:
@@ -81,11 +81,11 @@ def make(deps: Deps):
                 n = Narrative(headline=sanitise(n.headline), overview=sanitise(n.overview))
             headline, overview = n.headline, n.overview
         except Exception as e:
-            status = "partial_success"
+            status, err = "partial_success", f"{type(e).__name__}: {str(e)[:160]}"
             overview = f"(narrative unavailable: {type(e).__name__}; findings below are generated from the SQL evidence directly.)"
         memo = Memo(
             run_id=state["run_id"], agency=req.agency, date_from=req.date_from, date_to=req.date_to,
-            summary=f"{headline}. {overview}".strip(), findings=shown, limitations=lim, disclaimer=wording()["disclaimer"].strip(),
+            summary=f"{headline.rstrip('. ')}. {overview}".strip(), findings=shown, limitations=lim, disclaimer=wording()["disclaimer"].strip(),
             escalated=[f.finding_id for f in shown if f.status == "escalated"],
             stats={"candidates": len(findings), "shown": len(shown), "suppressed": len(suppressed), "rejected": len(rejected),
                    "llm_calls": None, "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds")},
@@ -95,7 +95,7 @@ def make(deps: Deps):
             d = deps.tracer.dir
             (d / f"{memo.run_id}.md").write_text(memo.markdown, encoding="utf-8")
             (d / f"{memo.run_id}.memo.json").write_text(memo.model_dump_json(indent=2), encoding="utf-8")
-        out = dict(input=f"{len(findings)} candidates", output=f"memo with {len(shown)} findings ({len(suppressed)} suppressed, {len(rejected)} rejected)",
+        out = dict(input=f"{len(findings)} candidates", output=f"memo with {len(shown)} findings ({len(suppressed)} suppressed, {len(rejected)} rejected)" + (f"; narrative failed: {err}" if status != "success" else ""),
                    status=status, query_ids=[])
         if res:
             deps.tracer.llm(NAME, "build_memo", res, **out)
