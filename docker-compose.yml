@@ -1,0 +1,62 @@
+name: ohmyfally
+
+# Our containers join Zetaris's external network so Zetaris can reach them by name.
+# Start Zetaris first (it creates `zetaris_default`), then: docker compose up -d
+services:
+  pi-postgres:
+    image: postgres:16-alpine
+    container_name: pi-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: gebiz
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pi_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d gebiz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [zetaris_default]
+
+  pi-s3:
+    image: chrislusf/seaweedfs:3.80
+    container_name: pi-s3
+    command: server -s3 -dir=/data
+    ports:
+      - "127.0.0.1:18333:8333"
+    volumes:
+      - pi_s3data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9333/cluster/status || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [zetaris_default]
+
+  # STUB: stream C replaces this block with the real TypeScript H-MEM service
+  # (build: ./services/hmem, port 7070, volume for state/). The stub only answers /healthz.
+  pi-hmem:
+    image: busybox:1.36
+    container_name: pi-hmem
+    command: >
+      sh -c "mkdir -p /www && echo '{\"ok\":true,\"conformance\":\"unknown\"}' > /www/healthz
+      && exec httpd -f -p 7070 -h /www"
+    ports:
+      - "127.0.0.1:7070:7070"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:7070/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [zetaris_default]
+
+volumes:
+  pi_pgdata:
+  pi_s3data:
+
+networks:
+  zetaris_default:
+    external: true
