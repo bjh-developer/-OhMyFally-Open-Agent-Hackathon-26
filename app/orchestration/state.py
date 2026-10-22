@@ -17,10 +17,15 @@ class HMemLike(Protocol):  # implemented by app/adapters/hmem_client.py (D2)
     def feedback(self, memory_id: str, signal: str, run_id: str) -> None: ...
 
 
+def _default_sql(sql: str) -> zetaris.Result:
+    # federated joins (Postgres + S3) can take 15 s+, so checks get a longer timeout than the 20 s default
+    return zetaris.run_sql(sql, timeout=max(60.0, get_settings().source_timeout))
+
+
 @dataclass
 class Deps:
     tracer: Tracer
-    sql: Callable[[str], zetaris.Result] = zetaris.run_sql
+    sql: Callable[[str], zetaris.Result] = _default_sql
     llm: Callable[..., nightshift.ChatResult] = nightshift.chat
     resolve: Callable[..., list[Match]] | None = None
     hmem: HMemLike | None = None

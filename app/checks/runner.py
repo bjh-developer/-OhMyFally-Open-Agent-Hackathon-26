@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import Any, Callable
 
 from ..adapters.config import ROOT
@@ -12,7 +14,7 @@ from ..adapters.zetaris import Result, to_date, to_float
 from ..schemas import Evidence, Finding
 from .rules import red_flags, wording
 
-CHECKS_DIR = ROOT / "sql" / "checks"
+CHECKS_DIR = Path(os.environ.get("PI_CHECKS_DIR") or ROOT / "sql" / "checks")  # env override for dev/tests
 CHECK_COLUMNS = ["flag_id", "tender_no", "agency", "supplier_name", "uen", "award_date", "awarded_amt",
                  "metric_name", "metric_value", "threshold", "detail"]
 SOURCE_OBJECTS = {

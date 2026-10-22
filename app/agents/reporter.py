@@ -69,6 +69,8 @@ def make(deps: Deps):
         headline = f"{len(shown)} award(s) at {req.agency} flagged as anomalies for review"
         overview = ""
         try:
+            if not shown:
+                raise LookupError("nothing to narrate")
             res = deps.llm("deep", [
                 {"role": "system", "content": "You write the opening of an audit memo. Use only the facts given. Use the phrases 'anomaly for review' and 'may indicate'. "
                  "Never use the words fraud, corrupt, illegal, criminal, guilty or scam."},
@@ -80,6 +82,9 @@ def make(deps: Deps):
             if banned_hits(n.headline + " " + n.overview):
                 n = Narrative(headline=sanitise(n.headline), overview=sanitise(n.overview))
             headline, overview = n.headline, n.overview
+        except LookupError:
+            headline = f"No awards at {req.agency} were flagged as anomalies for review in this scope"
+            overview = "The checks that ran returned no rows; this does not rule out matters outside the checks or the data available."
         except Exception as e:
             status, err = "partial_success", f"{type(e).__name__}: {str(e)[:160]}"
             overview = f"(narrative unavailable: {type(e).__name__}; findings below are generated from the SQL evidence directly.)"
