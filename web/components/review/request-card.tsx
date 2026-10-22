@@ -169,11 +169,11 @@ export function RequestCard() {
           </div>
 
           <Collapsible>
-            <CollapsibleTrigger className="group flex min-h-11 items-center gap-2 rounded-lg text-base font-semibold text-secondary underline-offset-4 hover:underline">
-              <ChevronDown aria-hidden strokeWidth={1.75} className="size-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            <CollapsibleTrigger className="group flex min-h-11 items-center gap-2 rounded-lg text-left text-base font-semibold text-secondary underline-offset-4 hover:underline">
+              <ChevronDown aria-hidden strokeWidth={1.75} className="size-5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               Choose which checks to run
-              <span className="text-sm font-normal text-muted-foreground no-underline">{checks.length ? `${checks.length} of ${CHECK_IDS.length} selected` : "All checks run by default"}</span>
             </CollapsibleTrigger>
+            <p className="pl-7 text-sm text-muted-foreground">{checks.length ? `${checks.length} of ${CHECK_IDS.length} checks selected` : "All checks run by default"}</p>
             <CollapsibleContent>
               <fieldset className="mt-2 grid gap-1">
                 <legend className="sr-only">Checks to run</legend>

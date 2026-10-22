@@ -40,12 +40,12 @@ describe("items and summary", () => {
   const items = buildItems(memo);
   const s = summarise(items);
   it("counts by status", () => {
-    expect(s.worth).toBe(4);
+    expect(s.worth).toBe(5);
     expect(s.needDecision).toBe(1);
     expect(s.cleared).toBe(1);
   });
-  it("sums value over shown items", () => expect(s.value).toBe(400000 + 58000 + 120000 + 76500));
-  it("writes a headline", () => expect(headline("Sample Agency", s)).toBe("4 items worth a second look at Sample Agency. 1 needs your decision."));
+  it("sums value over shown items", () => expect(s.value).toBe(400000 + 58000 + 120000 + 76500 + 136500));
+  it("writes a headline", () => expect(headline("Sample Agency", s)).toBe("5 items worth a second look at Sample Agency. 1 needs your decision."));
 });
 
 describe("plain wording helpers", () => {
