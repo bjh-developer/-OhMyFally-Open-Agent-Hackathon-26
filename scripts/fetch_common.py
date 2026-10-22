@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-import requests
+import httpx
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
@@ -24,7 +24,7 @@ def download_dataset(dataset_id: str, dest: Path, force: bool = False, max_polls
     dest.parent.mkdir(parents=True, exist_ok=True)
     url = None
     for _ in range(max_polls):
-        r = requests.get(f"{API}/{dataset_id}/initiate-download", timeout=TIMEOUT)
+        r = httpx.get(f"{API}/{dataset_id}/initiate-download", timeout=TIMEOUT)
         if r.status_code == 429:
             time.sleep(15)
             continue
@@ -32,8 +32,8 @@ def download_dataset(dataset_id: str, dest: Path, force: bool = False, max_polls
         url = (r.json().get("data") or {}).get("url")
         if url:
             break
-        r = requests.get(f"{API}/{dataset_id}/poll-download", timeout=TIMEOUT)
-        if r.ok:
+        r = httpx.get(f"{API}/{dataset_id}/poll-download", timeout=TIMEOUT)
+        if r.is_success:
             url = (r.json().get("data") or {}).get("url")
             if url:
                 break
@@ -41,10 +41,10 @@ def download_dataset(dataset_id: str, dest: Path, force: bool = False, max_polls
     if not url:
         raise RuntimeError(f"no download url for {dataset_id}")
     tmp = dest.with_suffix(dest.suffix + ".part")
-    with requests.get(url, stream=True, timeout=TIMEOUT) as r:
+    with httpx.stream("GET", url, timeout=TIMEOUT, follow_redirects=True) as r:
         r.raise_for_status()
         with open(tmp, "wb") as f:
-            for chunk in r.iter_content(1 << 20):
+            for chunk in r.iter_bytes(1 << 20):
                 f.write(chunk)
     tmp.replace(dest)
     return dest
@@ -61,15 +61,16 @@ load_dotenv(ROOT / ".env")
 
 
 def pg_conn(dbname: str = "gebiz"):
-    import psycopg2
+    import psycopg
 
-    return psycopg2.connect(
+    return psycopg.connect(
         host=os.getenv("PI_PG_HOST", "127.0.0.1"),
         port=int(os.getenv("PI_PG_PORT", "55432")),
         user=os.environ["POSTGRES_USER"],
         password=os.environ["POSTGRES_PASSWORD"],
         dbname=dbname,
         connect_timeout=10,
+        autocommit=False,
     )
 
 

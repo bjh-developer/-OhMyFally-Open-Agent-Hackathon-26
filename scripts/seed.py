@@ -13,7 +13,6 @@ check SQL that scans real data must find them.
 from __future__ import annotations
 
 import argparse
-import csv
 import io
 import json
 import os
@@ -69,12 +68,9 @@ def ensure_db(name: str) -> None:
 
 
 def copy_rows(cur, table: str, cols: list[str], rows: list[list]) -> None:
-    buf = io.StringIO()
-    w = csv.writer(buf)
-    for r in rows:
-        w.writerow(["\\N" if v is None else v for v in r])
-    buf.seek(0)
-    cur.copy_expert(f"COPY {table} ({','.join(cols)}) FROM STDIN WITH (FORMAT csv, NULL '\\N')", buf)
+    with cur.copy(f"COPY {table} ({','.join(cols)}) FROM STDIN") as cp:
+        for r in rows:
+            cp.write_row(r)
 
 
 def load_planted(enabled: bool) -> list[dict]:

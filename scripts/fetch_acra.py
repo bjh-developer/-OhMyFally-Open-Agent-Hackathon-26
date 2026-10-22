@@ -18,7 +18,7 @@ from collections import Counter
 from pathlib import Path
 
 import pandas as pd
-import requests
+import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fetch_common import RAW, ROOT, SAMPLE, download_dataset  # noqa: E402
@@ -35,7 +35,7 @@ KEEP_COLS = ["uen", "entity_name", "entity_type_description", "entity_status_des
 
 
 def dataset_ids() -> list[str]:
-    r = requests.get(COLLECTION_META, timeout=60)
+    r = httpx.get(COLLECTION_META, timeout=60)
     r.raise_for_status()
     return r.json()["data"]["collectionMetadata"]["childDatasets"]
 
