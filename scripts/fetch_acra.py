@@ -2,7 +2,12 @@
 """ACRA entities: download the 27 collection CSVs, keep only candidate matches for our suppliers.
 
   python scripts/fetch_acra.py download   # raw CSVs -> data/raw/acra/ (rate limited, cached)
-  python scripts/fetch_acra.py            # build data/sample/acra_entities.{parquet,csv}
+  python scripts/fetch_acra.py            # build the FULL candidate set -> data/local/ (gitignored)
+  python scripts/fetch_acra.py minimise   # after the Resolver ran: write the committed data/sample/ subset
+
+The committed sample is privacy-minimised: only entities the Resolver matched to a GeBIZ supplier, the top-3
+candidates of ambiguous (unresolved / llm_tiebreak) suppliers, with level_no/unit_no blanked for sole
+proprietorships/partnerships. The full set stays in data/local/ and is used by seed.py when present.
 
 Candidate rule: an ACRA entity is kept when ANY of its names (current or former_entity_name1..15)
 shares the first two significant tokens with a supplier in data/sample/awards.csv, or shares the first
@@ -21,7 +26,7 @@ import pandas as pd
 import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fetch_common import RAW, ROOT, SAMPLE, download_dataset  # noqa: E402
+from fetch_common import LOCAL, RAW, ROOT, SAMPLE, download_dataset, pg_conn  # noqa: E402
 from app.resolver.normalize import blocking_keys, normalize  # noqa: E402
 
 COLLECTION_META = "https://api-production.data.gov.sg/v2/public/api/collections/2/metadata"
@@ -111,19 +116,51 @@ def build() -> pd.DataFrame:
     out = pd.concat(kept, ignore_index=True).drop_duplicates("uen").reset_index(drop=True)
     out["registration_incorporation_date"] = pd.to_datetime(
         out["registration_incorporation_date"], errors="coerce").dt.strftime("%Y-%m-%d")
+    LOCAL.mkdir(parents=True, exist_ok=True)
+    out.to_parquet(LOCAL / "acra_entities_full.parquet", index=False)
+    out.to_csv(LOCAL / "acra_entities_full.csv", index=False)
+    print(f"ACRA total rows: {total}  candidates kept (local, gitignored): {len(out)}")
+    return out
+
+
+SOLE_PROP = "Sole Proprietorship/ Partnership"
+
+
+def minimise() -> pd.DataFrame:
+    """Committed sample = Resolver-matched entities + top-3 candidates of ambiguous suppliers; sole-prop unit blanked."""
+    full_path = LOCAL / "acra_entities_full.parquet"
+    if not full_path.exists():
+        raise SystemExit("no data/local/acra_entities_full.parquet; run fetch_acra.py (build) and the Resolver first")
+    full = pd.read_parquet(full_path)
+    conn = pg_conn("gebiz")
+    with conn.cursor() as cur:
+        cur.execute("SELECT uen FROM supplier_xwalk WHERE uen IS NOT NULL")
+        keep = {r[0] for r in cur.fetchall()}
+        matched = len(keep)
+        cur.execute("SELECT candidates FROM supplier_xwalk WHERE method IN ('unresolved', 'llm_tiebreak')")
+        for (cands,) in cur.fetchall():
+            for c in (cands or [])[:3]:
+                keep.add(c["uen"])
+    conn.close()
+    out = full[full["uen"].isin(keep)].copy().reset_index(drop=True)
+    sole = out["entity_type_description"] == SOLE_PROP
+    out.loc[sole, ["level_no", "unit_no"]] = ""
     SAMPLE.mkdir(parents=True, exist_ok=True)
     out.to_parquet(SAMPLE / "acra_entities.parquet", index=False)
-    out.to_csv(SAMPLE / "acra_entities.csv", index=False)  # fallback if Zetaris can't read Parquet
-    print(f"ACRA total rows: {total}  candidates kept: {len(out)}")
+    out.to_csv(SAMPLE / "acra_entities.csv", index=False)
+    print(f"matched uens={matched} + ambiguous candidates -> {len(out)} rows (of {len(full)} local)")
+    print(out["entity_type_description"].value_counts().to_string())
     return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", nargs="?", default="build", choices=["build", "download"])
+    ap.add_argument("cmd", nargs="?", default="build", choices=["build", "download", "minimise"])
     a = ap.parse_args()
     if a.cmd == "download":
         download_all()
+    elif a.cmd == "minimise":
+        minimise()
     else:
         build()
 

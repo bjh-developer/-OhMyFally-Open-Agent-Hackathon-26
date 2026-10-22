@@ -1,5 +1,6 @@
 -- R3: two or more DISTINCT winning suppliers (different UENs) at the same agency share an exact registered address
 -- (postal code + block + street + level + unit). One row per award by a supplier in the group.
+-- Sole proprietorships/partnerships are excluded: their unit-level address is not published in the committed sample.
 -- Params: {{agency}} {{date_from}} {{date_to}}
 WITH won AS (
   SELECT DISTINCT a.agency, x.uen
@@ -13,7 +14,8 @@ addr AS (
          concat_ws(' ', e.block, e.street_name, concat('#', e.level_no, '-', e.unit_no), concat('S', e.postal_code)) AS addr_text
   FROM won w
   JOIN ACRA_FILES.entities e ON e.uen = w.uen
-  WHERE e.postal_code IS NOT NULL AND length(e.postal_code) = 6 AND e.street_name IS NOT NULL AND upper(e.street_name) <> 'NA'
+  WHERE e.entity_type_description <> 'Sole Proprietorship/ Partnership'
+    AND e.postal_code IS NOT NULL AND length(e.postal_code) = 6 AND e.street_name IS NOT NULL AND upper(e.street_name) <> 'NA'
 ),
 grp AS (
   SELECT agency, addr_key, count(DISTINCT uen) AS n_suppliers, min(addr_text) AS addr_text

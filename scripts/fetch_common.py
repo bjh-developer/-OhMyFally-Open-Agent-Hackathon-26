@@ -10,6 +10,7 @@ import httpx
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 SAMPLE = ROOT / "data" / "sample"
+LOCAL = ROOT / "data" / "local"  # gitignored: full ACRA candidate set (contains sole-proprietor rows)
 API = "https://api-open.data.gov.sg/v1/public/api/datasets"
 TIMEOUT = 60
 

@@ -28,16 +28,27 @@ Runner-ups from the same stats: Ministry of Education (679, 2), A*STAR (937, 2).
 | `gebiz_pg.rules` | 9 |
 | `gebiz_pg.ago_chunks` | 11 (loaded from `data/ago/`; `embedding` is NULL until R5) |
 | `gebiz_pg.supplier_xwalk` | 1,267 |
-| `ACRA_FILES.entities` | 23,074 (23,067 candidates + 7 planted) of 2,124,508 ACRA rows |
+| `ACRA_FILES.entities` | 1,233 from the committed minimised sample (1,226 real + 7 planted). With the gitignored full set in `data/local/` it is 23,074 (23,067 candidates + 7 planted), out of 2,124,508 ACRA rows |
 | `internal_pg.bids / evaluations / coi_declarations` | 2 / 4 / 1 (planted P6 only) |
 
-ACRA candidate rule (`scripts/fetch_acra.py`): keep an entity if any of its names (current or `former_entity_name1..15`) shares the first two normalised tokens with a supplier, or the first token when that token is rare in ACRA (<= 50 entities). Files are ~6 MB (`acra_entities.parquet` 1.3 MB + CSV fallback 4.7 MB). Raw downloads live in `data/raw/` (gitignored).
+ACRA candidate rule (`scripts/fetch_acra.py`): keep an entity if any of its names (current or `former_entity_name1..15`) shares the first two normalised tokens with a supplier, or the first token when that token is rare in ACRA (<= 50 entities). Raw downloads live in `data/raw/` and the **full candidate set (23,067 rows) in `data/local/`; both are gitignored.**
+
+**Committed ACRA sample is privacy-minimised** (repo is public; the full set had 11,648 sole-proprietorship rows, often personal names with unit-level addresses). `python scripts/fetch_acra.py minimise` (run after the Resolver) keeps only: entities the Resolver matched to a GeBIZ supplier (any method except unresolved/out_of_scope), the top-3 candidates of unresolved / llm_tiebreak suppliers, and nothing else (planted entities are injected by `seed.py` from `planted.json`). `level_no` and `unit_no` are blanked for Sole Proprietorship/ Partnership rows. Result: 1,226 rows (~0.4 MB):
+
+| entity_type_description | rows |
+|---|---|
+| Local Company | 1,103 |
+| Sole Proprietorship/ Partnership | 85 |
+| Limited Liability Partnership | 28 |
+| Foreign Company Branch | 10 |
+
+`seed.py` uses `data/local/acra_entities_full.parquet` when it exists, otherwise the minimised sample (`--sample-only` forces the sample). I re-ran seed, register, Resolver passes 1-2 and all checks on the minimised sample: identical Resolver counts (section 5), every planted case still caught, R1-R4 still return real rows, 46 tests pass. A fresh clone only has the sample, so that is what judges get.
 
 ## 4. Reseed and re-register (order matters)
 
 ```bash
 docker compose up -d                       # pi-postgres, pi-s3 (external network zetaris_default must exist)
-python scripts/seed.py                     # idempotent; --no-planted skips the fictional cases; EMPTIES supplier_xwalk
+python scripts/seed.py                     # idempotent (uses data/local/ full ACRA set if present, else the sample); --no-planted skips the fictional cases; EMPTIES supplier_xwalk
 python scripts/register_zetaris.py         # idempotent; drops+recreates only gebiz_pg, internal_pg, ACRA_FILES; --csv for the CSV fallback
 python -m app.resolver.run --pass 1        # exact + former_name (R1/R2/R3 join through supplier_xwalk)
 python -m app.resolver.run --pass 2        # fuzzy + fast-lane LLM tie-break + unresolved/out_of_scope (R8 needs it)
@@ -45,7 +56,7 @@ python scripts/run_check.py R1 "People's Association" 2021-04-01 2026-03-31
 pytest                                     # 40 tests incl. tests/test_planted_checks.py (needs Zetaris up)
 ```
 
-Re-download only if needed: `python scripts/fetch_gebiz.py --force`; `python scripts/fetch_acra.py download` (rate limited, about 8 min) then `python scripts/fetch_acra.py`.
+Re-download only if needed: `python scripts/fetch_gebiz.py --force`; `python scripts/fetch_acra.py download` (rate limited, about 8 min), `python scripts/fetch_acra.py` (builds the full set in `data/local/`), run seed/register/Resolver, then `python scripts/fetch_acra.py minimise` to refresh the committed sample.
 
 Parquet works in Zetaris (date column typed as `date`). Verified syntax, found by trial since there is no local doc:
 - `CREATE DATASOURCE n OPTIONS (jdbcurl "...", jdbcdriver "org.postgresql.Driver", username "...", password "...")` — **`jdbcdriver` is required**, otherwise "Unknown DataSource Exception".
@@ -76,7 +87,7 @@ Layers (`app/resolver/match.py`): pass 1 = exact then former_name on the normali
 |---|---|---|---|---|
 | R1 incorporated < 183 days | 1 | 3 | 0 | P1 (HDB) |
 | R2 status not live | 15 | 9 | 3 | P2 (NParks) |
-| R3 shared exact address | 214 | 49 | 29 | P3 (HDB, two suppliers) |
+| R3 shared exact address | 212 | 42 | 29 | P3 (HDB, two suppliers) |
 | R4 splitting | 14 | 11 | 6 | P4 (PA, three awards) |
 | R8 local-looking, no match | 0 | 0 | 1 | P5 (NParks) |
 
@@ -85,15 +96,15 @@ Layers (`app/resolver/match.py`): pass 1 = exact then former_name on the normali
 
 ## 7. Known weaknesses and open TODOs
 
-1. **R3 is noisy** (214 HDB rows): most groups are 2 suppliers in one multi-tenant building or industrial lot (Raffles Quay, Tampines Industrial Drive, ...), often sister companies. Ideas: down-weight when `unit_no`/`level_no` are `na`, or when the building hosts many unrelated suppliers; the Critic or Risk step should cap R3 confidence.
+1. **R3 is noisy** (212 HDB rows): most groups are 2 suppliers in one multi-tenant building or industrial lot (Raffles Quay, Tampines Industrial Drive, ...), often sister companies. R3 skips sole proprietorships/partnerships because their unit-level address is blanked in the sample. Ideas: down-weight when `unit_no`/`level_no` are `na`, or when the building hosts many unrelated suppliers; the Critic or Risk step should cap R3 confidence.
 2. **R2 uses current status only** (ACRA has no history) and sole proprietorships that closed are included (`Terminated`, `Cancelled`); many hits are benign. R2 is the largest false-positive risk after R3.
 3. **R1 ignores negative ages.** Some sole-proprietor names match an ACRA row registered after the award (a re-registration of the same trading name); `BETWEEN 0 AND 183` excludes them, so those are silently not tested. Also, real R1 hits include `OVV` (a sole proprietorship, 156 days), which is a legitimate small trader.
 4. **R4:** the data has no quotations (section 1), and call-offs under a framework look like splitting.
-5. **Out-of-scope is name-suffix based.** A sole proprietor or partnership with a trade name and no PTE LTD, absent from the 23k-entity subset, becomes `out_of_scope`, not R8. Personal names are in `supplier_xwalk.supplier_name` unmasked; masking in the `public` role is still to do (D2).
+5. **Out-of-scope is name-suffix based.** A sole proprietor or partnership with a trade name and no PTE LTD, absent from the 23k-entity subset, becomes `out_of_scope`, not R8. Personal supplier names are in `supplier_xwalk.supplier_name` and `awards` unmasked (GeBIZ publishes them), and the 85 sole-proprietorship entity names kept in the sample may be personal names; masking in the `public` role is still to do (D2).
 6. **Subset risk:** `fetch_acra.py` only keeps entities sharing leading tokens with a supplier, so a renamed entity whose old and new names share no first token is missed (`former_name` covers the usual case).
 7. **LLM tie-break:** only 2 live matches, so the labelled-set accuracy is not measured yet (your `entity_labels.csv`, D2). Nightshift's fast lane sometimes returns 502 `empty_response` or 499; the Resolver retries twice and then leaves those suppliers unresolved rather than failing. A batch of 8 takes 10-40 s. The fast model ignores "JSON only" unless the system prompt says "Do not explain".
 8. The Resolver reads entities/awards through Zetaris but writes `supplier_xwalk` straight to Postgres (Zetaris sources are read-only). `app/resolver/entities.py` has its own small Zetaris REST client; swap it for `app/adapters/zetaris.py` if you want one code path.
-9. `data/README.md` (sources, SODL licence attribution, counts) is not written yet. Sources: GeBIZ awards and ACRA corporate entities from data.gov.sg under the Singapore Open Data Licence.
+9. `data/README.md` now covers sources, SODL attribution, counts and regeneration; extend it with eval numbers on D2.
 10. `red_flags.yaml` `why_it_matters` lines are deliberately generic: I did not attach AGO claims I had not checked. Stream C's `data/ago/` excerpts can be cited there.
 11. `requirements.txt`: I appended `pandas` (used by the fetch/seed scripts). Everything else I use was already listed.
 12. Not done (D2 per plan): R5, R6, R9 SQL, `entity_labels.csv`, `eval.py`, USL model.
