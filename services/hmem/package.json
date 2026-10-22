@@ -1,15 +1,21 @@
 {
-  "name": "@meterless/hmem-reference",
+  "name": "@ohmyfally/hmem-service",
   "version": "0.1.0",
-  "description": "Minimal runnable reference implementation of the H-MEM spec (AGENTS.md). Deterministic, zero runtime dependencies, not a production library.",
+  "description": "H-MEM memory service for the Procurement Integrity Investigator. Adapted from the Meterless H-MEM reference (Apache-2.0); exposes the CONTRACTS section 6 HTTP API.",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "start": "node --import tsx src/server.ts",
+    "test": "vitest run",
+    "conformance": "HMEM_IMPL=\"$PWD/src/index.ts\" tsx ../hmem-upstream/conformance/runner.ts && echo pass > conformance.status"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.6.0",
+    "tsx": "^4.19.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.0",
     "vitest": "^2.1.0"
   }
 }

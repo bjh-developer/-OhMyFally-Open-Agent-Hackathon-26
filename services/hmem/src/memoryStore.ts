@@ -33,6 +33,10 @@ export interface AddInput {
   goalRunId?: string;
   supersedes?: string;
   derivedFrom?: string[];
+  meta?: Record<string, string>;
+  agentId?: string;
+  runId?: string;
+  entities?: string[]; // caller-supplied entities, merged with the extracted ones
 }
 
 export class MemoryStoreService {
@@ -60,7 +64,10 @@ export class MemoryStoreService {
   persist(): void {
     if (!this.stateFile) return;
     const records = [...this.records.values()].sort((a, b) => a.id.localeCompare(b.id));
-    fs.writeFileSync(this.stateFile, JSON.stringify({ seq: this.seq, records }, null, 2) + "\n", "utf-8");
+    // Write-then-rename so a crash mid-write never leaves a truncated state.json.
+    const tmp = `${this.stateFile}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify({ seq: this.seq, records }, null, 2) + "\n", "utf-8");
+    fs.renameSync(tmp, this.stateFile);
   }
 
   add(input: AddInput): MemoryRecord {
@@ -89,10 +96,13 @@ export class MemoryStoreService {
       goalRunId: input.goalRunId,
       domain,
       namespace: this.namespace(domain, input.type ?? "general"),
-      entities: this.extractEntities(input.content),
+      entities: [...new Set([...(input.entities ?? []), ...this.extractEntities(input.content)])].slice(0, DEFAULTS.entityCap),
       relatedTo: [],
       supersedes: input.supersedes,
       derivedFrom: input.derivedFrom,
+      ...(input.meta ? { meta: { ...input.meta } } : {}),
+      ...(input.agentId ? { agentId: input.agentId } : {}),
+      ...(input.runId ? { runId: input.runId } : {}),
     };
     this.discoverRelationships(record);
     this.records.set(id, record);

@@ -63,7 +63,7 @@ export class MemoryRetrievalService {
     return clamp01(raw) * m.confidence;
   }
 
-  query(query: string, opts?: { topN?: number; threshold?: number; chatId?: string }): QueryResult {
+  query(query: string, opts?: { topN?: number; threshold?: number; chatId?: string; filter?: (m: MemoryRecord) => boolean }): QueryResult {
     const queryEmbedding = embed(query);
     const queryTokens = tokenize(query).slice(0, 8);
     const queryEntities = this.store.extractEntities(query);
@@ -74,6 +74,7 @@ export class MemoryRetrievalService {
     const scored: RetrievedMemory[] = [];
     for (const m of this.store.all()) {
       if (opts?.chatId && m.chatId && m.chatId !== opts.chatId) continue;
+      if (opts?.filter && !opts.filter(m)) continue;
       const s = this.score(m, queryEmbedding, queryTokens, queryEntities, queryDomain);
       if (s >= threshold) scored.push({ memory: m, relevance: s });
     }

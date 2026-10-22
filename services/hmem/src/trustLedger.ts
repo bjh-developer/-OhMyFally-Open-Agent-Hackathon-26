@@ -9,6 +9,10 @@ import type { LedgerAction, LedgerEntry, MemoryRecord } from "./types.ts";
 export class TrustLedgerService {
   private entries: LedgerEntry[] = [];
   private file?: string;
+  // OhMyFally: set by the HTTP server around each request so entries carry the
+  // run/agent that caused them, and mirrored out (logs/hmem-ledger.jsonl).
+  context: { runId?: string; agentId?: string } = {};
+  onEntry?: (entry: LedgerEntry) => void;
 
   constructor(private clock: () => number, persistDir?: string) {
     if (persistDir) {
@@ -29,9 +33,10 @@ export class TrustLedgerService {
     actor: string,
     extra?: { previousState?: Partial<MemoryRecord>; newState?: Partial<MemoryRecord>; details?: Record<string, unknown> }
   ): LedgerEntry {
-    const entry: LedgerEntry = { memoryId, action, actor, timestamp: this.clock(), ...extra };
+    const entry: LedgerEntry = { memoryId, action, actor, timestamp: this.clock(), ...extra, ...this.context };
     this.entries.push(entry);
     if (this.file) fs.appendFileSync(this.file, JSON.stringify(entry) + "\n", "utf-8");
+    this.onEntry?.(entry);
     return entry;
   }
 

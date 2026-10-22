@@ -4,7 +4,8 @@ export type MemoryType = "personal" | "factual" | "preference" | "general";
 export type MemoryLayer = "short_term" | "working" | "long_term";
 export type ProvenanceOrigin =
   | "chat_message" | "user_correction" | "file_save" | "file_open" | "file_edit"
-  | "model_response" | "plan_completion" | "document" | "manual" | "dream" | "sleep_synthesis";
+  | "model_response" | "plan_completion" | "document" | "manual" | "dream" | "sleep_synthesis"
+  | "auditor"; // OhMyFally: human auditor decisions (POST /auditor-decision)
 
 export interface Provenance {
   origin: ProvenanceOrigin;
@@ -37,6 +38,10 @@ export interface MemoryRecord {
   supersedes?: string;
   supersededBy?: string;   // set by conflict resolution; drives the retrieval penalty
   derivedFrom?: string[];
+  // OhMyFally additions (optional, so the reference contract is unchanged):
+  meta?: Record<string, string>; // agency, uen, flag_id, tender_no, scope, decision, pattern_tag, ...
+  agentId?: string;
+  runId?: string;
 }
 
 // The canonical 17 ledger action types (AGENTS.md section 9.1).
@@ -54,6 +59,8 @@ export interface LedgerEntry {
   previousState?: Partial<MemoryRecord>;
   newState?: Partial<MemoryRecord>;
   details?: Record<string, unknown>;
+  runId?: string;   // OhMyFally: which agent run caused this entry (GET /ledger?runId=)
+  agentId?: string;
 }
 
 export type MiningEventType =
