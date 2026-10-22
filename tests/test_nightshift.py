@@ -112,3 +112,16 @@ def test_4xx_not_retried():
 def test_extract_json_embedded():
     assert extract_json('blah {"a": "x}y", "b": [1,2]} trailing') == {"a": "x}y", "b": [1, 2]}
     assert extract_json("[1,2]") == [1, 2]
+
+
+def test_499_retried_only_once():
+    n = {"c": 0}
+
+    def h(req):
+        n["c"] += 1
+        return httpx.Response(499, text="request_aborted")
+
+    with budget_scope(10) as b:
+        with pytest.raises(NightshiftError):
+            chat("fast", [], client=_client(h))
+        assert b.used == 2

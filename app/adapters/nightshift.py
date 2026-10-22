@@ -190,6 +190,8 @@ def _post(client: httpx.Client, lane: Lane, payload: dict, retries: int) -> dict
             raise
         except NightshiftError as e:
             last = e
+            if str(e).startswith("HTTP 499") and attempt >= 1:
+                break  # an identical request aborts the same way; stop wasting calls after one retry
         log.warning("nightshift retry lane=%s attempt=%s err=%s", lane, attempt + 1, last)
         time.sleep(min(3.0, 1.0 * (attempt + 1)))
     raise last  # type: ignore[misc]
