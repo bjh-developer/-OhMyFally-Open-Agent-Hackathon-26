@@ -26,6 +26,8 @@ class FakeSQL:
     def _key(self, sql: str) -> str:
         if "FIXTURE_R1" in sql:
             return "R1"
+        if "FIXTURE_R3" in sql:
+            return "R3"
         if sql.startswith("SHOW DATASOURCES"):
             return "show_datasources"
         if "supplier_xwalk" in sql:

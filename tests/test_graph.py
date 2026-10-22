@@ -157,3 +157,20 @@ def test_requested_flag_without_sql_is_a_reported_gap(tmp_path):
     req = REQ.model_copy(update={"flags": ["R1", "R4"]})
     final = run_investigation(req, deps(tmp_path))
     assert "R4" in final["coverage_gaps"] and any("R4: not run" in x for x in final["memo"].limitations)
+
+
+def test_r3_awards_are_grouped_by_shared_address(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "CHECKS_DIR", runner.ROOT / "tests" / "fixtures" / "checks_r3")
+    req = REQ.model_copy(update={"flags": ["R1", "R3"]})
+    final = run_investigation(req, deps(tmp_path))
+    memo = final["memo"]
+    assert len(memo.findings) == 5 and len(memo.groups) == 1  # 1 R1 + 4 R3 awards -> 1 group
+    g = memo.groups[0]
+    assert g.flag_id == "R3" and g.n_awards == 4 and g.total_amt == 260000 and len(g.suppliers) == 3
+    assert "3 winning suppliers share 60 PAYA LEBAR ROAD #06-28 S409051" == g.title
+    assert set(g.finding_ids) == {f.finding_id for f in memo.findings if f.flag_id == "R3"}
+    ids = [f.finding_id for f in memo.findings]
+    pos = sorted(ids.index(i) for i in g.finding_ids)
+    assert pos == list(range(pos[0], pos[0] + 4))  # members are adjacent in the flat list
+    md = memo.markdown
+    assert md.count("### ") == 2 and "| BETA EVENTS PTE. LTD. | 201122222B | T2 |" in md and "5 awards in 2 entries" in md

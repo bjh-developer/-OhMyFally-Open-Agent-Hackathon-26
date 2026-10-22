@@ -75,6 +75,20 @@ class Critique(BaseModel):
     target: str | None = None  # agent to send back to
 
 
+class FindingGroup(BaseModel):
+    """Findings that describe one underlying pattern (e.g. R3: several awards at one shared address)."""
+    group_id: str
+    flag_id: str
+    title: str
+    detail: str = ""
+    finding_ids: list[str]
+    suppliers: list[str] = Field(default_factory=list)
+    n_awards: int = 0
+    total_amt: float = 0.0
+    status: FindingStatus = "accepted"
+    priority: float = 0.0
+
+
 class Memo(BaseModel):
     run_id: str
     agency: str
@@ -82,6 +96,7 @@ class Memo(BaseModel):
     date_to: date
     summary: str
     findings: list[Finding]
+    groups: list[FindingGroup] = Field(default_factory=list)  # additive: R3 awards grouped by shared address
     limitations: list[str] = Field(default_factory=list)
     disclaimer: str = ""
     escalated: list[str] = Field(default_factory=list)

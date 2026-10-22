@@ -28,7 +28,7 @@ def _fallback_score(f) -> float:
     """Deterministic 0-100 priority: match confidence, award size, flag priority, and how far past its threshold."""
     amt = f.awarded_amt or 0
     must = red_flags().get(f.flag_id, {}).get("priority") == "must"
-    score = 30 * f.confidence + 8 * math.log10(amt + 1) + (10 if must else 0)
+    score = 30 * f.confidence + 6 * math.log10(amt + 1) + (10 if must else 0)
     try:
         m, t = float(f.metric_value), float(f.threshold)
         if f.flag_id == "R1" and t > 0:
@@ -36,7 +36,7 @@ def _fallback_score(f) -> float:
         elif f.flag_id == "R4" and t > 0:
             score += 12 * min(1.0, max(0.0, (m - t) / t))
         elif f.flag_id == "R3":
-            score += min(12.0, 3.0 * (m - t + 1))
+            score += min(8.0, 2.0 * (m - t + 1))
     except (TypeError, ValueError):
         pass
     return round(min(100.0, score), 1)
