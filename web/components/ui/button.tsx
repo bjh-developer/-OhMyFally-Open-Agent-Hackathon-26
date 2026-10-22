@@ -1,31 +1,58 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { Slot } from "radix-ui"
 
+// SGDS md button: 48px tall, 16px/600 label, 8px radius. Primary is used once per view.
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-base font-semibold whitespace-nowrap transition-colors duration-200 outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {
-        default: "bg-accent text-accent-fg hover:opacity-90",
-        outline: "border border-border bg-surface text-fg hover:bg-surface-2",
-        ghost: "text-fg hover:bg-surface-2",
-        ok: "bg-ok-bg text-ok border border-ok/30 hover:opacity-80",
-        danger: "bg-bad-bg text-bad border border-bad/30 hover:opacity-80",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-card text-foreground hover:bg-muted",
+        secondary: "border border-input bg-card text-foreground hover:bg-muted",
+        ghost: "text-foreground hover:bg-muted",
+        link: "min-h-11 text-secondary underline underline-offset-4 hover:no-underline",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        md: "h-9 px-4 text-sm",
-        icon: "h-8 w-8",
+        default: "h-12 min-w-24 px-5",
+        sm: "h-11 min-w-20 px-4",
+        lg: "h-12 min-w-24 px-6",
+        icon: "size-11",
+        "icon-sm": "size-11",
+        "icon-lg": "size-12",
       },
     },
-    defaultVariants: { variant: "default", size: "md" },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
   }
-);
+)
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }) {
+  const Comp = asChild ? Slot.Root : "button"
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, ...props }, ref) => (
-  <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
-));
-Button.displayName = "Button";
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
+}
+
+export { Button, buttonVariants }
