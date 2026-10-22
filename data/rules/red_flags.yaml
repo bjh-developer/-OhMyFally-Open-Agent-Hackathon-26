@@ -1,0 +1,74 @@
+# Red-flag definitions (CONTRACTS §9). One entry per flag; `params` is also loaded into the Postgres `rules` table.
+# Findings are "anomalies for review", never conclusions (see wording.yaml).
+- flag_id: R1
+  name: Supplier incorporated shortly before award
+  logic: Supplier's ACRA incorporation date is less than 6 months (183 days) before the award date
+  params: {max_age_days: 183}
+  priority: must
+  limitation: Needs a Resolver match (GeBIZ has no UEN). Unresolved names cannot be tested. Newly formed entities are legitimate for many reasons.
+  why_it_matters: A winner formed shortly before award can indicate a shell or an insider-linked vehicle, or simply a new SME. Worth an auditor's look at the evaluation file.
+  source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
+- flag_id: R2
+  name: Supplier no longer live in ACRA
+  logic: ACRA status is struck off, ceased, in liquidation or similar (status is current, not at award time)
+  params: {status_patterns: ["STRUCK OFF", "CEASED", "LIQUIDATION", "WINDING", "DISSOLVED", "CANCELLED"]}
+  priority: must
+  limitation: ACRA publishes the current status only, so the entity may have been live when it won. Compare award_date with the dates in the underlying registry before concluding anything.
+  why_it_matters: Awarding to, or paying, an entity that is no longer live raises continuity and recoverability questions.
+  source_url: https://data.gov.sg/collections/2/view
+- flag_id: R3
+  name: Winning suppliers share an address
+  logic: Two or more distinct winning suppliers at the same agency share an exact ACRA registered address
+  params: {min_suppliers: 2, ignore_building_names: []}
+  priority: must
+  limitation: Shared business centres and virtual offices produce benign matches. Address match is on postal code + block + street + level + unit.
+  why_it_matters: Apparently independent bidders at one address can indicate common control or bid coordination.
+  source_url: https://data.gov.sg/collections/2/view
+- flag_id: R4
+  name: Possible contract splitting
+  logic: Same agency and supplier; >=2 awards each < 90000 SGD within 90 days, summing > 90000
+  params: {threshold_sgd: 90000, window_days: 90, min_awards: 2}
+  priority: must
+  limitation: GeBIZ here holds tender (ETT) awards only, no quotation (ETQ) records, so splitting below the quotation band is under-detected. Repeat call-offs under a framework can look like splitting.
+  why_it_matters: Splitting a requirement to stay under the S$90k tender threshold avoids open competition.
+  source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
+- flag_id: R5
+  name: Supplier line of business far from tender
+  logic: Embedding similarity between the supplier's SSIC description and the tender description is low
+  params: {max_similarity: 0.2}
+  priority: should
+  limitation: Embedding similarity is noisy; always escalated to human review at low confidence.
+  why_it_matters: A winner whose registered activity does not match the work may be a pass-through.
+  source_url: https://data.gov.sg/collections/2/view
+- flag_id: R6
+  name: Supplier concentration within a category
+  logic: One supplier holds a large share of an agency's awards (by value) in a tender category
+  params: {share_threshold: 0.5, min_awards: 5}
+  priority: should
+  limitation: Specialised categories legitimately have few suppliers.
+  why_it_matters: High concentration can signal weak competition.
+  source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
+- flag_id: R7
+  name: Supplier has former names
+  logic: ACRA lists one or more former entity names (informational only)
+  params: {}
+  priority: stretch
+  limitation: ACRA gives no change dates for name changes.
+  why_it_matters: A renamed entity can hide a prior history; context for auditors.
+  source_url: https://data.gov.sg/collections/2/view
+- flag_id: R8
+  name: Local-looking supplier with no ACRA match
+  logic: Supplier name has a local legal suffix (PTE LTD, PRIVATE LIMITED, LLP) but the Resolver found no ACRA entity above threshold. Foreign firms and government bodies are labelled "outside registry scope" instead.
+  params: {min_confidence: 0.8}
+  priority: must
+  limitation: Our ACRA subset is a candidate set, and renamed or typo'd names may fail to match. Treat as a lead for manual lookup.
+  why_it_matters: An award to an entity that cannot be found in the corporate registry needs identity verification.
+  source_url: https://data.gov.sg/collections/2/view
+- flag_id: R9
+  name: Winner not best-scored under published criteria
+  logic: The awarded supplier is not rank 1 in the evaluation scores (synthetic internal data only)
+  params: {}
+  priority: should
+  limitation: Synthetic internal records for planted tenders only; no real evaluation data is used.
+  why_it_matters: Departures from published evaluation criteria need documented justification.
+  source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
