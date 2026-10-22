@@ -34,6 +34,20 @@ export interface Finding {
   notes?: string[];
 }
 
+// Additive: findings that describe one pattern (R3: several awards at one shared address).
+export interface FindingGroup {
+  group_id: string;
+  flag_id: string;
+  title: string;
+  detail: string;
+  finding_ids: string[];
+  suppliers: string[];
+  n_awards: number;
+  total_amt: number;
+  status: FindingStatus;
+  priority: number;
+}
+
 export interface Memo {
   run_id: string;
   agency: string;
@@ -41,6 +55,7 @@ export interface Memo {
   date_to: string;
   summary: string;
   findings: Finding[];
+  groups?: FindingGroup[];
   limitations: string[];
   disclaimer: string;
   escalated: string[];
@@ -92,6 +107,7 @@ export interface DecisionRecord {
   pattern_tag?: string;
   scope: "agency" | "global";
   memoryId: string;
+  at: string; // ISO time the decision was made in this browser
 }
 
 export interface AuditorDecisionBody {
