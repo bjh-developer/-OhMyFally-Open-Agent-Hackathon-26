@@ -32,7 +32,6 @@ function HowItWorks() {
       <SheetContent>
         <SheetHeader className="p-6 pr-16">
           <SheetTitle className="text-xl leading-7 font-semibold tracking-[-0.4px]">How it works</SheetTitle>
-          <SheetDescription>Five steps, in plain words.</SheetDescription>
         </SheetHeader>
         <ol className="grid gap-4 px-6 pb-6 text-base">
           {HOW_IT_WORKS.map((t, i) => (

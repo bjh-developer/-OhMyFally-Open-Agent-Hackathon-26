@@ -14,8 +14,8 @@ node_modules/
 .DS_Store
 
 # Local run artefacts (copy curated ones to output_examples/ or `git add -f`)
-logs/run_*.jsonl
-logs/run_*.md
-logs/run_*.memo.json
+logs
 .pytest_cache/
 .worktrees/
+
+.vscode

@@ -22,7 +22,6 @@ export function AgentDiagram() {
   return (
     <section aria-labelledby="diagram" className="grid gap-4">
       <h2 id="diagram" className="text-xl leading-7 font-semibold tracking-[-0.4px]">How the agents work together</h2>
-      <p className="text-base text-muted-foreground">Planner → Resolver → Analyst ↔ Critic → Risk → Reporter. Each step is logged above.</p>
       <ol className="flex flex-col gap-2 md:flex-row md:flex-wrap" aria-label="Agent order">
         <Node icon={Compass} name="Planner" note="Chooses the checks" />
         <Join />
