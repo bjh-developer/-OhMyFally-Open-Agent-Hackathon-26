@@ -35,7 +35,7 @@ export const useRunCtx = () => {
   return c;
 };
 
-const DEFAULT_FORM: RunRequest = { agency: "", date_from: "", date_to: "" };
+const DEFAULT_FORM: RunRequest = { agency: "", date_from: "2024-04-01", date_to: "2025-03-31" }; // FY2024/25
 
 export function RunProvider({ children }: { children: React.ReactNode }) {
   const run = useRun();
