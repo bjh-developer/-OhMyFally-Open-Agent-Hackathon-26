@@ -1,0 +1,7 @@
+**/node_modules
+**/state
+**/conformance.status
+**/.DS_Store
+hmem-upstream/reference
+hmem-upstream/docs
+hmem-upstream/examples
