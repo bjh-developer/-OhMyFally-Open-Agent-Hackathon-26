@@ -92,17 +92,17 @@ function DecisionNote({ d }: { d: DecisionRecord }) {
 }
 
 export function ItemSheet() {
-  const { openItem: item, setOpenItem, setTarget, decisions } = useRunCtx();
+  const { openItem: item, setOpenItem, setTarget, decisions, restoreFocus } = useRunCtx();
   const f = item?.finding;
   const decision = f ? decisions[f.finding_id] : undefined;
   return (
     <Sheet open={!!item} onOpenChange={(o) => !o && setOpenItem(null)}>
-      {item && f && <SheetBody item={item} decision={decision} close={() => setOpenItem(null)} decide={(kind) => setTarget({ item, kind })} />}
+      {item && f && <SheetBody restoreFocus={restoreFocus} item={item} decision={decision} close={() => setOpenItem(null)} decide={(kind) => setTarget({ item, kind })} />}
     </Sheet>
   );
 }
 
-function SheetBody({ item, decision, close, decide }: { item: Item; decision?: DecisionRecord; close: () => void; decide: (k: "confirm" | "dismiss") => void }) {
+function SheetBody({ item, decision, close, decide, restoreFocus }: { restoreFocus: (e: Event) => void; item: Item; decision?: DecisionRecord; close: () => void; decide: (k: "confirm" | "dismiss") => void }) {
   const f = item.finding;
   const Icon = flagIcon(item.flag_id);
   const title = item.kind === "group" && item.group ? groupTitle(item.group) : flagTitle(item.flag_id);
@@ -117,7 +117,7 @@ function SheetBody({ item, decision, close, decide }: { item: Item; decision?: D
   const remember = canRemember(item);
 
   return (
-    <SheetContent aria-describedby="item-why" className="gap-0">
+    <SheetContent aria-describedby="item-why" className="gap-0" onCloseAutoFocus={restoreFocus}>
       <SheetHeader className="gap-3 border-b border-border p-6 pr-16">
         <SheetTitle className="flex items-start gap-2 text-xl leading-7 font-semibold tracking-[-0.4px]">
           <Icon aria-hidden size={24} strokeWidth={1.75} className="mt-0.5 shrink-0 text-muted-foreground" />

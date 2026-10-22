@@ -15,7 +15,7 @@ function EmptyState() {
   return (
     <div className="grid justify-items-center gap-2 rounded-lg border border-dashed border-border px-6 py-10 text-center">
       <ScanSearch aria-hidden size={24} strokeWidth={1.75} className="text-primary" />
-      <h3 className="text-lg leading-7 font-semibold">Ready when you are</h3>
+      <h2 className="text-lg leading-7 font-semibold">Ready when you are</h2>
       <p className="max-w-md text-base text-muted-foreground">Pick an agency and a period to see which awards need a second look.</p>
     </div>
   );

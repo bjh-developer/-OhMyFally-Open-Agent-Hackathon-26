@@ -23,6 +23,7 @@ type Ctx = ReturnType<typeof useRun> & {
   setOpenItem: (i: Item | null) => void;
   target: DecisionTarget | null;
   setTarget: (t: DecisionTarget | null) => void;
+  restoreFocus: (e: Event) => void; // onCloseAutoFocus for the sheet and dialog: focus goes back to what opened them
   begin: (req: RunRequest) => void;
   beginMock: () => void;
   clear: () => void;
@@ -46,14 +47,30 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
   const [form, setForm] = useState<RunRequest>(DEFAULT_FORM);
   const [checks, setChecks] = useState<string[]>([]);
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
-  const [openItem, setOpenItem] = useState<Item | null>(null);
-  const [target, setTarget] = useState<DecisionTarget | null>(null);
+  const [openItem, setOpenItemRaw] = useState<Item | null>(null);
+  const [target, setTargetRaw] = useState<DecisionTarget | null>(null);
+  const openers = useRef<{ sheet: HTMLElement | null; dialog: HTMLElement | null }>({ sheet: null, dialog: null });
+  const setOpenItem = useCallback((i: Item | null) => {
+    if (i) openers.current.sheet = document.activeElement as HTMLElement;
+    setOpenItemRaw(i);
+  }, []);
+  const setTarget = useCallback((t: DecisionTarget | null) => {
+    if (t) openers.current.dialog = document.activeElement as HTMLElement;
+    setTargetRaw(t);
+  }, []);
+  const restoreFocus = useCallback((e: Event) => {
+    e.preventDefault();
+    const o = openers.current;
+    const el = o.dialog?.isConnected ? o.dialog : o.sheet;
+    o.dialog = null; // the dialog's opener is used once; the sheet's still serves the sheet
+    if (el?.isConnected) el.focus();
+  }, []);
 
   // Decisions belong to one run: clear them when the run changes.
   useEffect(() => {
     setDecisions({});
-    setOpenItem(null);
-    setTarget(null);
+    setOpenItemRaw(null);
+    setTargetRaw(null);
   }, [run.runId]);
 
   const setUrlRun = useCallback(
@@ -114,8 +131,8 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<Ctx>(
-    () => ({ ...run, form, setForm, checks, setChecks, decisions, recordDecision, openItem, setOpenItem, target, setTarget, begin, beginMock, clear }),
-    [run, form, checks, decisions, recordDecision, openItem, target, begin, beginMock, clear]
+    () => ({ ...run, form, setForm, checks, setChecks, decisions, recordDecision, openItem, setOpenItem, target, setTarget, restoreFocus, begin, beginMock, clear }),
+    [run, form, checks, decisions, recordDecision, openItem, target, setOpenItem, setTarget, restoreFocus, begin, beginMock, clear]
   );
   return <RunCtx.Provider value={value}>{children}</RunCtx.Provider>;
 }

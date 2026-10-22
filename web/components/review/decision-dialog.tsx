@@ -16,15 +16,15 @@ import { useRunCtx } from "@/components/run-provider";
 const DEFAULT_CONFIRM_REASON = "Confirmed by auditor as needing follow-up.";
 
 export function DecisionDialog() {
-  const { target, setTarget } = useRunCtx();
+  const { target, setTarget, restoreFocus } = useRunCtx();
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && setTarget(null)}>
-      {target && <DecisionForm key={target.item.id + target.kind} item={target.item} kind={target.kind} />}
+      {target && <DecisionForm key={target.item.id + target.kind} item={target.item} kind={target.kind} restoreFocus={restoreFocus} />}
     </Dialog>
   );
 }
 
-function DecisionForm({ item, kind }: { item: Item; kind: "confirm" | "dismiss" }) {
+function DecisionForm({ item, kind, restoreFocus }: { item: Item; kind: "confirm" | "dismiss"; restoreFocus: (e: Event) => void }) {
   const { setTarget, runId, memo, isMock, recordDecision } = useRunCtx();
   const dismiss = kind === "dismiss";
   const [reason, setReason] = useState("");
@@ -70,7 +70,7 @@ function DecisionForm({ item, kind }: { item: Item; kind: "confirm" | "dismiss" 
   }
 
   return (
-    <DialogContent className="max-h-[92dvh] overflow-y-auto">
+    <DialogContent className="max-h-[92dvh] overflow-y-auto" onCloseAutoFocus={restoreFocus}>
       <form onSubmit={submit} noValidate className="grid gap-5">
         <DialogHeader>
           <DialogTitle className="text-xl leading-7 font-semibold tracking-[-0.4px]">{dismiss ? "Dismiss this item" : "Confirm this needs follow-up"}</DialogTitle>

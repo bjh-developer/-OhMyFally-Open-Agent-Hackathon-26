@@ -28,6 +28,7 @@
   --warning-foreground: #6f4300;
   --success: #2f7d4f;
   --success-subtle: #e3f1e8;
+  --success-foreground: #256640; /* success text on the tint: 5.9:1 */
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
 
@@ -74,6 +75,7 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
+  --color-success-foreground: var(--success-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-chart-1: var(--chart-1);
@@ -117,23 +119,13 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-  /* A 2px ring needs to stay visible on controls that already draw their own focus style. */
-  button:focus-visible,
-  a:focus-visible,
-  [role="tab"]:focus-visible,
-  [role="radio"]:focus-visible,
-  [role="checkbox"]:focus-visible,
-  input:focus-visible,
-  textarea:focus-visible,
-  select:focus-visible {
-    outline: 2px solid var(--ring) !important;
-    outline-offset: 2px !important;
-    box-shadow: none !important;
-  }
+}
+
+/* Unlayered and !important so no component utility can weaken the 2px #3B6EA5 focus ring (MASTER §8). */
+:focus-visible {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
 }
 
 /* Entry animation: opacity + transform only, 200ms (MASTER §3). */
