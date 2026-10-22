@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any, Callable
 
 from ..adapters.config import ROOT
@@ -12,7 +15,7 @@ from ..adapters.zetaris import Result, to_date, to_float
 from ..schemas import Evidence, Finding
 from .rules import red_flags, wording
 
-CHECKS_DIR = ROOT / "sql" / "checks"
+CHECKS_DIR = Path(os.environ.get("PI_CHECKS_DIR") or ROOT / "sql" / "checks")  # env override for dev/tests
 CHECK_COLUMNS = ["flag_id", "tender_no", "agency", "supplier_name", "uen", "award_date", "awarded_amt",
                  "metric_name", "metric_value", "threshold", "detail"]
 SOURCE_OBJECTS = {
@@ -38,7 +41,8 @@ def load_sql(flag_id: str) -> str:
 
 
 def _lit(v: str) -> str:
-    return v.replace("'", "''")
+    """Escape for a Spark SQL string literal: backslash and quote are backslash-escaped (``''`` is not an escape)."""
+    return v.replace("\\", "\\\\").replace("'", "\\'")
 
 
 def render(sql: str, *, agency: str, date_from: str | date, date_to: str | date) -> str:
@@ -86,6 +90,17 @@ def run_check(flag_id: str, *, agency: str, date_from: str | date, date_to: str 
     return CheckRun(flag_id, sql, res, rows)
 
 
+def tidy_number(v: Any) -> str | None:
+    """'113597.500000000000000000' -> '113597.5'; non-numeric strings pass through."""
+    if v is None:
+        return None
+    try:
+        d = Decimal(str(v))
+        return format(d.quantize(Decimal(1)) if d == d.to_integral() else d.normalize(), "f")
+    except InvalidOperation:
+        return str(v)
+
+
 def _fmt_amt(v: float | None) -> str:
     return "n/a" if v is None else f"{v:,.0f}"
 
@@ -96,10 +111,15 @@ def summarise(row: dict[str, Any]) -> str:
     detail = (row.get("detail") or "").strip()
     if not detail and row.get("metric_name"):
         detail = f"{row['metric_name']} = {row.get('metric_value')} (threshold {row.get('threshold')})."
-    return " ".join(wording()["summary_template"].format(
+    facts = " ".join(wording()["summary_template"].format(
         flag_name=flag.get("name", row["flag_id"]), supplier=row.get("supplier_name"), tender_no=row.get("tender_no"),
         agency=row.get("agency"), amt=_fmt_amt(row.get("awarded_amt")), date=row.get("award_date"), detail=detail,
     ).split())
+    return f"{facts} {wording()['summary_suffix']}"
+
+
+def facts_only(summary: str) -> str:
+    return summary.removesuffix(wording()["summary_suffix"]).strip()
 
 
 def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None) -> list[Finding]:
@@ -114,7 +134,7 @@ def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None
             uen=r.get("uen") if r.get("uen") not in ("", "null", None) else None,
             summary=summarise(r), confidence=confidence(r) if confidence else 1.0, evidence=[ev],
             awarded_amt=r.get("awarded_amt"), award_date=r.get("award_date"), metric_name=r.get("metric_name"),
-            metric_value=None if r.get("metric_value") is None else str(r["metric_value"]),
+            metric_value=tidy_number(r.get("metric_value")),
             threshold=None if r.get("threshold") is None else str(r["threshold"]), detail=r.get("detail"),
         ))
     return out

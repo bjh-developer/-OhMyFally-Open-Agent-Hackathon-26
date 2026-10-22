@@ -142,3 +142,18 @@ def test_hmem_dismiss_suppresses_and_cites(tmp_path):
     final = run_investigation(REQ, deps(tmp_path, hmem=h))
     assert final["memo"].findings == [] and final["memo"].stats["suppressed"] == 1
     assert final["findings"][0].memory_refs == ["mem_1"] and h.fb[1] == "helpful"
+
+
+def test_unverifiable_claim_escalates_after_retries(tmp_path):
+    fid = runner.finding_id("R1", "PLT000ETT25000001", "ZYLOQ TEST ENGINEERING PTE. LTD.", "T99ZZ0001A")
+    sql, llm = FakeSQL(), FakeLLM(unsupported={fid})
+    final = run_investigation(REQ, deps(tmp_path, sql, llm))
+    f = final["memo"].findings[0]
+    assert f.status == "escalated" and final["memo"].escalated == [fid]
+    assert sql.counts["R1"] == 6 and [e["status"] for e in trace(tmp_path) if e["agent_name"] == "CriticAgent"] == ["needs_revision", "needs_revision", "success"]
+
+
+def test_requested_flag_without_sql_is_a_reported_gap(tmp_path):
+    req = REQ.model_copy(update={"flags": ["R1", "R4"]})
+    final = run_investigation(req, deps(tmp_path))
+    assert "R4" in final["coverage_gaps"] and any("R4: not run" in x for x in final["memo"].limitations)

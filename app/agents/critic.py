@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from ..checks.runner import MATCH_DEPENDENT, load_sql, render
+from ..checks.runner import MATCH_DEPENDENT, facts_only, load_sql, render
 from ..orchestration.state import Deps, RunState
 from ..schemas import Critique, Finding
 from .common import compact_finding, dumps
@@ -110,7 +110,7 @@ def make(deps: Deps):
                         except Exception:
                             pass
                         break
-                    if meta.get("pattern_tag") and meta.get("agency") == f.agency and meta.get("decision") == "dismiss":
+                    if meta.get("pattern_tag") and meta.get("decision") == "dismiss" and (meta.get("agency") == f.agency or meta.get("scope") == "global"):
                         f.confidence = round(f.confidence * 0.7, 3)
                         f.memory_refs.append(m["id"])
                         memory_refs.append(m["id"])
@@ -121,12 +121,13 @@ def make(deps: Deps):
         receipt_res = None
         if live:
             try:
-                batch = [{**compact_finding(f), "evidence_rows": f.evidence[0].rows[:1]} for f in live[:15]]
+                batch = [{**compact_finding(f), "summary": facts_only(f.summary), "evidence_rows": f.evidence[0].rows[:1]} for f in live[:15]]
                 receipt_res = deps.llm("fast", [
-                    {"role": "system", "content": "You are a strict verifier. For each finding decide whether its summary only states facts that appear in its evidence_rows. "
-                     "Do not judge whether the finding is a problem."},
+                    {"role": "system", "content": "You are a strict verifier. For each finding decide whether the facts in its summary (names, tender number, agency, amount, date, "
+                     "metric values) agree with its evidence_rows. A summary is supported unless it states a fact that contradicts or is absent from the rows. "
+                     "Do not judge whether the finding is a real problem, and do not object to tone."},
                     {"role": "user", "content": dumps({"findings": batch, "answer_format": {"checks": [{"finding_id": "...", "supported": True, "reason": "short"}]}})},
-                ], json_schema=ClaimChecks, max_tokens=2500)
+                ], json_schema=ClaimChecks, max_tokens=6000)
                 for c in receipt_res.parsed.checks:
                     if not c.supported:
                         critiques.append(Critique(finding_id=c.finding_id, verdict="revise", target="AnalystAgent", reason=f"claim not supported: {c.reason}"))
@@ -134,16 +135,22 @@ def make(deps: Deps):
                         if fl and fl not in revise_checks:
                             revise_checks.append(fl)
             except Exception as e:
-                deps.tracer.emit(NAME, "claim_support_check", input=f"{len(live)} findings", output=f"skipped: {type(e).__name__}", status="partial_success")
+                deps.tracer.emit(NAME, "claim_support_check", input=f"{len(live)} findings", output=f"skipped: {type(e).__name__}: {str(e)[:150]}", status="partial_success")
 
         # bounded loops: flags over the retry limit are given up on, not looped
         give_up = [fl for fl in revise_checks if retries.get(fl, 0) >= deps.max_retries]
         for fl in give_up:
             revise_checks.remove(fl)
             for f in findings:
-                if f.flag_id == fl and any(c.finding_id == f.finding_id and c.verdict == "revise" and c.target == "AnalystAgent" for c in critiques):
-                    f.status = "rejected"
-                    f.notes.append("Rejected by Critic: evidence could not be reproduced after retries.")
+                for c in critiques:
+                    if c.finding_id != f.finding_id or c.verdict != "revise" or c.target != "AnalystAgent" or f.flag_id != fl:
+                        continue
+                    if c.reason.startswith("claim not supported"):  # rows exist, wording disputed: a human decides
+                        f.status = "escalated"
+                        f.notes.append(f"Escalated to human review: Critic could not verify the summary against its rows ({c.reason[:140]}).")
+                    else:
+                        f.status = "rejected"
+                        f.notes.append("Rejected by Critic: evidence could not be reproduced after retries.")
 
         if revise_checks:
             route, status = "analyst", "needs_revision"
