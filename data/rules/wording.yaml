@@ -1,0 +1,42 @@
+# Wording rules (owner: Joon Hao). The Risk agent rejects any finding text containing a banned term;
+# the Reporter rewrites it. Findings are "anomalies for review", never conclusions.
+banned_terms:
+  - fraud
+  - fraudulent
+  - corrupt
+  - corruption
+  - illegal
+  - unlawful
+  - criminal
+  - guilty
+  - scam
+  - bribe
+  - bribery
+  - collusion
+  - kickback
+required_phrasing:
+  - anomaly for review
+  - may indicate
+  - requires auditor judgement
+# Deterministic replacements used when a banned term slips into text and a rewrite is not possible.
+replacements:
+  fraudulent: "anomalous"
+  fraud: "anomaly"
+  corruption: "irregularity"
+  corrupt: "irregular"
+  illegal: "non-compliant"
+  unlawful: "non-compliant"
+  criminal: "irregular"
+  guilty: "responsible"
+  scam: "anomaly"
+  bribery: "irregularity"
+  bribe: "irregularity"
+  collusion: "coordination"
+  kickback: "irregular payment"
+disclaimer: >-
+  Automated screening output. Each item is an anomaly for review that may indicate a procurement-integrity
+  concern, and requires auditor judgement. It is not a finding of wrongdoing.
+# Template for deterministic per-finding summaries (fields: supplier, tender_no, agency, amt, date, flag_name, detail)
+summary_template: >-
+  {flag_name}: {supplier} was awarded {tender_no} by {agency} (S${amt}, {date}). {detail}
+  This is an anomaly for review and may indicate a concern that requires auditor judgement.

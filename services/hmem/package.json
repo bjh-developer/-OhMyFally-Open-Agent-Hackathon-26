@@ -1,0 +1,21 @@
+{
+  "name": "@ohmyfally/hmem-service",
+  "version": "0.1.0",
+  "description": "H-MEM memory service for the Procurement Integrity Investigator. Adapted from the Meterless H-MEM reference (Apache-2.0); exposes the CONTRACTS section 6 HTTP API.",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx src/server.ts",
+    "test": "vitest run",
+    "conformance": "HMEM_IMPL=\"$PWD/src/index.ts\" tsx ../hmem-upstream/conformance/runner.ts && echo pass > conformance.status"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.6.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}
