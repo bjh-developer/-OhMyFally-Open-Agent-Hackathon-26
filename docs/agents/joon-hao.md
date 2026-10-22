@@ -20,7 +20,7 @@ Joon Hao's background: full-stack (Python, FastAPI, Next.js, TypeScript, Tailwin
   - Never put the NVIDIA key in `.env`; it lives in Nightshift.
 - **Verify before claiming.** Every "done" needs proof: a test run, a Zetaris `SELECT` result, a Nightshift receipt or the conformance output. If something fails, say so with the output.
 - **Teammates' areas:**
-  - Inchara owns `scripts/fetch_*`, `scripts/seed.py`, `app/resolver/`, `sql/checks/`, `data/eval/` and `scripts/eval.py`.
+  - Inchara owns `scripts/fetch_*`, `scripts/seed.py`, `app/resolver/`, `sql/checks/`, `data/eval/` and `scripts/eval.py` **from D2**. On D1 you build them (§9) and hand them over.
   - Don't rewrite their files. Propose changes, or fix only what blocks integration and tell Joon Hao.
 - **Contracts:** don't change CONTRACTS.md on your own. Propose the change, and when it's agreed, update the doc in the same commit as the code.
 - **Bound everything:** timeouts on every call, max 2 retries, max 1 replan, a 40-call LLM cap. Don't start long-running jobs without saying so.
@@ -91,15 +91,25 @@ Log every agent hop as a trace line. Put the Zetaris `query_id`s and the Meterle
 
 Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27 are buffer only. Run work in parallel with subagents or extra sessions where the pieces are independent.
 
-- [ ] **D1, Thu 22 (08:00 to midnight):**
-  - Morning:
-    - commit the skeleton, Compose, `.env.example`, `scripts/smoke_test.py` and `scripts/zsql.py`;
-    - write the Zetaris and Nightshift adapters, with tests against recorded fixtures;
-    - register S1 and S2 with Inchara;
-    - **in a parallel session:** H-MEM reference into `services/hmem/` with conformance passing (§8.1).
-  - Quick wins with the agent: `red_flags.yaml`, `mof_thresholds.yaml` and `wording.yaml` (§8.2), so Inchara's SQL has definitions by midday.
-  - Afternoon: walking skeleton (request → Planner → Analyst runs R1 → Reporter JSON, written to `logs/`), then the LangGraph state and the first Critic loop.
-  - Evening: the Resolver agent around `resolve()`; R2, R3, R4 and R8 through the Analyst; `POST /run` and `run.py`. In parallel: the H-MEM HTTP API, Docker and tests (§8.1); AGO chunks; `planted.json` with Inchara (§8.2).
+- [ ] **D1, Thu 22 (08:00 to midnight): three parallel streams.** Inchara is out today, so her D1 data work is ours (§9). Run streams B and C as separate sessions, each on its own branch or worktree, merging into `main` as each piece passes. File ownership never overlaps:
+  - **A** (this session) owns `app/adapters/`, `app/orchestration/`, `app/agents/`, `app/schemas.py`, `app/tracing.py`, `app/api.py`, `run.py` and `docker-compose.yml`.
+  - **B** owns `scripts/fetch_*`, `scripts/seed.py`, `scripts/register_zetaris.py`, `sql/`, `app/resolver/` and `data/`.
+  - **C** owns `services/hmem/`.
+
+  | Time (SGT) | A: core and agents (this session) | B: data pipeline (parallel session, §9) | C: H-MEM service (parallel session, §8.1) |
+  |---|---|---|---|
+  | **First hour, unblockers** | Repo skeleton, `requirements.txt`, `.env.example`, `docker-compose.yml` (`pi-postgres`, `pi-s3`, a stub `pi-hmem`), `scripts/zsql.py`, `scripts/smoke_test.py`. **Commit and push.** | GeBIZ quotation check (ETT against ETQ counts) and the agency shortlist; download the raw GeBIZ and ACRA CSVs into `data/raw/` | Copy the reference into `services/hmem/`; run conformance; it must pass before any change |
+  | **To about 13:00** | Zetaris and Nightshift adapters, `schemas.py`, `tracing.py`; graph skeleton running against **recorded fixtures**, so it doesn't wait on data | `fetch_gebiz.py`, `fetch_acra.py`, `seed.py` (idempotent), `sql/register/` plus `register_zetaris.py`. **Milestone: `SELECT count(*)` works on `gebiz_pg.awards` and `ACRA_FILES.entities`.** Push | File persistence; `src/server.ts` HTTP API (CONTRACTS §6) |
+  | **To about 18:00** | Switch the skeleton to live data. Walking skeleton: request → Planner → Analyst runs **R1** → Reporter memo in `logs/` | **Resolver pass 1** (exact and former-name only) fills `supplier_xwalk`, which R1 joins through; then **`sql/checks/R1.sql`, pushed** (A needs it); then `red_flags.yaml` and `mof_thresholds.yaml`; then R2, R3, R4 and R8; then Resolver pass 2 (fuzzy and LLM tie-break) | Dockerfile, replacing the `pi-hmem` stub in Compose (coordinate the one edit with A); HTTP tests; conformance still passing, saved to `logs/evidence/` |
+  | **To midnight** | LangGraph state and the first Critic loop; Resolver agent around `resolve()`; R2–R4 and R8 through the Analyst; `POST /run` and `run.py`; `wording.yaml` | `planted.json` (fictional cases) injected by `seed.py`; every check catches its planted case; write `docs/handover/d1-data.md` for Inchara | AGO chunks, `data/ago/` (§8.2), once H-MEM is done |
+
+  **Nothing blocks A:**
+  - A builds against fixtures until B's 13:00 milestone.
+  - R1 SQL is B's first check. It needs `supplier_xwalk`, so the deterministic Resolver pass comes right before it, about 30 minutes after registration.
+  - Until the YAML exists, the red-flag definitions come from CONTRACTS §9.
+  - H-MEM isn't needed by A until D2.
+
+  **Midnight check:** real data queryable through Zetaris, an R1 memo produced end to end, the H-MEM API up with conformance passing, and the handover note written.
 - [ ] **D2, Fri 23 (feature freeze 23:59):**
   - Agents:
     - Critic retries and evidence re-checks;
@@ -234,3 +244,49 @@ Inchara's seed script injects them.
 - **UI (D2):** build the components in `web/components/` against the `Finding` schema in CONTRACTS §7.4, using mock JSON from `output_examples/` until the API is live. The web UI runs on **port 3100**.
 - **Deck (v1 on D2, final on D3):** problem and users, solution, architecture (reuse the plan diagram), stack, Zetaris and Meterless use, what was unique (the Critic re-queries Zetaris to verify every claim, the USL crosswalk, auditor memory in H-MEM), product visuals, future work.
 - **Demo script (D2):** follow the 6 segments in the plan doc. Keep it to 2:30–3:30.
+
+## 9. Data pipeline: Inchara's D1 work, done by Joon Hao (stream B, 22 Oct)
+
+Inchara is unavailable on D1. Follow `docs/agents/inchara.md` §1–3 for rules and verified facts. The D1 steps are:
+
+### 9.0 First hour (stream B)
+- [ ] **Check whether GeBIZ includes quotations.** Count `tender_no` patterns, ETT (tender) against ETQ (quotation), with the datastore API. Record the counts in the handover note, because R4 depends on it.
+- [ ] Pick 2–3 agencies with enough awards, a mix of values, and some sub-S$90k repeat suppliers. Record the shortlist in the handover note.
+- [ ] Download the raw GeBIZ and ACRA CSVs into `data/raw/` (gitignored; data only, no code).
+
+### 9.1 To about 13:00: data queryable through Zetaris
+1. `fetch_gebiz.py`: pull awards for the chosen agencies, parse dates, and write `data/sample/awards.csv`.
+2. `fetch_acra.py`: build the candidate subset. Normalise names (upper case, strip punctuation, drop PTE/LTD/PRIVATE/LIMITED/LLP). Keep every ACRA entity that shares the first 1–2 significant tokens with any supplier, by current or former name. Write `data/sample/acra_entities.parquet` (pyarrow), with a CSV copy as fallback.
+3. `seed.py`:
+   - create DBs `gebiz` and `agency_internal` in `pi-postgres`;
+   - load `awards`, `rules` (from `data/rules/` YAML) and `ago_chunks` (from `data/ago/`);
+   - create an empty `supplier_xwalk`;
+   - upload the ACRA file to `s3://pi-acra/acra/`.
+   It must be **idempotent**: running it twice gives the same state.
+4. Write `sql/register/` and `scripts/register_zetaris.py` (idempotent: it drops and recreates our objects only) and register the sources. Confirm both `SELECT count(*)` queries through Zetaris.
+
+### 9.2 Afternoon to midnight: Resolver, red-flag SQL, planted cases
+5. Resolver `app/resolver/match.py`, in **two passes**. Pass 1 (layers 1–2) runs **before R1**, because R1 joins through `supplier_xwalk`. Pass 2 (layers 3–5) runs after the checks are in. Apply these layers in order and record the `method`:
+   1. `exact` on the normalised name
+   2. `former_name` match
+   3. `fuzzy`: `rapidfuzz` token_set_ratio with blocking on the first token; ≥ 92 counts as a match, 80–92 is ambiguous
+   4. ambiguous top 3 goes to `llm_tiebreak` through the **fast** Nightshift lane, about 20 suppliers per call, returning JSON
+   5. otherwise `unresolved`. Names without a local suffix (foreign firms, government bodies) are `out_of_scope`.
+
+   Write the results to `supplier_xwalk`. Expose `resolve(names) -> list[Match]` (CONTRACTS §7.4) so the Resolver agent can call it and retry a different strategy when the Critic rejects a match.
+6. (The labelled set moves to Inchara on D2. It doesn't block anything on D1.)
+7. Red-flag SQL. Write **R1 first, right after Resolver pass 1, and push it**, because stream A needs it; then R2, R3, R4 and R8. Write `data/rules/red_flags.yaml` from CONTRACTS §9 alongside:
+   - `awards` joins to `supplier_xwalk` on supplier_name, and `supplier_xwalk` joins to `entities` on uen;
+   - output columns exactly as in CONTRACTS §7.3;
+   - use `{{agency}}`, `{{date_from}}` and `{{date_to}}` placeholders;
+   - Spark SQL functions: `datediff`, `date_add`, window functions for R4.
+8. Write `planted.json` (fictional suppliers only; format in §8.2), and make `seed.py` inject the fictional rows into awards, entities and (for R9) agency_internal. Then run each check and confirm its planted case appears.
+
+### 9.3 End of D1: handover
+Write `docs/handover/d1-data.md`, covering:
+- the agencies chosen and the quotation-check result;
+- row counts per table;
+- how to reseed and re-register;
+- Resolver method counts (exact, former_name, fuzzy, llm_tiebreak, unresolved, out_of_scope);
+- known weaknesses;
+- open TODOs for Inchara.

@@ -186,7 +186,7 @@ One line per agent step:
 
 | Day | Date (SGT) | By the end of the day |
 |---|---|---|
-| D1 | Thu 22 Oct, 08:00–24:00 | Real data queryable through Zetaris; an R1 memo produced end to end; H-MEM API up with conformance passing |
+| D1 | Thu 22 Oct, 08:00–24:00 | Real data queryable through Zetaris; an R1 memo produced end to end; H-MEM API up with conformance passing. **Inchara is out, so Joon Hao builds the data work** (`joon-hao.md` §9) and hands it over in `docs/handover/d1-data.md` |
 | D2 | Fri 23 Oct | Full system: all loops, H-MEM memory moment, all red flags, UI, evaluation numbers. **Feature freeze 23:59** |
 | D3 | Sat 24 Oct | Clean-setup test, README, `metadata.json`, examples, video, deck. **Submit on HackOS by 20:00** |
 | Buffer | Sun 25 to Tue 27 | Fixes and resubmits only. The hard deadline is 28 Oct, 07:45 SGT |

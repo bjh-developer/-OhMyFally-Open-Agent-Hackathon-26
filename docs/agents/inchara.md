@@ -2,7 +2,7 @@
 
 You are a coding agent working for **Inchara** on the Procurement Integrity Investigator (Open Agent Hackathon 2026, Track 02). **Read `docs/agents/CONTRACTS.md` first. It overrides anything here that conflicts with it.** The team plan explains the *why*: https://claude.ai/code/artifact/33db073a-a6f9-4f3d-a817-8e02bf03c74c
 
-Inchara's background: Year 2 CS, self-learning ML and web development, comfortable with Python, React, Node, Java and PostgreSQL, and interested in bioinformatics. Inchara owns **getting real data in, matching suppliers to companies, the red-flag SQL, and proving the system works with numbers**. This is the critical path: nothing else can be demoed until D1's data is queryable through Zetaris.
+Inchara's background: Year 2 CS, self-learning ML and web development, comfortable with Python, React, Node, Java and PostgreSQL, and interested in bioinformatics. Inchara owns **getting real data in, matching suppliers to companies, the red-flag SQL, and proving the system works with numbers**. Joon Hao builds the D1 data work while Inchara is unavailable (22 Oct). Inchara takes it over from D2 morning.
 
 ---
 
@@ -56,43 +56,26 @@ Inchara's background: Year 2 CS, self-learning ML and web development, comfortab
 
 ## 4. Day-by-day
 
-### Tonight (21 Oct, no product code)
-- [ ] Install Zetaris and Nightshift and get `smoke_test.py` to print 3 PASS lines. Do this first.
-- [ ] **Check whether GeBIZ includes quotations.** Count `tender_no` patterns, ETT (tender) against ETQ (quotation), with the datastore API. Report the counts to the team, because R4 depends on it.
-- [ ] Pick 2–3 agencies with enough awards, a mix of values, and some sub-S$90k repeat suppliers. Share the shortlist.
-- [ ] Download the raw GeBIZ and ACRA CSVs into `data/raw/` (gitignored; data only, no code).
-
 Everything ships by **Sat 24 Oct, 20:00 SGT**, with full scope. Sun 25 to Tue 27 are buffer only.
 
-### D1 morning (Thu 22, target 13:00): data queryable through Zetaris (**blocks everyone**)
-1. `fetch_gebiz.py`: pull awards for the chosen agencies, parse dates, and write `data/sample/awards.csv`.
-2. `fetch_acra.py`: build the candidate subset. Normalise names (upper case, strip punctuation, drop PTE/LTD/PRIVATE/LIMITED/LLP). Keep every ACRA entity that shares the first 1–2 significant tokens with any supplier, by current or former name. Write `data/sample/acra_entities.parquet` (pyarrow), with a CSV copy as fallback.
-3. `seed.py`:
-   - create DBs `gebiz` and `agency_internal` in `pi-postgres`;
-   - load `awards`, `rules` (from `data/rules/` YAML) and `ago_chunks` (from `data/ago/`);
-   - create an empty `supplier_xwalk`;
-   - upload the ACRA file to `s3://pi-acra/acra/`.
-   It must be **idempotent**: running it twice gives the same state.
-4. With Joon Hao, write `sql/register/` and register the sources. Confirm both `SELECT count(*)` queries through Zetaris.
+### D1 (Thu 22): done by Joon Hao (you start D2)
+Inchara is unavailable on D1, so Joon Hao builds the D1 data work. That covers:
+- the GeBIZ quotation check and the agency shortlist;
+- `fetch_gebiz.py`, `fetch_acra.py` and `seed.py`;
+- the Zetaris registration;
+- the Resolver (`app/resolver/`);
+- `sql/checks/` R1–R4 and R8, plus `red_flags.yaml`;
+- `planted.json` and its injection.
 
-### D1 afternoon to midnight (Thu 22): Resolver, red-flag SQL, planted cases
-5. Resolver `app/resolver/match.py`. Apply these layers in order and record the `method`:
-   1. `exact` on the normalised name
-   2. `former_name` match
-   3. `fuzzy`: `rapidfuzz` token_set_ratio with blocking on the first token; ≥ 92 counts as a match, 80–92 is ambiguous
-   4. ambiguous top 3 goes to `llm_tiebreak` through the **fast** Nightshift lane, about 20 suppliers per call, returning JSON
-   5. otherwise `unresolved`. Names without a local suffix (foreign firms, government bodies) are `out_of_scope`.
+These areas are **yours from D2 onwards**: you maintain and improve them, and you own their numbers.
 
-   Write the results to `supplier_xwalk`. Expose `resolve(names) -> list[Match]` (CONTRACTS §7.4) so the Resolver agent can call it and retry a different strategy when the Critic rejects a match.
-6. `entity_labels.csv`: hand-check about 100 pairs (supplier_name, correct uen or NONE). Include hard cases: punctuation, "PRIVATE LIMITED" against "PTE LTD", renamed companies, and branches.
-7. Red-flag SQL, R1, R2, R3, R4 and R8 (definitions are in `data/rules/red_flags.yaml`):
-   - `awards` joins to `supplier_xwalk` on supplier_name, and `supplier_xwalk` joins to `entities` on uen;
-   - output columns exactly as in CONTRACTS §7.3;
-   - use `{{agency}}`, `{{date_from}}` and `{{date_to}}` placeholders;
-   - Spark SQL functions: `datediff`, `date_add`, window functions for R4.
-8. With Joon Hao, write `planted.json`, and make `seed.py` inject the fictional rows into awards, entities and (for R9) agency_internal. Then run each check and confirm its planted case appears.
+**D2 first hour, handover:**
+1. `git pull`; `docker compose up -d`; `python scripts/seed.py`; `python scripts/register_zetaris.py`.
+2. Read `docs/handover/d1-data.md`, which Joon Hao writes at the end of D1. It covers what was built, the quotation-check result, the chosen agencies, known Resolver weaknesses and open TODOs.
+3. Run every `sql/checks/R*.sql` through Zetaris and confirm each planted case appears.
 
-### D2 (Fri 23): evaluation and the rest of the flags
+### D2 (Fri 23): labels, evaluation and the rest of the flags
+8a. `data/eval/entity_labels.csv`: hand-check about 100 GeBIZ-to-ACRA pairs (supplier_name, correct uen or NONE). Include hard cases: punctuation, "PRIVATE LIMITED" against "PTE LTD", renamed companies, and branches. Then measure Resolver accuracy and tune the thresholds in `app/resolver/` if needed.
 9. `scripts/eval.py`:
    - run the pipeline (or just the checks) on 3 sample requests;
    - compute recall on planted cases and Resolver accuracy against `entity_labels.csv`;
