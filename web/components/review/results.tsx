@@ -44,7 +44,7 @@ export function Results({ memo }: { memo: Memo }) {
   const toolsShown = items.some((i) => i.status === "accepted" || i.status === "escalated");
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <section aria-labelledby="headline" className="grid gap-2">
         <h2 id="headline" className="text-xl leading-7 font-semibold tracking-[-0.4px] lg:text-[22px] lg:leading-7 2xl:text-2xl">
           {headline(memo.agency, summary)}

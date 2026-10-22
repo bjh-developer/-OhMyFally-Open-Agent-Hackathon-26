@@ -98,6 +98,10 @@
 }
 
 @layer base {
+  /* A bare `grid` gets one column that may shrink, so long ids and tables never widen the page. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   * {
     border-color: var(--border);
   }

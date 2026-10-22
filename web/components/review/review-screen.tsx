@@ -28,7 +28,7 @@ export function ReviewScreen() {
   const retry = () => (isMock ? beginMock() : request ? begin(request) : clear());
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <h1 className={H1}>Review procurement awards</h1>
 
       {state === "idle" && (
