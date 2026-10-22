@@ -8,6 +8,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DISCLAIMER, PROTOTYPE_NOTE } from "@/lib/copy";
 import { useRunCtx } from "@/components/run-provider";
+import { ItemSheet } from "@/components/review/item-sheet";
+import { DecisionDialog } from "@/components/review/decision-dialog";
 
 const HOW_IT_WORKS = [
   "You choose an agency and a period.",
@@ -86,6 +88,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <p>{PROTOTYPE_NOTE}</p>
         </div>
       </footer>
+      <ItemSheet />
+      <DecisionDialog />
     </div>
   );
 }

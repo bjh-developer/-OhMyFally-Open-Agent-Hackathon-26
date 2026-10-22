@@ -2,13 +2,35 @@
 
 import { Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/review/status-badge";
 import { StrengthChip } from "@/components/review/strength-chip";
 import { flagTitle, formatDate, formatMoney, groupTitle, whyFlagged, type Item } from "@/lib/copy";
 import { flagIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import type { DecisionRecord } from "@/lib/types";
+
+export function RecordMenu({ item, title, onDecide, iconOnly = false }: { item: Item; title: string; onDecide: (i: Item, kind: "confirm" | "dismiss") => void; iconOnly?: boolean }) {
+  const remember = canRemember(item);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {iconOnly ? (
+          <Button variant="ghost" size="icon" aria-label={`More actions for ${title}`}>
+            <Ellipsis aria-hidden strokeWidth={1.75} />
+          </Button>
+        ) : (
+          <Button variant="outline" disabled={!remember}>Record a decision</Button>
+        )}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Record a decision</DropdownMenuLabel>
+        <DropdownMenuItem disabled={!remember} onSelect={() => onDecide(item, "confirm")}>Confirm this needs follow-up</DropdownMenuItem>
+        <DropdownMenuItem disabled={!remember} onSelect={() => onDecide(item, "dismiss")}>Dismiss this item</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function canRemember(item: Item) {
   return item.members.some((m) => !!m.uen);
@@ -67,18 +89,7 @@ export function ItemCard({
             </>
           )}
           {item.status === "accepted" && !decided && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label={`More actions for ${title}`}>
-                  <Ellipsis aria-hidden strokeWidth={1.75} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled={!remember} onSelect={() => onDecide(item, "confirm")}>
-                  Record a decision
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <RecordMenu item={item} title={title} onDecide={onDecide} iconOnly />
           )}
         </div>
       </div>
