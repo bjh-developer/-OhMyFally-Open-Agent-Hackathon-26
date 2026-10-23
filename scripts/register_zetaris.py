@@ -6,7 +6,8 @@
 Idempotent: `*_drop_*.sql` files drop OUR objects only (errors ignored), then everything is recreated.
 ${VARS} in the SQL come from .env / defaults, so no secret is committed. --csv swaps the ACRA table to the
 CSV fallback in sql/register/alt/ if Zetaris cannot read the Parquet file.
-Finishes by running the two milestone counts.
+40-47 rebuild the USL `procurement_usl` (drop, namespace, COMPILE, ACTIVATE per table).
+Finishes by running the milestone counts, including the USL.
 """
 from __future__ import annotations
 
@@ -62,7 +63,9 @@ def main() -> int:
                 continue
             print(f"FAIL  {f.name}: {msg[:400]}")
             return 1
-    for q in ("SELECT count(*) FROM gebiz_pg.awards", "SELECT count(*) FROM ACRA_FILES.entities"):
+    usl = "lightning.metastore.procurement.procurement_usl.award_profile"
+    for q in ("SELECT count(*) FROM gebiz_pg.awards", "SELECT count(*) FROM ACRA_FILES.entities",
+              f"SELECT count(*) FROM {usl}", f"SELECT count(*) FROM {usl} WHERE registry_status IS NOT NULL"):
         r = z.run(q)
         print(f"{q} -> {r['data'][0][0]}  (query_id={r['query_id']})")
     return 0

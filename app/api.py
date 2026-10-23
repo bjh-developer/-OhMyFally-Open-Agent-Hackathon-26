@@ -8,7 +8,7 @@ import asyncio
 import json
 import re
 import threading
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +17,7 @@ from fastapi.responses import StreamingResponse
 from .adapters.config import get_settings
 from .orchestration.factory import make_deps
 from .orchestration.graph import run_investigation
+from .privacy import PseudonymKeyMissing, mask_payload
 from .schemas import Memo, RunRequest
 from .tracing import Tracer, new_run_id
 
@@ -68,10 +69,17 @@ def _view(run_id: str) -> dict:
 
 
 @app.get("/runs/{run_id}")
-def get_run(run_id: str) -> dict:
+def get_run(run_id: str, view: Literal["full", "public"] = "full") -> dict:
+    """``?view=public`` pseudonymises supplier names (app/privacy.py); the default is the auditor's full view."""
     if not _ID.match(run_id):
         raise HTTPException(404, "unknown run")
-    return _view(run_id)
+    out = _view(run_id)
+    if view == "public":
+        try:
+            out["memo"] = mask_payload(out["memo"])
+        except PseudonymKeyMissing:
+            raise HTTPException(503, "public view unavailable: PSEUDONYM_KEY is not configured")
+    return out
 
 
 @app.get("/runs/{run_id}/events")
