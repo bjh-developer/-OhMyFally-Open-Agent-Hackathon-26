@@ -158,7 +158,7 @@
 
 /* Sileo toast, styled to MASTER: white surface, foreground text, tokens for state colour, no forced capitals. */
 [data-sileo-viewport] {
-  --sileo-width: 360px;
+  --sileo-width: 420px; /* wide enough that the white shape always covers icon + title */
   --sileo-state-success: var(--success);
   --sileo-state-error: var(--destructive);
   --sileo-state-warning: var(--warning);
@@ -167,7 +167,8 @@
   --sileo-state-loading: var(--muted-foreground);
   z-index: 1700 !important; /* above header (100) and dialogs (1600); Sileo injects its CSS after ours */
   pointer-events: none; /* only the toasts themselves take clicks */
-  filter: drop-shadow(0 0 2px rgba(14, 14, 14, 0.16)) drop-shadow(0 4px 8px rgba(14, 14, 14, 0.08));
+  /* crisp 1px-like edge plus lift, so the white toast stands off the #FAFAF7 page */
+  filter: drop-shadow(0 0 1px rgba(14, 14, 14, 0.55)) drop-shadow(0 6px 16px rgba(14, 14, 14, 0.18));
 }
 [data-sileo-viewport] [data-sileo-title] {
   text-transform: none;
