@@ -42,3 +42,9 @@ At the Critic's unchanged 0.92 threshold, only 94 of the 99 correct links pass: 
 This is an **in-sample diagnostic, not a held-out benchmark**. The original ACRA sample was already minimised using Resolver candidates, and these labels deliberately cover source-supported cases. The set is positive-heavy, with only one negative and three unresolved labels. It cannot establish general accuracy, negative-case performance, or coverage of the full registry. Broader independent labels and human sign-off remain necessary before making those claims.
 
 The separate fictional tests exposed a legal-form bug: when no current/former-name candidate passed the legal-form check, `_pick` fell back to the incompatible candidates. The fix preserves the rejection instead, preventing an LLP from being assigned a company UEN solely because their names normalise alike. Three regression cases failed before this fix and passed afterward. No real supplier records were altered.
+
+## Combined evaluation and precision labels
+
+Run `python -X utf8 scripts/eval.py` to evaluate the three sample requests, supplemental planted scopes, fresh Resolver accuracy and `precision_review.csv`, writing `output_examples/metrics.json`. The script runs the production SQL checks rather than the full LLM investigation pipeline. No saved outputs are reused as answers.
+
+`precision_review.csv` is a human review queue, initially containing 30 pending nonplanted findings. Leave `label` blank while pending. After review, use `plausible`, `explained` or `unclear`, set `review_status=human_reviewed` and provide a reviewer and reason. Precision is `plausible / (plausible + explained)` on matching human-reviewed findings; unclear/pending/agent-reviewed rows are excluded. Until there are decided human labels, precision is null. Existing review files are never overwritten. See `docs/handover/d2-evaluation.md` for definitions, limitations and reproduction steps.

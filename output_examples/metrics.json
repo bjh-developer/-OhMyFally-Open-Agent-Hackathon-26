@@ -1,0 +1,730 @@
+{
+  "generated_at": "2026-10-23T07:58:19.585999+00:00",
+  "mode": "live_checks",
+  "pipeline_agents": [
+    "Resolver crosswalk read",
+    "Analyst"
+  ],
+  "complete": true,
+  "precision": {
+    "status": "not_measured",
+    "definition": "plausible / (plausible + explained); unclear and pending excluded. Plausibility is not proof of wrongdoing.",
+    "precision": null,
+    "plausible": 0,
+    "explained": 0,
+    "unclear": 0,
+    "decided": 0,
+    "human_reviewed": 0,
+    "pending": 30,
+    "agent_reviewed_excluded": 0,
+    "unmatched_labels": 0,
+    "nonplanted_candidates": 92,
+    "review_coverage": 0.0,
+    "labels_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\data\\eval\\precision_review.csv",
+    "queue_created": false,
+    "queue_selection": "Top 30 nonplanted sample findings by award value; no supplier names or addresses"
+  },
+  "errors": [],
+  "planted": {
+    "stage": "SQL candidate findings; no Critic, Risk or memory suppression applied",
+    "cases": 8,
+    "cases_caught": 8,
+    "case_flag_pairs": 8,
+    "case_flags_evaluated": 8,
+    "case_flags_caught": 8,
+    "expected_awards": 15,
+    "found_awards": 15,
+    "award_recall": 1.0,
+    "case_flag_recall": 1.0,
+    "case_recall": 1.0,
+    "negative_controls_passed": true,
+    "results": [
+      {
+        "case_id": "P1",
+        "flag_id": "R1",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P2",
+        "flag_id": "R2",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P3",
+        "flag_id": "R3",
+        "evaluated": true,
+        "expected_awards": 2,
+        "found_awards": 2,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P4",
+        "flag_id": "R4",
+        "evaluated": true,
+        "expected_awards": 3,
+        "found_awards": 3,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P5",
+        "flag_id": "R8",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P6",
+        "flag_id": "R9",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P7",
+        "flag_id": "R5",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P8",
+        "flag_id": "R6",
+        "evaluated": true,
+        "expected_awards": 5,
+        "found_awards": 5,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      }
+    ]
+  },
+  "resolver": {
+    "overall": {
+      "total": 100,
+      "correct": 100,
+      "accuracy": 1.0,
+      "linked": 99,
+      "positive_labels": 99,
+      "link_precision": 1.0,
+      "link_recall": 1.0,
+      "wrong_links": 0,
+      "missed_links": 0,
+      "correct_abstentions": 1,
+      "critic_accepted_links": 94,
+      "critic_link_precision": 1.0,
+      "critic_link_recall": 0.9494949494949495
+    },
+    "human_reviewed": {
+      "total": 0,
+      "correct": 0,
+      "accuracy": null,
+      "linked": 0,
+      "positive_labels": 0,
+      "link_precision": null,
+      "link_recall": null,
+      "wrong_links": 0,
+      "missed_links": 0,
+      "correct_abstentions": 0,
+      "critic_accepted_links": 0,
+      "critic_link_precision": null,
+      "critic_link_recall": null
+    },
+    "by_category": {
+      "current_name": {
+        "total": 50,
+        "correct": 50,
+        "accuracy": 1.0,
+        "linked": 50,
+        "positive_labels": 50,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 50,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "former_name": {
+        "total": 5,
+        "correct": 5,
+        "accuracy": 1.0,
+        "linked": 5,
+        "positive_labels": 5,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 0,
+        "critic_link_precision": null,
+        "critic_link_recall": 0.0
+      },
+      "llp": {
+        "total": 10,
+        "correct": 10,
+        "accuracy": 1.0,
+        "linked": 10,
+        "positive_labels": 10,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 10,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "placeholder": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0,
+        "linked": 0,
+        "positive_labels": 0,
+        "link_precision": null,
+        "link_recall": null,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 1,
+        "critic_accepted_links": 0,
+        "critic_link_precision": null,
+        "critic_link_recall": null
+      },
+      "private_limited": {
+        "total": 15,
+        "correct": 15,
+        "accuracy": 1.0,
+        "linked": 15,
+        "positive_labels": 15,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 15,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "punctuation_or_case": {
+        "total": 9,
+        "correct": 9,
+        "accuracy": 1.0,
+        "linked": 9,
+        "positive_labels": 9,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 9,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "registered_foreign_branch": {
+        "total": 10,
+        "correct": 10,
+        "accuracy": 1.0,
+        "linked": 10,
+        "positive_labels": 10,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 10,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      }
+    },
+    "methods": {
+      "exact": 94,
+      "former_name": 5,
+      "out_of_scope": 1
+    },
+    "pending_excluded": 3,
+    "critic_threshold": 0.92,
+    "generated_at": "2026-10-23T08:00:24.131140+00:00",
+    "mode": "live",
+    "resolver_mode": "full",
+    "labels_sha256": "d02ec84087947f4c0babbf4859faf539de488f79733109e1c07a6f23f2709fbd",
+    "registry_entities": 1236,
+    "sources": {
+      "5fc46b01-2221-4139-bece-56b011693c2f": {
+        "sql": "SELECT uen, entity_name, entity_type_description, entity_status_description, registration_incorporation_date, postal_code, former_entity_name1, former_entity_name2, former_entity_name3, former_entity_name4, former_entity_name5, former_entity_name6, former_entity_name7, former_entity_name8, former_entity_name9, former_entity_name10, former_entity_name11, former_entity_name12, former_entity_name13, former_entity_name14, former_entity_name15 FROM ACRA_FILES.entities",
+        "rows": 1236
+      },
+      "1910ac47-a249-419d-839e-1acf82bf8e5c": {
+        "sql": "SELECT DISTINCT supplier_name FROM gebiz_pg.awards",
+        "rows": 1270
+      }
+    },
+    "runtime_seconds": 5.765,
+    "llm_calls": 0,
+    "llm_failed_batches": 0,
+    "meterless_receipt_ids": [],
+    "limitations": [
+      "Agent-reviewed labels are not human sign-off or independently verified legal identities.",
+      "The registry sample was previously minimised using Resolver candidates; this is an in-sample diagnostic, not a held-out benchmark.",
+      "Only source-supported corporate matches and a placeholder are scored; ambiguous cases remain pending.",
+      "No fuzzy or LLM tie-break accuracy claim is supported unless those methods appear in the results.",
+      "Former names have no change dates; historical ownership at award time is unverified."
+    ]
+  },
+  "tokens": {
+    "llm_calls": 0,
+    "total_tokens": 0,
+    "provider_reported_total_tokens": null,
+    "status": "no_llm_calls",
+    "note": "SQL checks use no LLM. Resolver tie-break usage is not estimated; unknown provider usage remains null."
+  },
+  "quality_checks_passed": true,
+  "samples": [
+    {
+      "request": {
+        "agency": "Housing and Development Board",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "flags": [],
+        "question": "Which of HDB's 2025 procurement awards need review, and why?"
+      },
+      "checks": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R8",
+        "R9"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 50,
+      "findings_by_flag": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 15,
+        "R4": 2,
+        "R5": 28,
+        "R6": 2,
+        "R9": 1
+      },
+      "runtime_seconds": 39.453,
+      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075819_1.jsonl",
+      "supplemental": false
+    },
+    {
+      "request": {
+        "agency": "People's Association",
+        "date_from": "2024-01-01",
+        "date_to": "2024-12-31",
+        "flags": [
+          "R1",
+          "R4"
+        ],
+        "question": "Check the People's Association 2024 awards for new suppliers and possible contract splitting."
+      },
+      "checks": [
+        "R1",
+        "R4"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 7,
+      "findings_by_flag": {
+        "R4": 7
+      },
+      "runtime_seconds": 12.329,
+      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075859_2.jsonl",
+      "supplemental": false
+    },
+    {
+      "request": {
+        "agency": "National Parks Board",
+        "date_from": "2023-01-01",
+        "date_to": "2025-12-31",
+        "flags": [],
+        "question": "Screen NParks awards from 2023 to 2025."
+      },
+      "checks": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R8",
+        "R9"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 45,
+      "findings_by_flag": {
+        "R2": 1,
+        "R3": 13,
+        "R4": 2,
+        "R5": 22,
+        "R6": 6,
+        "R8": 1
+      },
+      "runtime_seconds": 38.187,
+      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075911_3.jsonl",
+      "supplemental": false
+    }
+  ],
+  "supplemental_scopes": [
+    {
+      "request": {
+        "agency": "Housing and Development Board",
+        "date_from": "2021-04-01",
+        "date_to": "2026-03-31",
+        "flags": [
+          "R3"
+        ],
+        "question": null
+      },
+      "checks": [
+        "R3"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 212,
+      "findings_by_flag": {
+        "R3": 212
+      },
+      "runtime_seconds": 9.516,
+      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075949_4.jsonl",
+      "supplemental": true
+    },
+    {
+      "request": {
+        "agency": "Synthetic Review Agency",
+        "date_from": "2021-04-01",
+        "date_to": "2026-03-31",
+        "flags": [
+          "R5",
+          "R6"
+        ],
+        "question": null
+      },
+      "checks": [
+        "R5",
+        "R6"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 6,
+      "findings_by_flag": {
+        "R5": 1,
+        "R6": 5
+      },
+      "runtime_seconds": 19.281,
+      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075959_5.jsonl",
+      "supplemental": true
+    }
+  ],
+  "sql_calls": [
+    {
+      "scope": "sample_1",
+      "query_id": "ef2de867-1d26-4829-af4c-a57d66f5fdf3",
+      "rows": 216,
+      "runtime_seconds": 2.922
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "953ce143-7f76-4549-80a1-201eac23185a",
+      "rows": 216,
+      "runtime_seconds": 2.875
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "85b3f118-b3e1-4d67-8858-23ca60815661",
+      "rows": 1,
+      "runtime_seconds": 3.094
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "4c2575a2-2620-405b-9460-5288af901906",
+      "rows": 1,
+      "runtime_seconds": 3.156
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "98d2105b-d880-43bb-98e5-e4b7d6cb474c",
+      "rows": 15,
+      "runtime_seconds": 3.578
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "baa39744-40a3-490d-a5ad-d1377434b048",
+      "rows": 2,
+      "runtime_seconds": 3.25
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "c57e7d86-dcfb-4c17-8b31-382e44f71ceb",
+      "rows": 1,
+      "runtime_seconds": 2.828
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "084ccbff-da05-4d6b-8d24-e2b10e5872fa",
+      "rows": 128,
+      "runtime_seconds": 3.313
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "a6959e72-af73-4470-b7e5-bb6f3cf74104",
+      "rows": 28,
+      "runtime_seconds": 4.219
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "69a2f5f1-f692-4ba1-8c45-8e3256c3c2eb",
+      "rows": 2,
+      "runtime_seconds": 3.36
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "4c32cf65-0509-4d3b-8f04-7600a54b6935",
+      "rows": 0,
+      "runtime_seconds": 3.093
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "784697e1-3dbd-4e24-ac82-20780a2d2ced",
+      "rows": 1,
+      "runtime_seconds": 3.688
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "5d5e6680-0316-4ef4-a3ed-9b6fbaddd6bc",
+      "rows": 161,
+      "runtime_seconds": 2.797
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "70dc9eb5-343c-47c1-a2f9-deda98d9dd36",
+      "rows": 161,
+      "runtime_seconds": 3.094
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "bfe92ff0-d1ee-4336-8861-2656bd5c9de3",
+      "rows": 0,
+      "runtime_seconds": 3.156
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "00b3435d-b23c-462c-a284-05f1e8eb3760",
+      "rows": 7,
+      "runtime_seconds": 3.266
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "b81dc80c-0bdb-43d4-bc32-02914ea83297",
+      "rows": 171,
+      "runtime_seconds": 2.687
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "822b160e-3976-4ad4-af69-698825c40167",
+      "rows": 171,
+      "runtime_seconds": 3.141
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "41342fb3-afca-4863-9eb2-5338a0214e13",
+      "rows": 0,
+      "runtime_seconds": 3.062
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "46bd350d-cf9c-42f1-83f9-04aefb8fa13a",
+      "rows": 1,
+      "runtime_seconds": 3.031
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "589c9333-a720-468c-863e-3d4c998ade17",
+      "rows": 13,
+      "runtime_seconds": 3.219
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "9e4cc700-65bc-491a-9d5e-020aebb7c9ad",
+      "rows": 2,
+      "runtime_seconds": 3.25
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "9b85d747-5090-4896-918b-20e78df01683",
+      "rows": 1,
+      "runtime_seconds": 2.735
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "568e2e03-2b9a-4ba8-b572-7680cc7d5971",
+      "rows": 104,
+      "runtime_seconds": 3.187
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "b2459082-2ef0-41a7-b07c-b31a6edded8d",
+      "rows": 22,
+      "runtime_seconds": 4.203
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "436c8976-8b3b-4353-b701-f48c086a5024",
+      "rows": 6,
+      "runtime_seconds": 3.188
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "616a3323-350f-4a75-9853-245d2afac4d9",
+      "rows": 1,
+      "runtime_seconds": 3.031
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "6c59f745-c610-48ad-9af0-267fdc7de53f",
+      "rows": 0,
+      "runtime_seconds": 3.453
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "80037243-441b-4bbe-8b6f-a26113d9c3a9",
+      "rows": 619,
+      "runtime_seconds": 2.719
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "ad86bbbf-e2d6-4bfe-ba2d-ce6d9b47edb2",
+      "rows": 619,
+      "runtime_seconds": 3.14
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "fff14bbe-a4c5-42aa-8d24-db404e1b97e3",
+      "rows": 212,
+      "runtime_seconds": 3.641
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "7d362f4c-73a7-418e-bf99-e74acd0caf0e",
+      "rows": 3,
+      "runtime_seconds": 2.781
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "cfadb57b-3e73-4c54-8474-5eda5a702298",
+      "rows": 3,
+      "runtime_seconds": 2.984
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "59b3518d-75e5-4b67-8a67-775c86163c68",
+      "rows": 1,
+      "runtime_seconds": 2.61
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "9273001d-fb58-4919-9eea-589f9b33f6ac",
+      "rows": 2,
+      "runtime_seconds": 3.172
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "bc1ff9e2-7bea-4c19-8f7b-89a8e8423fc6",
+      "rows": 1,
+      "runtime_seconds": 4.641
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "e476fb8d-2221-4eb3-89c3-32a5c6f3b799",
+      "rows": 5,
+      "runtime_seconds": 3.078
+    },
+    {
+      "scope": "resolver_accuracy",
+      "query_id": "5fc46b01-2221-4139-bece-56b011693c2f",
+      "rows": 1236,
+      "runtime_seconds": 2.828
+    },
+    {
+      "scope": "resolver_accuracy",
+      "query_id": "1910ac47-a249-419d-839e-1acf82bf8e5c",
+      "rows": 1270,
+      "runtime_seconds": 2.906
+    }
+  ],
+  "runtime_seconds": 124.547,
+  "limitations": [
+    "Check-level evaluation does not measure Critic acceptance, memory suppression, ranking or memo quality.",
+    "Planted recall uses fictional cases and does not establish precision on real awards.",
+    "Precision is unmeasured until humans label findings; unclear, pending and agent reviews are excluded from the precision denominator.",
+    "Resolver accuracy is an agent-reviewed, positive-heavy in-sample diagnostic; human-reviewed accuracy remains separate.",
+    "R5 semantic scores and R6 keyword categories are uncalibrated screening heuristics."
+  ],
+  "provenance": {
+    "inputs": [
+      {
+        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_1.json",
+        "sha256": "d61b750d5b8031f2c34ddff5c26e0c3217e70f0d8c2d63616b3a13f20ba018ae"
+      },
+      {
+        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_2.json",
+        "sha256": "c0d8e22a0e68b5cb75eca2f2ca16d8c8ea48c067e07b712bf20c8998091e96bf"
+      },
+      {
+        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_3.json",
+        "sha256": "1c9ef1bee1b1b99e2bf94f328ee34beafec1b34028d8ebd49965f7e843c34f62"
+      }
+    ],
+    "evaluator_sha256": "042ff350e8a09b9623665aa967d25d405623ab9c7d7fa386ebbe12dac4b150a2",
+    "check_sql_sha256": {
+      "R1": "0279dcaa5d22c2892d97f728c8306de99db7d866011944a0c4e98d9290317c2e",
+      "R2": "60760f06312e6072ca9922f5c961734cf983c7d0f31d1d260cd3257bb214fcf8",
+      "R3": "9a592a632263cb1ab8c0f08cdb02eddbd5c1230e1bc10ba597b771364faa570e",
+      "R4": "74a7e05c19e6d8397b9b33d87a9fa43dcc3592bba0f17e6649d5d4c5d3cce1e3",
+      "R5": "d4549a9c6c844c6f7551a968291991c87bcd89a0ff0dc234ae827a131602743a",
+      "R6": "37c1b75f35344020c72abfd94dac5acd51a0c5bbf4cf90cc27f3d16514d65a82",
+      "R8": "ad5ed01724df413e1334fc15c4c8ea74f040706483d6d21d46d3bdf9b3fded5d",
+      "R9": "da791e7ac5264f4301988524781bc536010ed21c3a06fb07d4e5d74adb203368"
+    },
+    "planted_sha256": "b7e8e212048b63c8665badcfb4e8c246f897f31577c4d3de3fe0a36f3abee6a9",
+    "precision_labels_sha256": "5a192fa50f4a779b21cfa8f3cdc67a5e95496d335d38e8886881d641754cad8f"
+  }
+}
