@@ -121,3 +121,23 @@ export interface AuditorDecisionBody {
   pattern_tag?: string;
   scope: "agency" | "global";
 }
+
+// GET /runs/{id}/summary (app/run_summary.py). Fields added later may be missing on old runs.
+export interface RunSummary {
+  run_id: string;
+  critiques: number;
+  retries: number;
+  escalations: number;
+  replans: number;
+  partial_success: number;
+  llm_calls: number;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  duration_s: number;
+  per_agent: { agent: string; calls: number; time_s: number; llm_calls: number }[];
+  memory_hits?: number;
+  memory_tracked?: boolean;
+  cleared_by_memory?: number;
+  zetaris_queries: number;
+  loops: { from_agent: string; to_agent: string; reason: string; claims?: number }[];
+}

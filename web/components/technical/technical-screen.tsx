@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/technical/copy-button";
+import { BehaviourPanel } from "@/components/technical/behaviour-panel";
 import { AgentDiagram } from "@/components/technical/agent-diagram";
 import { H1 } from "@/components/review/review-screen";
 import { formatDuration } from "@/lib/copy";
@@ -152,6 +153,8 @@ export function TechnicalScreen() {
           </Button>
         </div>
       </section>
+
+      <BehaviourPanel runId={runId} state={state} isMock={isMock} />
 
       <section aria-labelledby="timeline" className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
