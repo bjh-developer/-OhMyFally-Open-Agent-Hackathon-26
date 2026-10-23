@@ -1,0 +1,19 @@
+{
+  "name": "synthetic-2025",
+  "request": {
+    "agency": "Synthetic Review Agency",
+    "date_from": "2025-01-01",
+    "date_to": "2025-12-31",
+    "flags": [
+      "R5",
+      "R6"
+    ]
+  },
+  "source_run_id": "run_20261023_190938_131c63",
+  "hmem_used": false,
+  "git_sha": "70acd2a",
+  "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
+  "recorded_at": "2026-10-23T19:12:45+0800",
+  "zetaris_queries": 9,
+  "nightshift_calls": 4
+}

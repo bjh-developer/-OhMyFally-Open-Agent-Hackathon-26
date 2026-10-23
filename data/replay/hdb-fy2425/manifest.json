@@ -3,12 +3,14 @@
   "request": {
     "agency": "Housing and Development Board",
     "date_from": "2024-04-01",
-    "date_to": "2025-03-31"
+    "date_to": "2025-03-31",
+    "flags": []
   },
-  "source_run_id": "run_20261023_092036_19a85d",
-  "git_sha": "f2ab5ca",
+  "source_run_id": "run_20261023_184826_c28010",
+  "hmem_used": false,
+  "git_sha": "70acd2a",
   "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
-  "recorded_at": "2026-10-23T09:22:02+0800",
-  "zetaris_queries": 9,
+  "recorded_at": "2026-10-23T18:52:32+0800",
+  "zetaris_queries": 16,
   "nightshift_calls": 8
 }

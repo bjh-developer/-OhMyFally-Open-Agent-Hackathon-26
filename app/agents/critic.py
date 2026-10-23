@@ -21,7 +21,7 @@ from ..checks.rules import red_flags
 from ..checks.runner import MATCH_DEPENDENT, available_checks, facts_only, load_sql, render
 from ..orchestration.state import Deps, RunState
 from ..schemas import Critique, Finding
-from .common import compact_finding, dumps, parallel_map
+from .common import compact_finding, dumps, merge_results, parallel_map
 
 NAME = "CriticAgent"
 
@@ -210,7 +210,7 @@ def make(deps: Deps):
 
         # 5. claim support check (fast lane, one batched call, only for still-accepted findings)
         live = [f for f in findings if f.status == "accepted" and not any(c.finding_id == f.finding_id for c in critiques)]
-        receipt_res = None
+        batch_results: list = []
         if live:
             # Small batches: one big call makes Nemotron generate long enough that Nightshift aborts it (HTTP 499).
             pending = live[:15]
@@ -232,7 +232,7 @@ def make(deps: Deps):
                     deps.tracer.emit(NAME, "claim_support_check", input=f"findings {start}-{start + len(chunk) - 1} of {len(pending)}",
                                      output=f"skipped: {type(res).__name__}: {str(res)[:150]}", status="partial_success")
                     continue
-                receipt_res = res
+                batch_results.append(res)
                 for c in res.parsed.checks:
                     if not c.supported:
                         critiques.append(Critique(finding_id=c.finding_id, verdict="revise", target="AnalystAgent", reason=f"claim not supported: {c.reason}"))
@@ -269,6 +269,7 @@ def make(deps: Deps):
         if deps.hmem:
             out["memory_hits"], out["memory_ids"] = len(mem_seen), mem_seen
             out["output"] += f"; used {len(applied)} past decision{'s' if len(applied) != 1 else ''} (recalled {len(mem_seen)})"
+        receipt_res = merge_results(batch_results)
         if receipt_res:
             deps.tracer.llm(NAME, "validate_claims", receipt_res, **out)
         else:

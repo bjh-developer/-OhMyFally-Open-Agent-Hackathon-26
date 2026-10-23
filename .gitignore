@@ -1,14 +1,20 @@
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+secrets/
+credentials/
 
 # Python
+.venv
 .venv/
 .cache/
 __pycache__/
 *.pyc
 
 # Node (H-MEM service)
+node_modules
 node_modules/
 
 # OS

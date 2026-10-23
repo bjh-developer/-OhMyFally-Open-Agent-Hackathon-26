@@ -70,3 +70,45 @@ def test_endpoint(tmp_path, monkeypatch):
     assert c.get("/runs/run_abc/summary?view=public").status_code in (200, 503)
     assert c.get("/runs/run_nope/summary").status_code == 404
     assert len(read_events(tmp_path / "run_abc.jsonl")) == len(CLEAN)
+
+
+def _ev(agent, action, status="success", target=None, out="", **kw):
+    return {"timestamp": "2026-10-23T10:00:00Z", "agent_name": agent, "action": action, "status": status,
+            "target_agent": target, "output_summary": out, **kw}
+
+
+def test_model_calls_count_every_receipt_id_not_events():
+    evs = [_ev("CriticAgent", "validate_claims", meterless_receipt_ids=["r1", "r2", "r3"], meterless_receipt_id="r3"),
+           _ev("RiskAgent", "assess_risk", meterless_receipt_ids=["r4", "r2"]),  # r2 repeated: counted once
+           _ev("PlannerAgent", "plan", meterless_receipt_id="r5")]
+    s = summarise(evs)
+    assert s["llm_calls"] == 5
+    assert {a["agent"]: a["llm_calls"] for a in s["per_agent"]} == {"CriticAgent": 3, "RiskAgent": 2, "PlannerAgent": 1}
+
+
+def test_plan_review_limitations_are_not_a_loop():
+    evs = [_ev("CriticAgent", "plan_review", "partial_success", "AnalystAgent",
+               "limitations: R4 is partial: GeBIZ holds 0 quotation (ETQ) records; 3 supplier names could not be matched")]
+    s = summarise(evs)
+    assert s["loops"] == []
+    assert s["plan_notes"] == ["R4 is partial: GeBIZ holds 0 quotation (ETQ) records", "3 supplier names could not be matched"]
+
+
+def test_real_back_edges_are_still_loops():
+    evs = [_ev("CriticAgent", "validate_claims", "needs_revision", "AnalystAgent", "1 issues; route=analyst; revise=['R1']; cited row not reproduced"),
+           _ev("CriticAgent", "plan_review", "needs_revision", "PlannerAgent", "replan: Add ['R2'] to the plan"),
+           _ev("RiskAgent", "assess_risk", "needs_revision", "ReporterAgent", "0 escalated, 1 wording violations, replan=False.")]
+    s = summarise(evs)
+    assert [(l["from_agent"], l["to_agent"]) for l in s["loops"]] == [("CriticAgent", "AnalystAgent"), ("CriticAgent", "PlannerAgent")]
+    assert s["replans"] == 1 and s["critiques"] == 2
+
+
+def test_merge_results_keeps_every_batch_receipt():
+    from app.adapters.nightshift import ChatResult
+    from app.agents.common import merge_results
+
+    a = ChatResult(content="", receipt_id="a2", receipt_ids=["a1", "a2"], routed_model="nvidia/nemotron-x", latency_ms=900, calls=2)
+    b = ChatResult(content="", receipt_id="b1", receipt_ids=["b1"], routed_model="nvidia/nemotron-x", latency_ms=1500, calls=1)
+    m = merge_results([a, b])
+    assert m.receipt_ids == ["a1", "a2", "b1"] and m.routed_model == "nvidia/nemotron-x" and m.latency_ms == 1500 and m.calls == 3
+    assert merge_results([]) is None and merge_results([a]) is a

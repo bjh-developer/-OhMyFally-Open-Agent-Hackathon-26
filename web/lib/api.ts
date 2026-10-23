@@ -13,7 +13,7 @@ async function readError(res: Response): Promise<string> {
 }
 
 export async function startRun(req: RunRequest): Promise<RunView> {
-  const res = await fetch(`${API_URL}/run`, {
+  const res = await fetch(`${API_URL}/run?wait=false`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(req),

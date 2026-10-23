@@ -29,6 +29,7 @@ class Settings:
     source_timeout: float
     logs_dir: Path
     replay_dir: Path
+    offline: bool = False
 
 
 def _bool(v: str | None, default: bool) -> bool:
@@ -40,10 +41,17 @@ def _replay_dir(name: str) -> Path:
     return Path(name) if os.sep in name else ROOT / "data" / "replay" / name
 
 
+def _unset(v: str) -> bool:
+    """Empty or an .env.example placeholder ("your-zetaris-api-key") counts as not configured."""
+    v = v.strip()
+    return not v or v.lower().startswith("your-") or v.lower() in {"change-me", "changeme"}
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     load_dotenv(ROOT / ".env", override=False)
     e = os.environ.get
+    sample = _bool(e("SAMPLE_MODE"), True)
     return Settings(
         zetaris_url=e("ZETARIS_REST_URL", "http://localhost:8888/api/v1.0").rstrip("/"),
         zetaris_org_id=e("ZETARIS_ORG_ID", "1"),
@@ -55,10 +63,12 @@ def get_settings() -> Settings:
         app_deep=e("METERLESS_APP_DEEP", "procurement-integrity"),
         app_fast=e("METERLESS_APP_FAST", "procurement-integrity-fast"),
         hmem_url=e("HMEM_URL", "http://127.0.0.1:7070").rstrip("/"),
-        sample_mode=_bool(e("SAMPLE_MODE"), True),
+        sample_mode=sample,
         max_retries=int(e("MAX_RETRIES", "2")),
         llm_call_cap=int(e("LLM_CALL_CAP", "40")),
         source_timeout=float(e("SOURCE_TIMEOUT_SECONDS", "20")),
         logs_dir=ROOT / "logs",
         replay_dir=_replay_dir(e("REPLAY_SET", "hdb-fy2425")),
+        # SAMPLE_MODE with no Zetaris key and no Nightshift token: serve recordings only, never touch the network
+        offline=sample and _unset(e("ZETARIS_API_KEY", "")) and _unset(e("METERLESS_RUNTIME_TOKEN", "")),
     )

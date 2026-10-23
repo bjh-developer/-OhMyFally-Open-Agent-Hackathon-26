@@ -4,6 +4,10 @@ from __future__ import annotations
 import importlib
 import logging
 
+import httpx
+
+from .. import replay
+
 from ..tracing import Tracer
 from .state import Deps
 
@@ -48,8 +52,20 @@ def make_deps(tracer: Tracer | None = None, **overrides) -> Deps:
         except Exception as e:
             log.warning("app.resolver not available (%s); Resolver agent reads supplier_xwalk only", type(e).__name__)
     if d.hmem is None:
-        try:
-            d.hmem = importlib.import_module("app.adapters.hmem_client").HMemClient()
-        except Exception:
-            pass
+        d.hmem = _hmem(d.tracer)
     return d
+
+
+def _hmem(tracer: Tracer):
+    """H-MEM client, or None (and a trace line saying why) when memory cannot be used. Never fatal."""
+    if replay.offline():
+        tracer.emit("Orchestrator", "memory_skipped", output="H-MEM skipped: offline sample mode makes no network calls; runs without auditor memory")
+        return None
+    try:
+        client = importlib.import_module("app.adapters.hmem_client").HMemClient()
+        client.http.get(f"{client.url}/healthz", timeout=3.0).raise_for_status()
+        return client
+    except (httpx.HTTPError, OSError, ImportError) as e:
+        log.warning("H-MEM unavailable (%s); continuing without memory", type(e).__name__)
+        tracer.emit("Orchestrator", "memory_skipped", output=f"H-MEM unreachable ({type(e).__name__}); continuing without auditor memory", status="partial_success")
+        return None

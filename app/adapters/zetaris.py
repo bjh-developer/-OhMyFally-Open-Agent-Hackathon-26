@@ -196,6 +196,11 @@ def run_sql(
     (SAMPLE_MODE=true and a recorded set exists), serve the recorded result, labelled ``replayed``."""
     from .. import replay
 
+    if replay.offline():  # SAMPLE_MODE without credentials: recordings only, no network
+        rec = replay.serve_sql(sql) if replay.enabled() else None
+        if rec is None:
+            raise ZetarisError("offline sample mode: no recorded Zetaris result for this query")
+        return rec
     if replay.enabled() and replay.breaker_open("zetaris"):
         rec = replay.serve_sql(sql)
         if rec is not None:

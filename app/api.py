@@ -8,11 +8,13 @@ import asyncio
 import json
 import re
 import threading
+import time
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from .adapters.config import get_settings
 from .orchestration.factory import make_deps
@@ -20,7 +22,7 @@ from .orchestration.graph import run_investigation
 from .run_summary import read_events, summarise
 from .privacy import PseudonymKeyMissing, mask_payload
 from .schemas import Memo, RunRequest
-from .tracing import Tracer, new_run_id
+from .tracing import Tracer, format_event, new_run_id
 
 app = FastAPI(title="Procurement Integrity Investigator")
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:3100", "http://localhost:3100"],
@@ -28,6 +30,20 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:3100", "http
 
 _RUNS: dict[str, dict[str, Any]] = {}
 _ID = re.compile(r"^run_[A-Za-z0-9_\-]{1,64}$")
+
+
+WAIT_TIMEOUT_S = 600
+
+
+def _error_body(run_id: str | None, etype: str, message: str, recoverable: bool, started: float | None = None) -> dict:
+    return {"run_id": run_id, "status": "error", "error": {"type": etype, "message": message, "recoverable": recoverable},
+            "trace_id": run_id, "execution_time_seconds": round(time.monotonic() - started, 2) if started else 0.0}
+
+
+@app.exception_handler(RequestValidationError)
+async def _invalid_request(_: Request, exc: RequestValidationError) -> JSONResponse:
+    msg = "; ".join(f"{'.'.join(str(x) for x in e['loc'][1:]) or 'body'}: {e['msg']}" for e in exc.errors())[:400]
+    return JSONResponse(_error_body(None, "invalid_request", msg, True), status_code=422)
 
 
 def _execute(run_id: str, req: RunRequest) -> None:
@@ -40,7 +56,10 @@ def _execute(run_id: str, req: RunRequest) -> None:
         rec["error"] = final.get("rejected_reason")
     except Exception as e:  # never leave a run hanging
         rec["status"], rec["error"] = "failed", f"{type(e).__name__}: {str(e)[:200]}"
+        rec["error_type"] = type(e).__name__
         rec["tracer"].emit("Orchestrator", "run_failed", output=rec["error"], status="failed")
+    finally:
+        rec["finished"] = time.monotonic()
 
 
 @app.get("/healthz")
@@ -48,16 +67,32 @@ def healthz() -> dict:
     return {"ok": True}
 
 
-@app.post("/run", status_code=202)
-def post_run(req: RunRequest, wait: bool = False) -> dict:
-    """Start a run. ``?wait=true`` blocks until the memo is ready (for scripts and tests)."""
+@app.post("/run")
+def post_run(req: RunRequest, wait: bool = True) -> JSONResponse:
+    """Run an investigation. By default the call blocks and returns the finished result (memo included), so a plain
+    ``curl -X POST /run -d @input.json`` gets the answer. ``?wait=false`` returns 202 at once with a run_id to poll
+    (``GET /runs/{id}``, ``GET /runs/{id}/events``). A failed or rejected run returns
+    ``{run_id, status:"error", error:{type, message, recoverable}, trace_id, execution_time_seconds}``."""
     run_id = new_run_id()
-    _RUNS[run_id] = {"status": "running", "tracer": Tracer(run_id), "memo": None, "error": None}
+    started = time.monotonic()
+    tracer = Tracer(run_id)
+    tracer.subscribe(lambda e: print(format_event(e), flush=True))
+    _RUNS[run_id] = {"status": "running", "tracer": tracer, "memo": None, "error": None, "started": started}
     t = threading.Thread(target=_execute, args=(run_id, req), daemon=True)
     t.start()
-    if wait:
-        t.join(timeout=600)
-    return _view(run_id)
+    if not wait:
+        return JSONResponse(_view(run_id), status_code=202)
+    t.join(timeout=WAIT_TIMEOUT_S)
+    rec = _RUNS[run_id]
+    if rec["status"] == "running":  # still going after the wait budget: hand back the id to poll
+        return JSONResponse({**_view(run_id), "execution_time_seconds": round(time.monotonic() - started, 2)}, status_code=202)
+    secs = round(rec.get("finished", time.monotonic()) - started, 2)
+    if rec["status"] == "done":
+        return JSONResponse({**_view(run_id), "trace_id": run_id, "execution_time_seconds": secs})
+    if rec["status"] == "rejected":
+        return JSONResponse(_error_body(run_id, "request_rejected", str(rec["error"]), True, started), status_code=422)
+    msg = "The investigation could not finish. The trace holds the details: " + str(rec["tracer"].path.name)
+    return JSONResponse(_error_body(run_id, "run_failed", msg, False, started), status_code=500)
 
 
 def _view(run_id: str) -> dict:
