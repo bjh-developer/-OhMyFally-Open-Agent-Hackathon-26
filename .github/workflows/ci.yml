@@ -18,7 +18,8 @@ jobs:
       - name: TruffleHog
         uses: trufflesecurity/trufflehog@v3.88.0
         with:
-          extra_args: --results=verified,unknown
+          # JDBC only matches credential-free URLs here (passwords are ${POSTGRES_PASSWORD} placeholders filled from .env).
+          extra_args: --results=verified,unknown --exclude-detectors=JDBC
 
   tests:
     runs-on: ubuntu-latest
