@@ -1,0 +1,36 @@
+{
+  "request": {
+    "agency": "Housing and Development Board",
+    "date_from": "2024-04-01",
+    "date_to": "2025-03-31"
+  },
+  "source_run_id": "run_20261023_092036_19a85d",
+  "method": "tokens = chars / 4 (estimate, not a tokenizer count)",
+  "pushdown": {
+    "llm_calls": 8,
+    "prompt_chars": 47909,
+    "est_tokens": 11977,
+    "provider_reported_prompt_tokens": 27837,
+    "note": "prompts the agents really sent, from the recorded live run"
+  },
+  "naive": {
+    "joined_rows": 278,
+    "columns": 36,
+    "chars": 145115,
+    "est_tokens": 36279,
+    "note": "awards x supplier_xwalk x ACRA entities for the same agency and period, one compact JSON dump, no instructions; lower bound (one dump, not one per LLM call)"
+  },
+  "app_side_zetaris_rows_chars": 253525,
+  "app_side_note": "result rows the Python side pulled from Zetaris (checks, name lists, crosswalk, entity index); never sent to the LLM",
+  "reduction": {
+    "factor": 3.0,
+    "pct_fewer_tokens": 67.0
+  },
+  "caveats": [
+    "chars/4 is a rough estimate; compact JSON of ASCII text is closer to 3-4 chars/token",
+    "naive row count may exceed the model's context window, in which case it could not be done at all",
+    "provider-reported prompt_tokens (when present) exceed chars/4 for the pushdown prompts; the naive side was not tokenised by the provider, so the ratio rests on chars/4 for both sides",
+    "this is the curated sample subset (a few hundred joined rows); naive cost grows with table size, pushdown cost with the number of flagged awards, so the gap widens on the full registry",
+    "pushdown prompts also carry instructions, so the comparison favours naive slightly"
+  ]
+}

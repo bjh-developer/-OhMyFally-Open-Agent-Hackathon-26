@@ -1,0 +1,140 @@
+{
+ "entries": [
+  {
+   "lane": "deep",
+   "agent": "You are the Planner of a procurement-integrity screening system for a government agency au",
+   "sys_key": "b5765ccb4f1d77d7",
+   "exact_key": "6ab10905b11a9330",
+   "prompt_chars": 1174,
+   "content": "{\"checks\": [\"R1\", \"R2\", \"R3\", \"R4\", \"R8\"], \"rationale\": \"The auditor did not specify individual flags, so all implemented checks are selected for Housing and Development Board awards from 2024-04-01 through 2025-03-31.\"}",
+   "receipt_id": "rcpt_req_o8875om0",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 3404,
+   "usage": {
+    "prompt_tokens": 670,
+    "completion_tokens": 442,
+    "total_tokens": 1112
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "c3571b0d6c1ca950",
+   "prompt_chars": 7175,
+   "content": "{\"checks\":[{\"finding_id\":\"R3-adb50504\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$175,000,000, 2024-05-31, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-a2a322fd\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$98,000,000, 2024-09-30, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-c9721329\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$34,355,000, 2025-01-31, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-8eeb16c9\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$37,555,000, 2025-01-31, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-7ed002e3\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$2,126,937, 2024-04-19, metric 2/threshold 2, address match.\"}]}",
+   "receipt_id": "rcpt_req_12ns5u33",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 5754,
+   "usage": {
+    "prompt_tokens": 3795,
+    "completion_tokens": 1010,
+    "total_tokens": 4805
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "d940371c73f07ee1",
+   "prompt_chars": 7139,
+   "content": "{\"checks\":[{\"finding_id\":\"R3-ee6d3db5\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$11,230,000, 2024-11-22, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-7b056a9f\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$2,364,847, 2025-02-26, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-c728707c\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$270,900,000, 2024-08-30, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-64f4d44d\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$173,700,000, 2025-02-28, metric 2/threshold 2, address match.\"},{\"finding_id\":\"R3-340040d7\",\"supported\":true,\"reason\":\"Supplier, tender, agency, S$235,800,000, 2025-03-04, metric 2/threshold 2, address match.\"}]}",
+   "receipt_id": "rcpt_req_85ekz4s3",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 13760,
+   "usage": {
+    "prompt_tokens": 3814,
+    "completion_tokens": 1359,
+    "total_tokens": 5173
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "48ae3bead0d5923f",
+   "prompt_chars": 7015,
+   "content": "{\"checks\":[{\"finding_id\":\"R2-d8569c32\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric, threshold all match evidence.\"},{\"finding_id\":\"R3-743f6c8a\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric, threshold match.\"},{\"finding_id\":\"R3-375d93b6\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric, threshold match.\"},{\"finding_id\":\"R3-d90c5d6f\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric, threshold match.\"},{\"finding_id\":\"R3-1d70e578\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric, threshold match.\"}]}",
+   "receipt_id": "rcpt_req_y21f45j2",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 15337,
+   "usage": {
+    "prompt_tokens": 3637,
+    "completion_tokens": 1694,
+    "total_tokens": 5331
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You triage procurement anomalies for an agency auditor. Score each finding's review priori",
+   "sys_key": "6f80bcbad053d646",
+   "exact_key": "5b641b12091553c8",
+   "prompt_chars": 5450,
+   "content": "{\"scores\":[{\"finding_id\":\"R3-2d3927ec\",\"priority\":85,\"reason\":\"Largest award S$160k; metric at threshold; high confidence.\"},{\"finding_id\":\"R3-ed143f38\",\"priority\":80,\"reason\":\"Large award S$150k; metric at threshold; high confidence.\"},{\"finding_id\":\"R3-1d70e578\",\"priority\":65,\"reason\":\"Above S$90k; metric at threshold; high confidence.\"},{\"finding_id\":\"R3-d90c5d6f\",\"priority\":60,\"reason\":\"Below S$90k; metric at threshold; high confidence.\"},{\"finding_id\":\"R3-375d93b6\",\"priority\":55,\"reason\":\"Moderate award S$72k; metric at threshold; high confidence.\"},{\"finding_id\":\"R3-9a39f786\",\"priority\":30,\"reason\":\"Small award S$9,626; metric at threshold; high confidence.\"}]}",
+   "receipt_id": "rcpt_req_klcp1bup",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 16732,
+   "usage": {
+    "prompt_tokens": 5466,
+    "completion_tokens": 1228,
+    "total_tokens": 6694
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You triage procurement anomalies for an agency auditor. Score each finding's review priori",
+   "sys_key": "6f80bcbad053d646",
+   "exact_key": "b15f2d05224a6680",
+   "prompt_chars": 6414,
+   "content": "{\"scores\":[{\"finding_id\":\"R3-ee6d3db5\",\"priority\":60,\"reason\":\"S$11.23M award; address metric at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-7b056a9f\",\"priority\":55,\"reason\":\"S$2.36M award; address metric at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-7ed002e3\",\"priority\":54,\"reason\":\"S$2.13M award; address metric at threshold; confidence 1.0.\"},{\"finding_id\":\"R4-06f24f8e\",\"priority\":30,\"reason\":\"S$158,291 window exceeds S$90k threshold; confidence 1.0.\"},{\"finding_id\":\"R4-1751c091\",\"priority\":29,\"reason\":\"Same splitting window above threshold; smaller award; confidence 1.0.\"},{\"finding_id\":\"R3-743f6c8a\",\"priority\":55,\"reason\":\"S$1.04M award; address metric at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-8d909020\",\"priority\":46,\"reason\":\"S$629,975 award; address metric at threshold; confidence 1.0.\"}]}",
+   "receipt_id": "rcpt_req_y6lb72xm",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 29405,
+   "usage": {
+    "prompt_tokens": 3232,
+    "completion_tokens": 1297,
+    "total_tokens": 4529
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You triage procurement anomalies for an agency auditor. Score each finding's review priori",
+   "sys_key": "6f80bcbad053d646",
+   "exact_key": "7383089c61cbb07c",
+   "prompt_chars": 6342,
+   "content": "{\"scores\":[{\"finding_id\":\"R3-c728707c\",\"priority\":97,\"reason\":\"Largest award S$270.9M; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-340040d7\",\"priority\":96,\"reason\":\"Very large award S$235.8M; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-adb50504\",\"priority\":90,\"reason\":\"Large award S$175M; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-64f4d44d\",\"priority\":90,\"reason\":\"Large award S$173.7M; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-a2a322fd\",\"priority\":85,\"reason\":\"S$98M award; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-8eeb16c9\",\"priority\":78,\"reason\":\"S$37.6M award; address metric exactly at threshold; confidence 1.0.\"},{\"finding_id\":\"R3-c9721329\",\"priority\":77,\"reason\":\"S$34.4M award; address metric exactly at threshold; confidence 1.0.\"}]}",
+   "receipt_id": "rcpt_req_smqlty95",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 32812,
+   "usage": {
+    "prompt_tokens": 3907,
+    "completion_tokens": 1069,
+    "total_tokens": 4976
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You write the opening of an audit memo. Use only the facts given. Use the phrases 'anomaly",
+   "sys_key": "2c0af6dc82fe6d9b",
+   "exact_key": "e07a0785f7edea23",
+   "prompt_chars": 7200,
+   "content": "{\"headline\":\"HDB accepted 21 anomalies for review for tenders awarded from 2024-04-01 to 2025-03-31, with zero findings suppressed or rejected.\",\"overview\":\"The accepted items include distinct winning suppliers sharing ACRA addresses, a supplier recorded as struck off in ACRA at award, and two sub-S$90,000 awards within 90 days totaling S$158,291 above the tender threshold. Each item is an anomaly for review and may indicate a concern that requires auditor judgement; shared business centres can explain address matches, and ACRA's current status may reflect post-award timing.\"}",
+   "receipt_id": "rcpt_req_h710b1cd",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 6432,
+   "usage": {
+    "prompt_tokens": 3316,
+    "completion_tokens": 799,
+    "total_tokens": 4115
+   },
+   "calls": 1
+  }
+ ]
+}

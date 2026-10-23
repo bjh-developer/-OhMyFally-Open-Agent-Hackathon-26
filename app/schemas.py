@@ -126,3 +126,4 @@ class TraceEvent(BaseModel):
     routed_model: str | None = None
     latency_ms: int | None = None
     egress: Any = None
+    replayed: bool | None = None  # true: served from a recorded run, not a live service (app/replay.py)
