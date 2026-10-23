@@ -38,7 +38,7 @@
   logic: Embedding similarity between the supplier's SSIC description and the tender description is low
   params: {max_similarity: 0.2}
   priority: should
-  limitation: Embedding similarity is noisy; always escalated to human review at low confidence.
+  limitation: Embedding similarity is uncalibrated and business descriptions can be broad; always escalated at confidence at most 0.6. Only description pairs with a stored Resolver confidence of at least 0.92 and nonempty descriptions are scored. Run prepare_r5.py after seeding or source changes.
   why_it_matters: A winner whose registered activity does not match the work may be a pass-through.
   source_url: https://data.gov.sg/collections/2/view
 - flag_id: R6
@@ -46,7 +46,7 @@
   logic: One supplier holds a large share of an agency's awards (by value) in a tender category
   params: {share_threshold: 0.5, min_awards: 5}
   priority: should
-  limitation: Specialised categories legitimately have few suppliers.
+  limitation: Ten first-match keyword categories are approximate; specialised categories legitimately have few suppliers. Requires at least five distinct category tenders, compares positive award value within the requested agency and period, and groups by supplier name without consolidating aliases.
   why_it_matters: High concentration can signal weak competition.
   source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
 - flag_id: R7
@@ -71,6 +71,6 @@
   logic: The awarded supplier is not rank 1 in the evaluation scores (synthetic internal data only)
   params: {}
   priority: should
-  limitation: Synthetic internal records for planted tenders only; no real evaluation data is used.
+  limitation: Synthetic internal records only; no real evaluation data is used. Compares weighted scores only when every bidder has the same complete criteria and weights, weights sum to one and scores are between 0 and 100. Tied best scores are not flagged; documented award exceptions still require review.
   why_it_matters: Departures from published evaluation criteria need documented justification.
   source_url: https://mof.gov.sg/policies/government-procurement/procurement-process

@@ -1,0 +1,245 @@
+{
+  "mode": "live",
+  "checked_at": "2026-10-23T07:34:43.304862+00:00",
+  "checks": [
+    {
+      "case": "P1",
+      "flag": "R1",
+      "query_id": "abd62ab9-8b7b-445b-b9e5-1cac765f0b4c",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "ACRA_FILES.entities"
+      ],
+      "rows_returned": 1,
+      "expected_awards_found": 1,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT25000001",
+          "metric_name": "incorporation_age_days",
+          "metric_value": "21",
+          "threshold": "183"
+        }
+      ]
+    },
+    {
+      "case": "P2",
+      "flag": "R2",
+      "query_id": "fc4c63b8-93e4-4a49-b79f-a1bac51a66ba",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "ACRA_FILES.entities"
+      ],
+      "rows_returned": 3,
+      "expected_awards_found": 1,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT24000002",
+          "metric_name": "acra_status",
+          "metric_value": "Struck Off",
+          "threshold": "Live"
+        }
+      ]
+    },
+    {
+      "case": "P3",
+      "flag": "R3",
+      "query_id": "d03256fd-3341-4bf0-ba2e-cd6d40f6ce76",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "ACRA_FILES.entities"
+      ],
+      "rows_returned": 212,
+      "expected_awards_found": 2,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT24000003",
+          "metric_name": "suppliers_at_address",
+          "metric_value": "2",
+          "threshold": "2"
+        },
+        {
+          "tender_no": "PLT000ETT24000013",
+          "metric_name": "suppliers_at_address",
+          "metric_value": "2",
+          "threshold": "2"
+        }
+      ]
+    },
+    {
+      "case": "P4",
+      "flag": "R4",
+      "query_id": "2fdee64c-7ee6-45d6-ba8a-0af5aabae7b9",
+      "source_objects": [
+        "gebiz_pg.awards"
+      ],
+      "rows_returned": 11,
+      "expected_awards_found": 3,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT24000004",
+          "metric_name": "window_total_sgd",
+          "metric_value": "105000.000000000000000000",
+          "threshold": "90000"
+        },
+        {
+          "tender_no": "PLT000ETT24000014",
+          "metric_name": "window_total_sgd",
+          "metric_value": "105000.000000000000000000",
+          "threshold": "90000"
+        },
+        {
+          "tender_no": "PLT000ETT24000024",
+          "metric_name": "window_total_sgd",
+          "metric_value": "105000.000000000000000000",
+          "threshold": "90000"
+        }
+      ]
+    },
+    {
+      "case": "P5",
+      "flag": "R8",
+      "query_id": "ae70fe1d-d09a-4040-afc3-1f3ea61a9155",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "ACRA_FILES.entities"
+      ],
+      "rows_returned": 1,
+      "expected_awards_found": 1,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT25000005",
+          "metric_name": "resolver_confidence",
+          "metric_value": "0.0",
+          "threshold": "0.8"
+        }
+      ]
+    },
+    {
+      "case": "P6",
+      "flag": "R9",
+      "query_id": "fffef2f5-dc69-4761-8bd5-128899bbba89",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "internal_pg.evaluations"
+      ],
+      "rows_returned": 1,
+      "expected_awards_found": 1,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT25000006",
+          "metric_name": "winner_weighted_score",
+          "metric_value": "82.400000",
+          "threshold": "89.600000"
+        }
+      ]
+    },
+    {
+      "case": "P7",
+      "flag": "R5",
+      "query_id": "3ffc9562-0262-4738-aac5-a4dce4656d79",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk",
+        "ACRA_FILES.entities",
+        "gebiz_pg.rules"
+      ],
+      "rows_returned": 1,
+      "expected_awards_found": 1,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT25000007",
+          "metric_name": "business_description_cosine_similarity",
+          "metric_value": "0.039395",
+          "threshold": "0.2"
+        }
+      ]
+    },
+    {
+      "case": "P8",
+      "flag": "R6",
+      "query_id": "24664eb6-5262-437c-90be-f8175f9b02a1",
+      "source_objects": [
+        "gebiz_pg.awards",
+        "gebiz_pg.supplier_xwalk"
+      ],
+      "rows_returned": 5,
+      "expected_awards_found": 5,
+      "passed": true,
+      "planted_metrics": [
+        {
+          "tender_no": "PLT000ETT25000080",
+          "metric_name": "supplier_category_value_share",
+          "metric_value": "0.833333",
+          "threshold": "0.5"
+        },
+        {
+          "tender_no": "PLT000ETT25000081",
+          "metric_name": "supplier_category_value_share",
+          "metric_value": "0.833333",
+          "threshold": "0.5"
+        },
+        {
+          "tender_no": "PLT000ETT25000082",
+          "metric_name": "supplier_category_value_share",
+          "metric_value": "0.833333",
+          "threshold": "0.5"
+        },
+        {
+          "tender_no": "PLT000ETT25000083",
+          "metric_name": "supplier_category_value_share",
+          "metric_value": "0.833333",
+          "threshold": "0.5"
+        },
+        {
+          "tender_no": "PLT000ETT25000084",
+          "metric_name": "supplier_category_value_share",
+          "metric_value": "0.833333",
+          "threshold": "0.5"
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "unit_tests_passed": 81,
+  "live_sql_boundary_tests_passed": 14,
+  "live_planted_tests_passed": 8,
+  "r5_preparation": {
+    "max_similarity": 0.2,
+    "prepared": true,
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "backend": "local_fastembed",
+    "prepared_at": "2026-10-23T07:31:13.995565+00:00",
+    "source_query_id": "9be54904-0d9c-40bf-9da0-3efb002f466e",
+    "description_sha256": "b4241029c74610ed1f95df672ef5c73b499517e19a5db6cd2ef4bd56f232a628",
+    "meterless_receipt_ids": [],
+    "pairs": 1052
+  },
+  "end_to_end": {
+    "run_id": "run_20261023_153325_492c5c",
+    "replayed": false,
+    "findings": 6,
+    "r5_confidence": 0.6,
+    "r5_status": "escalated",
+    "llm_calls": 5,
+    "runtime_seconds": 283.572,
+    "all_steps_succeeded": true,
+    "meterless_receipt_ids": [
+      "rcpt_req_5ne3149m",
+      "rcpt_req_m23pxwxc",
+      "rcpt_req_qois7ayf",
+      "rcpt_req_iz1tknk9"
+    ]
+  }
+}

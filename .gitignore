@@ -9,6 +9,7 @@ credentials/
 # Python
 .venv
 .venv/
+.cache/
 __pycache__/
 *.pyc
 

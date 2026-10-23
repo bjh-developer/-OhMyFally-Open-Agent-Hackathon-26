@@ -157,14 +157,19 @@ def make(deps: Deps):
         for f in findings:
             if f.status != "accepted" or f.flag_id not in MATCH_DEPENDENT:
                 continue
-            if f.confidence < deps.match_threshold:
+            # R5's finding confidence expresses semantic uncertainty, not a weak identity match.
+            match_confidence = f.confidence
+            if f.flag_id == "R5":
+                match = matches.get(f.supplier_name)
+                match_confidence = match.confidence if match and match.uen == f.uen else 0.0
+            if match_confidence < deps.match_threshold:
                 if resolver_retry < deps.max_retries and f.supplier_name not in redo_names:
                     redo_names.append(f.supplier_name)
                     critiques.append(Critique(finding_id=f.finding_id, verdict="revise", target="ResolverAgent",
-                                              reason=f"match confidence {f.confidence:.2f} below {deps.match_threshold}"))
+                                              reason=f"match confidence {match_confidence:.2f} below {deps.match_threshold}"))
                 else:
                     f.status = "rejected"
-                    f.notes.append(f"Rejected: supplier match confidence {f.confidence:.2f} stayed below {deps.match_threshold} after retries.")
+                    f.notes.append(f"Rejected: supplier match confidence {match_confidence:.2f} stayed below {deps.match_threshold} after retries.")
                     critiques.append(Critique(finding_id=f.finding_id, verdict="reject", reason="low-confidence supplier match"))
 
         # 3. H-MEM recall

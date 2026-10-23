@@ -33,6 +33,16 @@ python scripts/fetch_acra.py minimise    # refresh the committed ACRA sample
 
 More detail, row counts and known weaknesses: `docs/handover/d1-data.md`.
 
+## Remaining checks (D2)
+
+R5, R6 and R9 are implemented. After seed/register/Resolver, run `python -X utf8 scripts/prepare_r5.py --download-model` once to cache the local model and prepare R5; omit the download flag on later preparations. Seed clears the derived scores, so repeat preparation after a reseed. R6 uses ten keyword categories and R9 compares synthetic weighted evaluation scores.
+
+Fictional P7/P8 add seven awards and three entities under `Synthetic Review Agency`, bringing the seeded totals to 2,481 awards and 1,236 entities. Existing P6 exercises R9. All eight planted cases and fourteen live SQL boundary tests pass. See `docs/handover/d2-red-flags.md` for implementation details, limitations and reproduction commands.
+
+## Combined evaluation
+
+`python -X utf8 scripts/eval.py` runs three sample SQL-check requests, supplemental scopes for otherwise-uncovered planted cases, fresh Resolver accuracy and human precision-label scoring. Actual results are written to `output_examples/metrics.json`: the live snapshot caught all 8 planted cases / 15 expected awards and matched 100/100 reviewed Resolver labels. These are check-level, in-sample results, not final-memo accuracy. The 30-row `eval/precision_review.csv` queue is pending human review, so precision remains null. Details: `docs/handover/d2-evaluation.md`.
+
 ## Resolver evaluation (23 Oct 2026)
 
 `eval/entity_labels.csv` provides 100 agent-reviewed, source-supported labels plus 3 pending cases. The live Resolver run scored 100/100 on this selected in-sample set; at the Critic's unchanged confidence threshold, 94/99 correct UEN links qualify. No human-reviewed accuracy or fuzzy/LLM accuracy is established by this set. See `eval/README.md` for provenance, category counts, reproduction commands, and limitations, and `output_examples/resolver_metrics.json` for the actual report.
