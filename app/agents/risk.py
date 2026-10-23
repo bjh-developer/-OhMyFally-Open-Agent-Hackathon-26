@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from ..checks.rules import banned_hits, red_flags
 from ..checks.runner import available_checks
 from ..orchestration.state import Deps, RunState
-from .common import compact_finding, dumps
+from .common import compact_finding, dumps, parallel_map
 
 NAME = "RiskAgent"
 ESCALATE_BELOW = 0.7
@@ -25,6 +25,7 @@ class Scores(BaseModel):
 
 
 SCORE_BATCH = 7  # findings per deep-lane scoring call
+PARALLEL = 3  # concurrent Nightshift calls per agent
 
 def _fallback_score(f) -> float:
     """Deterministic 0-100 priority: match confidence, award size, flag priority, and how far past its threshold."""
@@ -64,23 +65,25 @@ def make(deps: Deps):
         res = None
         ranked = sorted(live, key=lambda f: -base[f.finding_id])[:20]  # the model scores the top 20 by the deterministic score
         if live:
-            # Score in small batches: one 20-finding call runs long enough for Nightshift to abort it (HTTP 499).
-            for i in range(0, len(ranked), SCORE_BATCH):
-                chunk = ranked[i:i + SCORE_BATCH]
-                try:
-                    r = deps.llm("deep", [
-                        {"role": "system", "content": "You triage procurement anomalies for an agency auditor. Score each finding's review priority 0-100 "
-                         "from the evidence only (amount, strength of the metric versus its threshold, confidence). These are anomalies for review, not conclusions. "
-                         "Keep each reason under 15 words."},
-                        {"role": "user", "content": dumps({"findings": [compact_finding(f) for f in chunk],
-                                                           "answer_format": {"scores": [{"finding_id": "...", "priority": 50, "reason": "short"}]}})},
-                    ], json_schema=Scores, max_tokens=2500)
-                    res = r
-                    for sc in r.parsed.scores:
-                        if sc.finding_id in scores:  # blend so the model can reorder but not saturate the scale
-                            scores[sc.finding_id] = round(0.6 * base[sc.finding_id] + 0.4 * max(0.0, min(100.0, sc.priority)), 1)
-                except Exception:
-                    pass  # this batch keeps its deterministic score
+            # Score in small parallel batches: one 20-finding call ran long enough for Nightshift to abort it (HTTP 499).
+            chunks = [ranked[i:i + SCORE_BATCH] for i in range(0, len(ranked), SCORE_BATCH)]
+
+            def score(chunk: list) -> Any:
+                return deps.llm("deep", [
+                    {"role": "system", "content": "You triage procurement anomalies for an agency auditor. Score each finding's review priority 0-100 "
+                     "from the evidence only (amount, strength of the metric versus its threshold, confidence). These are anomalies for review, not conclusions. "
+                     "Keep each reason under 15 words."},
+                    {"role": "user", "content": dumps({"findings": [compact_finding(f) for f in chunk],
+                                                       "answer_format": {"scores": [{"finding_id": "...", "priority": 50, "reason": "short"}]}})},
+                ], json_schema=Scores, max_tokens=2500)
+
+            for r in parallel_map(score, chunks, max_workers=PARALLEL):
+                if isinstance(r, BaseException):
+                    continue  # this batch keeps its deterministic score
+                res = r
+                for sc in r.parsed.scores:
+                    if sc.finding_id in scores:  # blend so the model can reorder but not saturate the scale
+                        scores[sc.finding_id] = round(0.6 * base[sc.finding_id] + 0.4 * max(0.0, min(100.0, sc.priority)), 1)
         # replan: planned must-have coverage missing, once
         gaps = state.get("coverage_gaps") or []
         have = set(available_checks())

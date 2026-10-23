@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from ..checks.runner import MATCH_DEPENDENT, facts_only, load_sql, render
 from ..orchestration.state import Deps, RunState
 from ..schemas import Critique, Finding
-from .common import compact_finding, dumps
+from .common import compact_finding, dumps, parallel_map
 
 NAME = "CriticAgent"
 
@@ -29,6 +29,7 @@ class ClaimChecks(BaseModel):
 
 
 CLAIM_BATCH = 5  # findings per fast-lane claim check
+PARALLEL = 3  # concurrent Nightshift calls per agent
 
 def _row_key(r: dict) -> tuple:
     return (str(r.get("flag_id")), str(r.get("tender_no")), str(r.get("supplier_name")), str(r.get("metric_value")))
@@ -124,26 +125,31 @@ def make(deps: Deps):
         if live:
             # Small batches: one big call makes Nemotron generate long enough that Nightshift aborts it (HTTP 499).
             pending = live[:15]
-            for i in range(0, len(pending), CLAIM_BATCH):
-                chunk = pending[i:i + CLAIM_BATCH]
-                try:
-                    batch = [{**compact_finding(f), "summary": facts_only(f.summary), "evidence_rows": f.evidence[0].rows[:1]} for f in chunk]
-                    res = deps.llm("fast", [
-                        {"role": "system", "content": "You are a strict verifier. For each finding decide whether the facts in its summary (names, tender number, agency, amount, date, "
-                         "metric values) agree with its evidence_rows. A summary is supported unless it states a fact that contradicts or is absent from the rows. "
-                         "Do not judge whether the finding is a real problem, and do not object to tone. Keep each reason under 15 words."},
-                        {"role": "user", "content": dumps({"findings": batch, "answer_format": {"checks": [{"finding_id": "...", "supported": True, "reason": "short"}]}})},
-                    ], json_schema=ClaimChecks, max_tokens=2000)
-                    receipt_res = res
-                    for c in res.parsed.checks:
-                        if not c.supported:
-                            critiques.append(Critique(finding_id=c.finding_id, verdict="revise", target="AnalystAgent", reason=f"claim not supported: {c.reason}"))
-                            fl = next((x.flag_id for x in live if x.finding_id == c.finding_id), None)
-                            if fl and fl not in revise_checks:
-                                revise_checks.append(fl)
-                except Exception as e:
-                    deps.tracer.emit(NAME, "claim_support_check", input=f"findings {i + 1}-{i + len(chunk)} of {len(pending)}",
-                                     output=f"skipped: {type(e).__name__}: {str(e)[:150]}", status="partial_success")
+            chunks = [pending[i:i + CLAIM_BATCH] for i in range(0, len(pending), CLAIM_BATCH)]
+
+            def check(chunk: list) -> Any:
+                batch = [{**compact_finding(f), "summary": facts_only(f.summary), "evidence_rows": f.evidence[0].rows[:1]} for f in chunk]
+                return deps.llm("fast", [
+                    {"role": "system", "content": "You are a strict verifier. For each finding decide whether the facts in its summary (names, tender number, agency, amount, date, "
+                     "metric values) agree with its evidence_rows. A summary is supported unless it states a fact that contradicts or is absent from the rows. "
+                     "Do not judge whether the finding is a real problem, and do not object to tone. Keep each reason under 15 words."},
+                    {"role": "user", "content": dumps({"findings": batch, "answer_format": {"checks": [{"finding_id": "...", "supported": True, "reason": "short"}]}})},
+                ], json_schema=ClaimChecks, max_tokens=2000)
+
+            # Batches run in parallel: one big call ran long enough for Nightshift to abort it (HTTP 499), and serial batches were slow.
+            for chunk, res in zip(chunks, parallel_map(check, chunks, max_workers=PARALLEL)):
+                if isinstance(res, BaseException):
+                    start = pending.index(chunk[0]) + 1
+                    deps.tracer.emit(NAME, "claim_support_check", input=f"findings {start}-{start + len(chunk) - 1} of {len(pending)}",
+                                     output=f"skipped: {type(res).__name__}: {str(res)[:150]}", status="partial_success")
+                    continue
+                receipt_res = res
+                for c in res.parsed.checks:
+                    if not c.supported:
+                        critiques.append(Critique(finding_id=c.finding_id, verdict="revise", target="AnalystAgent", reason=f"claim not supported: {c.reason}"))
+                        fl = next((x.flag_id for x in live if x.finding_id == c.finding_id), None)
+                        if fl and fl not in revise_checks:
+                            revise_checks.append(fl)
 
         # bounded loops: flags over the retry limit are given up on, not looped
         give_up = [fl for fl in revise_checks if retries.get(fl, 0) >= deps.max_retries]
