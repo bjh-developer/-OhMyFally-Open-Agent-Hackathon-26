@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -60,7 +60,8 @@ function DecisionForm({ item, kind, restoreFocus }: { item: Item; kind: "confirm
       }
       const rec: DecisionRecord = { decision: kind, reason: finalReason, pattern_tag, scope, memoryId, at: new Date().toISOString() };
       recordDecision(item.members, rec);
-      toast(isMock ? "Sample review: decisions aren't saved." : "Decision saved. We'll remember it for next time.");
+      if (isMock) notify("info", "Sample review: decisions aren't saved.");
+      else notify("success", "Decision saved. We'll remember it for next time.");
       setTarget(null);
     } catch {
       setErr(true);

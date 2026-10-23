@@ -155,3 +155,28 @@
   .skeleton-pulse,
   .animate-pulse { animation: none !important; }
 }
+
+/* Sileo toast, styled to MASTER: white surface, foreground text, tokens for state colour, no forced capitals. */
+[data-sileo-viewport] {
+  --sileo-width: 360px;
+  --sileo-state-success: var(--success);
+  --sileo-state-error: var(--destructive);
+  --sileo-state-warning: var(--warning);
+  --sileo-state-info: var(--primary);
+  --sileo-state-action: var(--secondary);
+  --sileo-state-loading: var(--muted-foreground);
+  z-index: 1700; /* above dialogs (1600) */
+  pointer-events: none; /* only the toasts themselves take clicks */
+  filter: drop-shadow(0 0 2px rgba(14, 14, 14, 0.16)) drop-shadow(0 4px 8px rgba(14, 14, 14, 0.08));
+}
+[data-sileo-viewport] [data-sileo-title] {
+  text-transform: none;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+[data-sileo-viewport][data-theme="light"] [data-sileo-description] { color: var(--muted-foreground); }
+[data-sileo-viewport] [data-sileo-button] { font-weight: 600; }
+[data-sileo-viewport] [data-sileo-toast]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
