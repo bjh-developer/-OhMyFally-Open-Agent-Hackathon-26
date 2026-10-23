@@ -102,3 +102,20 @@ class Tracer:
         """Emit with the receipt fields of a nightshift ChatResult."""
         return self.emit(agent, action, receipt_ids=res.receipt_ids, routed_model=res.routed_model,
                          latency_ms=res.latency_ms, egress=res.egress, **kw)
+
+
+def format_event(e: TraceEvent) -> str:
+    """One readable line per trace event: time, agent, action, status, model, ids."""
+    parts = [time.strftime("%H:%M:%S"), f"{e.agent_name:<15}", f"{e.action:<20}", f"{e.status:<15}"]
+    if e.target_agent:
+        parts.append(f"-> {e.target_agent}")
+    if e.routed_model:
+        parts.append(f"model={e.routed_model}")
+    if e.zetaris_query_ids:
+        parts.append(f"zetaris={len(e.zetaris_query_ids)}q[{e.zetaris_query_ids[0][:13]}]")
+    if e.meterless_receipt_ids:
+        parts.append(f"receipts={len(e.meterless_receipt_ids)}[{e.meterless_receipt_ids[0][:16]}]")
+    if e.retry_count:
+        parts.append(f"retry={e.retry_count}")
+    line = " ".join(parts)
+    return f"{line} | {e.output_summary[:110]}"

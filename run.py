@@ -18,7 +18,7 @@ from pathlib import Path
 from app.orchestration.factory import make_deps
 from app.orchestration.graph import run_investigation
 from app.schemas import RunRequest
-from app.tracing import Tracer
+from app.tracing import Tracer, format_event
 
 
 def serve() -> int:
@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         ap.error("give --input or --agency/--from/--to")
     tracer = Tracer(a.run_id)
-    tracer.subscribe(lambda e: print(f"  [{e.agent_name}] {e.action} -> {e.status}: {e.output_summary[:110]}", file=sys.stderr))
+    tracer.subscribe(lambda e: print(format_event(e), flush=True))
     final = run_investigation(req, make_deps(tracer))
     memo = final.get("memo")
     if not memo:
