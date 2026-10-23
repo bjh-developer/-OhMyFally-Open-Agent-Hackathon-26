@@ -71,15 +71,18 @@ class Tracer:
         routed_model: str | None = None,
         latency_ms: int | None = None,
         egress: Any = None,
+        replayed: bool = False,
     ) -> TraceEvent:
+        ids = [*(query_ids or []), *(receipt_ids or [])]
+        replayed = replayed or any(str(i).startswith("replay:") for i in ids)
         ev = TraceEvent(
             trace_id=self.run_id, agent_name=agent, action=action,
-            input_summary=_short(input), output_summary=_short(output), target_agent=target,
+            input_summary=_short(input), output_summary=_short(output) + (" [replayed from recorded run]" if replayed else ""), target_agent=target,
             confidence=confidence, retry_count=retry, status=status,  # type: ignore[arg-type]
             zetaris_query_ids=list(query_ids or []),
             meterless_receipt_id=(receipt_ids[-1] if receipt_ids else None),
             meterless_receipt_ids=list(receipt_ids or []),
-            routed_model=routed_model, latency_ms=latency_ms, egress=_egress(egress),
+            routed_model=routed_model, latency_ms=latency_ms, egress=_egress(egress), replayed=True if replayed else None,
         )
         with self._lock:
             self.events.append(ev)

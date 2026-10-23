@@ -1,0 +1,3 @@
+- **Pushdown:** the agents sent ~11,977 tokens to Nemotron in 8 calls (HDB FY24/25; Zetaris joins and filters first).
+- **Naive:** dumping the 278 raw joined award x ACRA rows would be ~36,279 tokens in a single pass.
+- **Saving:** ~3.0x fewer tokens (67.0%); estimate = chars/4, naive counted once, so conservative.

@@ -28,10 +28,16 @@ class Settings:
     llm_call_cap: int
     source_timeout: float
     logs_dir: Path
+    replay_dir: Path
 
 
 def _bool(v: str | None, default: bool) -> bool:
     return default if v is None else v.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _replay_dir(name: str) -> Path:
+    """REPLAY_SET is a set name under data/replay/, or a path."""
+    return Path(name) if os.sep in name else ROOT / "data" / "replay" / name
 
 
 @lru_cache(maxsize=1)
@@ -54,4 +60,5 @@ def get_settings() -> Settings:
         llm_call_cap=int(e("LLM_CALL_CAP", "40")),
         source_timeout=float(e("SOURCE_TIMEOUT_SECONDS", "20")),
         logs_dir=ROOT / "logs",
+        replay_dir=_replay_dir(e("REPLAY_SET", "hdb-fy2425")),
     )

@@ -20,6 +20,7 @@ import httpx
 from pydantic import BaseModel, ValidationError
 
 from .config import get_settings
+from ..replay import prompt_chars
 
 log = logging.getLogger("pi.nightshift")
 
@@ -29,6 +30,10 @@ TIMEOUT_S = 180.0
 
 class NightshiftError(RuntimeError):
     pass
+
+
+class NightshiftUnavailable(NightshiftError):
+    """Outage-type failure (connection, timeout, 429/499/5xx) after retries; the only kind replay mode answers."""
 
 
 class CallCapExceeded(NightshiftError):
@@ -92,6 +97,8 @@ class ChatResult:
     receipt_ids: list[str] = field(default_factory=list)  # includes repair retries
     calls: int = 1
     lane: str = ""
+    prompt_chars: int = 0     # characters of message content sent, summed over attempts
+    replayed: bool = False    # True when served from a recorded run (app/replay.py)
 
 
 def _receipt(body: dict) -> dict:
@@ -180,12 +187,12 @@ def _post(client: httpx.Client, lane: Lane, payload: dict, retries: int) -> dict
             r = client.post(f"{s.meterless_url}/chat/completions", json=payload, headers=headers, timeout=TIMEOUT_S)
             # 499 = Nightshift/provider aborted the request mid-flight (seen on the fast lane); transient, so retry.
             if r.status_code in (408, 425, 429, 499, 500, 502, 503, 504):
-                raise NightshiftError(f"HTTP {r.status_code}: {r.text[:200]}")
+                raise NightshiftUnavailable(f"HTTP {r.status_code}: {r.text[:200]}")
             if r.status_code >= 400:
                 raise NightshiftClientError(f"HTTP {r.status_code}: {r.text[:300]}")
             return r.json()
         except (httpx.TimeoutException, httpx.TransportError) as e:
-            last = NightshiftError(f"{type(e).__name__}: {e}")
+            last = NightshiftUnavailable(f"{type(e).__name__}: {e}")
         except NightshiftClientError:
             raise
         except NightshiftError as e:
@@ -197,7 +204,7 @@ def _post(client: httpx.Client, lane: Lane, payload: dict, retries: int) -> dict
     raise last  # type: ignore[misc]
 
 
-def chat(
+def _chat_live(
     lane: Lane,
     messages: list[dict],
     json_schema: dict | type[BaseModel] | None = None,
@@ -222,6 +229,7 @@ def chat(
     client = client or httpx.Client(timeout=TIMEOUT_S)
     ids: list[str] = []
     calls = 0
+    sent_chars = prompt_chars(msgs)
     try:
         body = _post(client, lane, payload, retries); calls += 1
         rc = _receipt(body)
@@ -239,6 +247,7 @@ def chat(
                 payload["messages"] = msgs + prior + [
                     {"role": "user", "content": f"Your previous reply was not valid ({str(err)[:300]}). Return ONLY the corrected JSON."},
                 ]
+                sent_chars += prompt_chars(payload["messages"])
                 payload["max_tokens"] = int(payload["max_tokens"] * 1.5)  # empty replies usually mean reasoning used the budget
                 body = _post(client, lane, payload, retries); calls += 1
                 rc = _receipt(body)
@@ -252,7 +261,40 @@ def chat(
                     raise NightshiftError(f"JSON invalid after repair retry: {str(err2)[:200]}") from err2
         log.info("nightshift ok lane=%s receipt=%s model=%s calls=%s", lane, rc["receipt_id"], rc["routed_model"], calls)
         return ChatResult(content=content, parsed=parsed, receipt_id=rc["receipt_id"], routed_model=rc["routed_model"],
-                          latency_ms=rc["latency_ms"], egress=rc["egress"], usage=usage, receipt_ids=ids, calls=calls, lane=lane)
+                          latency_ms=rc["latency_ms"], egress=rc["egress"], usage=usage, receipt_ids=ids, calls=calls, lane=lane, prompt_chars=sent_chars)
     finally:
         if own:
             client.close()
+
+
+def chat(
+    lane: Lane,
+    messages: list[dict],
+    json_schema: dict | type[BaseModel] | None = None,
+    max_tokens: int = 2000,
+    temperature: float = 0.2,
+    *,
+    client: httpx.Client | None = None,
+    retries: int = 2,
+) -> ChatResult:
+    """Live chat completion (see ``_chat_live``). If Nightshift is unreachable and replay mode is on
+    (SAMPLE_MODE=true and a recorded set exists), serve the recorded reply, labelled ``replayed``.
+    Cap, client (4xx) and bad-JSON errors are never replayed."""
+    from .. import replay
+
+    if replay.enabled() and replay.breaker_open("nightshift"):
+        rec = replay.serve_chat(lane, messages, json_schema)
+        if rec is not None:
+            return rec
+    try:
+        res = _chat_live(lane, messages, json_schema, max_tokens, temperature, client=client, retries=retries)
+    except NightshiftUnavailable as e:
+        if replay.enabled():
+            replay.trip("nightshift")
+            rec = replay.serve_chat(lane, messages, json_schema)
+            if rec is not None:
+                log.warning("nightshift unreachable (%s); served recorded reply %s", str(e)[:80], rec.receipt_id)
+                return rec
+        raise
+    replay.record_chat(lane, messages, res)
+    return res

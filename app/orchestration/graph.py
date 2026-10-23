@@ -6,6 +6,7 @@ from datetime import date
 
 from langgraph.graph import END, START, StateGraph
 
+from .. import replay
 from ..adapters.nightshift import budget_scope
 from ..agents import analyst, critic, planner, reporter, resolver, risk
 from ..schemas import Memo, RunRequest
@@ -58,13 +59,19 @@ def run_investigation(request: RunRequest, deps: Deps, *, llm_cap: int | None = 
     """Run the whole graph. Returns final state (``memo`` is None when the gate rejected the request)."""
     deps.tracer.emit("Orchestrator", "start_run", input=request.model_dump_json(), output=f"run {deps.tracer.run_id}")
     graph = build_graph(deps)
+    replay_mark = replay.mark()
     with budget_scope(llm_cap) as budget:
         final = graph.invoke({"run_id": deps.tracer.run_id, "request": request, "matches": {}, "retries": {}, "resolver_retry": 0},
                              config={"recursion_limit": 40})
+    served = replay.served_since(replay_mark)
     if final.get("memo"):
         final["memo"].stats["llm_calls"] = budget.used
+        if served:  # some answers came from a recorded run: say so in the memo
+            replay.annotate_memo(final["memo"], served)
+            if deps.write_files:
+                (deps.tracer.dir / f"{final['memo'].run_id}.md").write_text(final["memo"].markdown, encoding="utf-8")
         if deps.write_files:
             (deps.tracer.dir / f"{final['memo'].run_id}.memo.json").write_text(final["memo"].model_dump_json(indent=2), encoding="utf-8")
-    deps.tracer.emit("Orchestrator", "end_run", output=f"llm_calls={budget.used}; " + ("memo ready" if final.get("memo") else f"rejected: {final.get('rejected_reason')}"),
-                     status="success" if final.get("memo") else "failed")
+    deps.tracer.emit("Orchestrator", "end_run", output=f"llm_calls={budget.used}; " + (f"{len(served)} replayed step(s); " if served else "") + ("memo ready" if final.get("memo") else f"rejected: {final.get('rejected_reason')}"),
+                     status="success" if final.get("memo") else "failed", replayed=bool(served))
     return final

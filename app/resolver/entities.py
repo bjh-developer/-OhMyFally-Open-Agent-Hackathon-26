@@ -35,19 +35,13 @@ def _env() -> dict[str, str]:
 
 
 def zetaris_query(sql: str, limit: int = 100000, timeout: float = 170.0) -> tuple[list[str], list[list], str]:
-    """One statement through Zetaris REST. Returns (headers, rows-as-strings, query_id)."""
-    env = _env()
-    qid = str(uuid.uuid4())
-    r = httpx.post(
-        env["ZETARIS_REST_URL"].rstrip("/") + "/sql-editor/sqls/run",
-        headers={"Authorization": f"Bearer {env['ZETARIS_API_KEY']}", "X-Org-ID": env["ZETARIS_ORG_ID"],
-                 "X-Request-ID": qid},
-        json={"queryId": qid, "sql": sql, "source": "SqlEditor", "limit": limit},
-        timeout=timeout,
-    )
-    r.raise_for_status()
-    body = r.json()
-    return body["headers"], body["data"], qid
+    """One statement through Zetaris REST. Returns (headers, rows-as-strings, query_id).
+
+    Goes through the adapter so replay mode (SAMPLE_MODE + recorded set, Zetaris down) can answer it."""
+    from app.adapters.zetaris import run_sql
+
+    r = run_sql(sql, limit=limit, timeout=timeout, retries=0)
+    return r.headers, r.rows, r.query_id
 
 
 @dataclass
