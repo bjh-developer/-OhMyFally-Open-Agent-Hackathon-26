@@ -92,12 +92,8 @@ def evaluate(labels: list[dict], matches: list, threshold: float = MATCH_THRESHO
             "critic_threshold": threshold, "predictions": details}
 
 
-def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, default=ROOT / "data/eval/entity_labels.csv")
-    parser.add_argument("--output", type=Path, default=ROOT / "output_examples/resolver_metrics.json")
-    parser.add_argument("--deterministic", action="store_true", help="Disable LLM tie-breaks")
-    args = parser.parse_args(argv)
+def evaluate_live(labels_path: Path, *, deterministic: bool = False, sql_fn=None) -> dict:
+    """Run a fresh evaluation; shared by this CLI and the combined evaluation harness."""
     # This is a live evaluation. Never silently report recorded responses as new accuracy.
     os.environ["SAMPLE_MODE"] = "false"
     from app.adapters.config import get_settings
@@ -105,14 +101,14 @@ def main(argv=None) -> int:
     from app.adapters.nightshift import budget_scope
     from app.resolver.llm import RECEIPTS, nightshift_tiebreak
     get_settings.cache_clear()
-    labels = load_labels(args.labels)
+    labels = load_labels(labels_path)
     reviewed = [row for row in labels if row["review_status"] in REVIEWED]
     if not reviewed:
         raise ValueError("No reviewed labels to evaluate")
     start = time.monotonic()
     sources = {}
     def live_query(sql, **kwargs):
-        result = run_sql(sql, limit=100000, timeout=90, retries=0)
+        result = (sql_fn or run_sql)(sql, limit=100000, timeout=90, retries=0)
         if result.replayed:
             raise ValueError("Live evaluation received replayed data")
         sources[result.query_id] = {"sql": sql, "rows": len(result.rows)}
@@ -132,11 +128,11 @@ def main(argv=None) -> int:
     RECEIPTS.clear()
     with budget_scope(40) as budget:
         matches = resolve([row["supplier_name"] for row in reviewed], index,
-                          tiebreak=None if args.deterministic else nightshift_tiebreak)
+                          tiebreak=None if deterministic else nightshift_tiebreak)
     report = evaluate(labels, matches)
     report.update({"generated_at": datetime.now(timezone.utc).isoformat(), "mode": "live",
-                   "resolver_mode": "deterministic" if args.deterministic else "full",
-                   "labels_sha256": hashlib.sha256(args.labels.read_bytes()).hexdigest(),
+                   "resolver_mode": "deterministic" if deterministic else "full",
+                   "labels_sha256": hashlib.sha256(labels_path.read_bytes()).hexdigest(),
                    "registry_entities": len(index.entities), "sources": sources,
                    "runtime_seconds": round(time.monotonic() - start, 3),
                    "llm_calls": budget.used, "llm_failed_batches": len(LLM_ERRORS),
@@ -146,11 +142,21 @@ def main(argv=None) -> int:
                        "Only source-supported corporate matches and a placeholder are scored; ambiguous cases remain pending.",
                        "No fuzzy or LLM tie-break accuracy claim is supported unless those methods appear in the results.",
                        "Former names have no change dates; historical ownership at award time is unverified."]})
+    return report
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--labels", type=Path, default=ROOT / "data/eval/entity_labels.csv")
+    parser.add_argument("--output", type=Path, default=ROOT / "output_examples/resolver_metrics.json")
+    parser.add_argument("--deterministic", action="store_true", help="Disable LLM tie-breaks")
+    args = parser.parse_args(argv)
+    report = evaluate_live(args.labels, deterministic=args.deterministic)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({key: report[key] for key in ("overall", "methods", "pending_excluded", "llm_calls", "llm_failed_batches")}, indent=2))
     print(f"Saved {args.output}")
-    return 1 if LLM_ERRORS else 0
+    return 1 if report["llm_failed_batches"] else 0
 
 
 if __name__ == "__main__":
