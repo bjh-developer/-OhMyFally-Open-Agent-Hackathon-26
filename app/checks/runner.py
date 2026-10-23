@@ -23,7 +23,10 @@ SOURCE_OBJECTS = {
     "R2": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk", "ACRA_FILES.entities"],
     "R3": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk", "ACRA_FILES.entities"],
     "R4": ["gebiz_pg.awards"],
+    "R5": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk", "ACRA_FILES.entities", "gebiz_pg.rules"],
+    "R6": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk"],
     "R8": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk", "ACRA_FILES.entities"],
+    "R9": ["gebiz_pg.awards", "gebiz_pg.supplier_xwalk", "internal_pg.evaluations"],
 }
 _AGENCY_OK = re.compile(r"^[\w &.,'()/\-]{1,120}$")
 _DATE_OK = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -37,7 +40,7 @@ def available_checks() -> list[str]:
 def load_sql(flag_id: str) -> str:
     if not _FLAG_OK.match(flag_id):
         raise ValueError(f"bad flag id {flag_id!r}")
-    return (CHECKS_DIR / f"{flag_id}.sql").read_text()
+    return (CHECKS_DIR / f"{flag_id}.sql").read_text(encoding="utf-8")
 
 
 def _lit(v: str) -> str:
@@ -81,6 +84,9 @@ class CheckRun:
 
 def run_check(flag_id: str, *, agency: str, date_from: str | date, date_to: str | date,
               run_sql: Callable[[str], Result]) -> CheckRun:
+    if flag_id == "R5":
+        from .semantic import require_prepared
+        require_prepared(run_sql, agency=agency, date_from=date_from, date_to=date_to)
     sql = render(load_sql(flag_id), agency=agency, date_from=date_from, date_to=date_to)
     res = run_sql(sql)
     missing = [c for c in CHECK_COLUMNS if c not in res.headers]
@@ -128,11 +134,14 @@ def to_findings(run: CheckRun, confidence: Callable[[dict], float] | None = None
     out: list[Finding] = []
     for r in run.rows:
         ev = Evidence(**ev_base, rows=[{k: (str(v) if isinstance(v, date) else v) for k, v in r.items()}])
+        conf = confidence(r) if confidence else 1.0
+        if run.flag_id == "R5":
+            conf = min(conf, 0.6)  # Semantic uncertainty is separate from supplier identity confidence.
         out.append(Finding(
             finding_id=finding_id(run.flag_id, r["tender_no"], r["supplier_name"], r.get("uen")),
             flag_id=run.flag_id, tender_no=r["tender_no"], agency=r["agency"], supplier_name=r["supplier_name"],
             uen=r.get("uen") if r.get("uen") not in ("", "null", None) else None,
-            summary=summarise(r), confidence=confidence(r) if confidence else 1.0, evidence=[ev],
+            summary=summarise(r), confidence=conf, evidence=[ev],
             awarded_amt=r.get("awarded_amt"), award_date=r.get("award_date"), metric_name=r.get("metric_name"),
             metric_value=tidy_number(r.get("metric_value")),
             threshold=None if r.get("threshold") is None else str(r["threshold"]), detail=r.get("detail"),

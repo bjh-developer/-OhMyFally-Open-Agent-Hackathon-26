@@ -306,7 +306,144 @@
      }
     ]
    },
-   "expected": "flag R9 on PLT000ETT25000006 (check owned by Inchara, D2)"
+   "expected": "flag R9 on PLT000ETT25000006; weighted winner score 82.4 versus best 89.6"
+  },
+  {
+   "case_id": "P7",
+   "flags": [
+    "R5"
+   ],
+   "agency": "Synthetic Review Agency",
+   "description": "Fictional bakery wins computer software and network support work; semantic mismatch",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT25000007",
+     "supplier_name": "QUILLORA TEST BAKERY PTE. LTD.",
+     "awarded_amt": 120000,
+     "award_date": "2025-03-01",
+     "tender_description": "Provision of computer software development and computer network server support services"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0007H",
+     "entity_name": "QUILLORA TEST BAKERY PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2015-01-01",
+     "block": "90",
+     "street_name": "FICTIONAL TEST ROAD",
+     "level_no": "01",
+     "unit_no": "7H",
+     "building_name": "na",
+     "postal_code": "999090",
+     "primary_ssic_code": "10712",
+     "primary_ssic_description": "MANUFACTURE OF BREAD, CAKES AND CONFECTIONERY",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected": "R5 semantic mismatch, always low confidence and escalated"
+  },
+  {
+   "case_id": "P8",
+   "flags": [
+    "R6"
+   ],
+   "agency": "Synthetic Review Agency",
+   "description": "Fictional supplier holds 5 of 6 equal-value transport awards (83.33 percent by value)",
+   "awards": [
+    {
+     "tender_no": "PLT000ETT25000080",
+     "supplier_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-01-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    },
+    {
+     "tender_no": "PLT000ETT25000081",
+     "supplier_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-02-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    },
+    {
+     "tender_no": "PLT000ETT25000082",
+     "supplier_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-03-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    },
+    {
+     "tender_no": "PLT000ETT25000083",
+     "supplier_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-04-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    },
+    {
+     "tender_no": "PLT000ETT25000084",
+     "supplier_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-05-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    },
+    {
+     "tender_no": "PLT000ETT25000089",
+     "supplier_name": "MERIDIAN TEST FREIGHT PTE. LTD.",
+     "awarded_amt": 10000,
+     "award_date": "2025-06-10",
+     "tender_description": "Provision of road freight transport and delivery services"
+    }
+   ],
+   "entities": [
+    {
+     "uen": "T99ZZ0008J",
+     "entity_name": "VELORIN TEST LOGISTICS PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2015-01-01",
+     "block": "90",
+     "street_name": "FICTIONAL TEST ROAD",
+     "level_no": "01",
+     "unit_no": "8J",
+     "building_name": "na",
+     "postal_code": "999090",
+     "primary_ssic_code": "49231",
+     "primary_ssic_description": "FREIGHT TRANSPORT BY ROAD",
+     "no_of_officers": "2"
+    },
+    {
+     "uen": "T99ZZ0018K",
+     "entity_name": "MERIDIAN TEST FREIGHT PTE. LTD.",
+     "entity_type_description": "Local Company",
+     "entity_status_description": "Live Company",
+     "registration_incorporation_date": "2015-01-01",
+     "block": "90",
+     "street_name": "FICTIONAL TEST ROAD",
+     "level_no": "01",
+     "unit_no": "8K",
+     "building_name": "na",
+     "postal_code": "999090",
+     "primary_ssic_code": "49231",
+     "primary_ssic_description": "FREIGHT TRANSPORT BY ROAD",
+     "no_of_officers": "2"
+    }
+   ],
+   "expected_tenders": {
+    "R6": [
+     "PLT000ETT25000080",
+     "PLT000ETT25000081",
+     "PLT000ETT25000082",
+     "PLT000ETT25000083",
+     "PLT000ETT25000084"
+    ]
+   },
+   "not_expected_tenders": {
+    "R6": [
+     "PLT000ETT25000089"
+    ]
+   },
+   "expected": "R6 on five leader awards, not the competitor award"
   }
  ]
 }

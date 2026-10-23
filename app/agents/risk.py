@@ -54,8 +54,10 @@ def make(deps: Deps):
         # escalation
         escalated = []
         for f in live:
+            if f.flag_id == "R5":
+                f.confidence = min(f.confidence, 0.6)
             should_have = red_flags().get(f.flag_id, {}).get("priority") != "must"
-            if f.status == "accepted" and (f.confidence < ESCALATE_BELOW or should_have):
+            if f.status == "accepted" and (f.flag_id == "R5" or f.confidence < ESCALATE_BELOW or should_have):
                 f.status = "escalated"
                 f.notes.append("Escalated to human review: " + ("low confidence" if f.confidence < ESCALATE_BELOW else "should-have flag"))
                 escalated.append(f.finding_id)

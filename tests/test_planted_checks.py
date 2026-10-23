@@ -12,9 +12,9 @@ import pytest
 
 from app.checks import runner
 from app.resolver.entities import zetaris_query
+from app.adapters.config import get_settings
 
 PLANTED = json.loads((Path(__file__).resolve().parent.parent / "data" / "eval" / "planted.json").read_text())["cases"]
-runner._lit = lambda v: v.replace("\\", "\\\\").replace("'", "\\'")  # Spark quote escaping (see scripts/run_check.py)
 
 
 def _zetaris_up() -> bool:
@@ -30,18 +30,23 @@ def _real_env(monkeypatch):
     """conftest.py fakes Zetaris/Nightshift env for unit tests; integration tests want the real .env."""
     for k in ("ZETARIS_REST_URL", "ZETARIS_ORG_ID", "ZETARIS_API_KEY"):
         monkeypatch.delenv(k, raising=False)
+    monkeypatch.setenv("SAMPLE_MODE", "false")
+    get_settings.cache_clear()
 
 
 pytestmark = pytest.mark.skipif(not _zetaris_up(), reason="Zetaris not reachable")
 
-CASES = [(c, f) for c in PLANTED for f in c["flags"] if f != "R9"]  # R9 check is built on D2
+CASES = [(c, f) for c in PLANTED for f in c["flags"]]
 
 
 @pytest.mark.parametrize("case,flag", CASES, ids=[f"{c['case_id']}-{f}" for c, f in CASES])
 def test_check_catches_planted_case(case, flag):
-    sql = runner.render(runner.load_sql(flag), agency=case["agency"], date_from="2021-04-01", date_to="2026-03-31")
-    headers, rows, _ = zetaris_query(sql)
-    assert headers == runner.CHECK_COLUMNS
-    found = {r[headers.index("tender_no")] for r in rows}
-    expected = {a["tender_no"] for a in case["awards"]}
+    from app.adapters.zetaris import run_sql
+    run = runner.run_check(flag, agency=case["agency"], date_from="2021-04-01", date_to="2026-03-31",
+                           run_sql=lambda sql: run_sql(sql, limit=100000, timeout=90, retries=0))
+    assert not run.result.replayed
+    assert run.result.headers == runner.CHECK_COLUMNS
+    found = {r["tender_no"] for r in run.rows}
+    expected = set(case.get("expected_tenders", {}).get(flag, [a["tender_no"] for a in case["awards"]]))
     assert expected <= found, f"{flag} missed {expected - found}"
+    assert not found.intersection(case.get("not_expected_tenders", {}).get(flag, []))

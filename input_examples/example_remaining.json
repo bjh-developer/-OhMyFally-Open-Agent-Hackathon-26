@@ -1,0 +1,9 @@
+{
+  "agency": "Synthetic Review Agency",
+  "date_from": "2025-01-01",
+  "date_to": "2025-12-31",
+  "flags": [
+    "R5",
+    "R6"
+  ]
+}
