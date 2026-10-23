@@ -21,7 +21,7 @@ export function NotifyToaster() {
     <SileoToaster
       position="top-right"
       theme="light"
-      offset={{ top: 16, right: 16 }}
+      offset={{ top: 72, right: 16 }} /* clear the 56px sticky header */
       options={{ duration: 5000, fill: "#ffffff", roundness: 8 }}
     />
   );

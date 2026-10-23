@@ -165,7 +165,7 @@
   --sileo-state-info: var(--primary);
   --sileo-state-action: var(--secondary);
   --sileo-state-loading: var(--muted-foreground);
-  z-index: 1700; /* above dialogs (1600) */
+  z-index: 1700 !important; /* above header (100) and dialogs (1600); Sileo injects its CSS after ours */
   pointer-events: none; /* only the toasts themselves take clicks */
   filter: drop-shadow(0 0 2px rgba(14, 14, 14, 0.16)) drop-shadow(0 4px 8px rgba(14, 14, 14, 0.08));
 }
