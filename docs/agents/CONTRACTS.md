@@ -121,6 +121,7 @@ The service writes its trust ledger to `logs/hmem-ledger.jsonl`.
 - A run that finishes after the 600 s wait budget also returns 202 so the caller can poll.
 - Errors never carry a stack trace: `{run_id, status:"error", error:{type, message, recoverable}, trace_id, execution_time_seconds}`. `request_rejected` (gate or offline sample mode with no recorded data) is 422 and recoverable, `invalid_request` (bad body) is 422 with `run_id: null`, `run_failed` is 500.
 - `GET /runs/{id}` keeps its previous shape (`error` is a string there).
+- `GET /runs/{id}` and `GET /runs/{id}/events` fall back to `logs/<id>.jsonl` and `logs/<id>.memo.json` for runs this process didn't start (an API restart, or a CLI run), so shared links keep working.
 
 ## 7. Data contracts
 

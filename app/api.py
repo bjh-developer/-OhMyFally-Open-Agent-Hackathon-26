@@ -95,10 +95,36 @@ def post_run(req: RunRequest, wait: bool = True) -> JSONResponse:
     return JSONResponse(_error_body(run_id, "run_failed", msg, False, started), status_code=500)
 
 
+def _from_disk(run_id: str) -> tuple[dict, list[dict]] | None:
+    """A run this process didn't start (API restarted, or a CLI run): rebuilt from logs/<run_id>.jsonl and .memo.json."""
+    logs = get_settings().logs_dir
+    path = logs / f"{run_id}.jsonl"
+    if not path.is_file():
+        return None
+    events = read_events(path)
+    memo_path = logs / f"{run_id}.memo.json"
+    memo = json.loads(memo_path.read_text(encoding="utf-8")) if memo_path.is_file() else None
+    failed = next((e for e in events if e.get("action") == "run_failed"), None)
+    ended = any(e.get("action") == "end_run" for e in events)
+    if memo:
+        status, error = "done", None
+    elif failed:
+        status, error = "failed", failed.get("output_summary")
+    elif ended:
+        status, error = "rejected", (events[-1].get("output_summary") if events else None)
+    else:  # no end line: the run was cut off (process stopped mid-run)
+        status, error = "failed", "trace ends before the run finished"
+    view = {"run_id": run_id, "status": status, "error": error, "trace_path": str(path), "memo": memo, "events": len(events)}
+    return view, events
+
+
 def _view(run_id: str) -> dict:
     rec = _RUNS.get(run_id)
     if not rec:
-        raise HTTPException(404, "unknown run")
+        disk = _from_disk(run_id)
+        if not disk:
+            raise HTTPException(404, "unknown run")
+        return disk[0]
     memo: Memo | None = rec["memo"]
     return {"run_id": run_id, "status": rec["status"], "error": rec["error"], "trace_path": str(rec["tracer"].path),
             "memo": memo.model_dump(mode="json") if memo else None, "events": len(rec["tracer"].events)}
@@ -143,8 +169,20 @@ def get_run_summary(run_id: str, view: Literal["full", "public"] = "full") -> di
 @app.get("/runs/{run_id}/events")
 async def run_events(run_id: str) -> StreamingResponse:
     """Server-sent events: replays the trace so far, then streams new lines until the run ends."""
-    if not _ID.match(run_id) or run_id not in _RUNS:
+    if not _ID.match(run_id):
         raise HTTPException(404, "unknown run")
+    if run_id not in _RUNS:
+        disk = _from_disk(run_id)
+        if not disk:
+            raise HTTPException(404, "unknown run")
+        view, events = disk
+
+        async def replay():
+            for e in events:
+                yield f"data: {json.dumps(e)}\n\n"
+            yield f"event: end\ndata: {json.dumps({'status': view['status']})}\n\n"
+
+        return StreamingResponse(replay(), media_type="text/event-stream")
     rec = _RUNS[run_id]
 
     async def gen():
