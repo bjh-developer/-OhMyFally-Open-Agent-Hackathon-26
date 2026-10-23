@@ -13,7 +13,7 @@ The team plan is the source of truth for *why*: https://claude.ai/code/artifact/
 ## 2. Hard rules (all owners, all agents)
 
 1. **No product code committed before 22 Oct 2026, 08:00 SGT** (00:00 UTC). Docs and config are fine.
-2. **Develop in Cursor.** This is required by the hackathon.
+2. **Any editor or coding agent.** Cursor is no longer required by the hackathon (confirmed 23 Oct).
 3. **Secrets live only in `.env`, which is gitignored.** Commit `.env.example` with placeholders. Never print, log, paste or put a key in a URL. The NVIDIA key lives only in Nightshift's Providers tab.
 4. **All LLM calls go through Nightshift.** Use the two app headers in §5, and never call build.nvidia.com directly except as the logged fallback.
 5. **All data access goes through Zetaris.** Do not query Postgres or S3 directly from agent code (setup and seed scripts are the exception).
