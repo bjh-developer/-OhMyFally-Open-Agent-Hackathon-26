@@ -6,6 +6,8 @@
   python scripts/record_replay.py --name pa-2024 --input input_examples/example_2.json
 
 Stores Zetaris results keyed by normalised SQL and Nightshift replies keyed by prompt (see app/replay.py).
+Record with H-MEM stopped (HMEM_URL pointing nowhere): recalled memories change which findings reach the
+Critic, and offline replay runs without memory, so the recorded SQL must match that path.
 Takes about 3 minutes and uses the LLM call budget of a normal run. Refuses to record a run that itself
 used replayed data.
 """
@@ -45,7 +47,8 @@ def main() -> int:
     tracer = Tracer()
     mark = replay.mark()
     with replay.Recorder() as rec:
-        final = run_investigation(req, make_deps(tracer))
+        deps = make_deps(tracer)
+        final = run_investigation(req, deps)
     if replay.served_since(mark):
         print("run used replayed data; not recording", file=sys.stderr)
         return 2
@@ -58,7 +61,7 @@ def main() -> int:
     except Exception:
         sha = None
     man = rec.save(out, {"name": a.name, "request": {"agency": a.agency, "date_from": a.d1, "date_to": a.d2, "flags": list(req.flags)},
-                         "source_run_id": tracer.run_id, "git_sha": sha,
+                         "source_run_id": tracer.run_id, "hmem_used": deps.hmem is not None, "git_sha": sha,
                          "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such."})
     print(f"recorded {man['zetaris_queries']} zetaris queries, {man['nightshift_calls']} nightshift calls -> {out}")
     print(f"source run: {tracer.run_id} ({len(memo.findings)} findings)")
