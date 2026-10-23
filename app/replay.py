@@ -1,7 +1,15 @@
 """Replay mode: serve recorded Zetaris and Nightshift responses when a live service is unreachable.
 
-Active only when ``SAMPLE_MODE=true`` and a recorded set exists (``data/replay/<REPLAY_SET>/``) and the live call
-failed with an outage-type error (connection, timeout, 5xx; never a 4xx or a bad-JSON reply). Every replayed
+Active only when ``SAMPLE_MODE=true`` and a recorded set exists (``data/replay/<set>/``). Two modes:
+
+* fallback (keys configured): the live call is tried first and replay answers only an outage-type failure
+  (connection, timeout, 5xx; never a 4xx or a bad-JSON reply);
+* offline (``Settings.offline``: SAMPLE_MODE with no Zetaris key and no Nightshift token): the network is never
+  touched, every call is answered from the recorded set.
+
+One set is recorded per request (``manifest.json`` ``request``); ``use_for(request)`` picks the set for the run
+(a contextvar), falling back to REPLAY_SET. The agents run unchanged on the recorded Zetaris rows; a model call with
+no recorded reply raises like an outage, so the agents' own rule-based fallbacks run. Every replayed response is labelled: ids start with ``replay:``, ``Result.replayed`` / ``ChatResult.replayed`` are set, trace
 response is labelled: ids start with ``replay:``, ``Result.replayed`` / ``ChatResult.replayed`` are set, trace
 events carry ``replayed: true`` and the memo gets a limitation line. A miss re-raises the original error.
 
@@ -16,6 +24,7 @@ import hashlib
 import json
 import logging
 import re
+import contextvars
 import threading
 import time
 from dataclasses import dataclass, field
@@ -32,6 +41,8 @@ BREAKER_S = 30.0
 
 _lock = threading.Lock()
 _served: list[dict] = []
+_missed: list[dict] = []
+_set_dir: contextvars.ContextVar[Path | None] = contextvars.ContextVar("replay_set_dir", default=None)
 _down_until: dict[str, float] = {}
 
 
@@ -66,9 +77,47 @@ def agent_hint(messages: list[dict]) -> str:
 
 # ---- enable / breaker --------------------------------------------------------
 
+def current_dir() -> Path:
+    return _set_dir.get() or get_settings().replay_dir
+
+
 def enabled() -> bool:
     s = get_settings()
-    return bool(s.sample_mode and (s.replay_dir / "manifest.json").is_file())
+    return bool(s.sample_mode and (current_dir() / "manifest.json").is_file())
+
+
+def offline() -> bool:
+    """True when SAMPLE_MODE has no credentials to try: answer only from recordings, never open a socket."""
+    return bool(get_settings().offline)
+
+
+def available_sets() -> list[dict]:
+    """Manifests of every recorded set under data/replay/ (name, request)."""
+    out = []
+    for m in sorted(get_settings().replay_dir.parent.glob("*/manifest.json")):
+        try:
+            man = json.loads(m.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        out.append({"name": m.parent.name, "dir": m.parent, "request": man.get("request") or {}})
+    return out
+
+
+def use_for(request: Any) -> bool:
+    """Choose the recorded set that matches the request's agency and period for this run. Returns False when none
+    does (the default REPLAY_SET then applies, or the run is refused in offline mode)."""
+    for s in available_sets():
+        r = s["request"]
+        if (str(r.get("agency", "")).strip().lower() == request.agency.strip().lower()
+                and r.get("date_from") == str(request.date_from) and r.get("date_to") == str(request.date_to)):
+            _set_dir.set(s["dir"])
+            with _lock:
+                st = _load(str(s["dir"]))
+                st.used.clear()
+                st.cursor.clear()
+            return True
+    _set_dir.set(None)
+    return False
 
 
 def trip(kind: str) -> None:
@@ -83,9 +132,11 @@ def breaker_open(kind: str) -> bool:
 
 def reset() -> None:
     """Forget the outage breaker, the served log and cached fixtures (tests)."""
+    _set_dir.set(None)
     with _lock:
         _down_until.clear()
         _served.clear()
+        _missed.clear()
     _load.cache_clear()
 
 
@@ -111,7 +162,7 @@ def _load(path: str) -> Store:
 
 
 def store() -> Store:
-    return _load(str(get_settings().replay_dir))
+    return _load(str(current_dir()))
 
 
 def _note(kind: str, key: str, how: str) -> dict:
@@ -122,9 +173,23 @@ def _note(kind: str, key: str, how: str) -> dict:
     return rec
 
 
+def _miss(kind: str, what: str) -> None:
+    _missed.append({"kind": kind, "what": what, "at": time.time()})  # callers may hold _lock; list.append is atomic
+
+
 def mark() -> int:
     with _lock:
         return len(_served)
+
+
+def mark_missed() -> int:
+    with _lock:
+        return len(_missed)
+
+
+def missed_since(m: int) -> list[dict]:
+    with _lock:
+        return list(_missed[m:])
 
 
 def served_since(m: int) -> list[dict]:
@@ -143,6 +208,7 @@ def serve_sql(sql: str):
     e = s.sql.get(key)
     if e is None:
         log.warning("replay miss zetaris key=%s sql=%s", key, norm_sql(sql)[:100])
+        _miss("zetaris", key)
         return None
     _note("zetaris", key, "exact")
     return Result(headers=list(e["headers"]), rows=[list(r) for r in e["rows"]], query_id=f"replay:{key}", ms=0,
@@ -171,6 +237,7 @@ def serve_chat(lane: str, messages: list[dict], json_schema: Any = None):
                 pick, how = same[n % len(same)], "template"
         if pick is None:
             log.warning("replay miss nightshift lane=%s agent=%s", lane, agent_hint(messages)[:60])
+            _miss("nightshift", agent_hint(messages)[:60])
             return None
         s.used.add(pick)
         e = s.entries[pick]
@@ -197,20 +264,32 @@ def limitation_line(served: list[dict]) -> str:
     return f"{MEMO_LINE}. {z} Zetaris result(s) and {n} Nightshift reply(ies) came from the recorded set '{name}', not from live services."
 
 
-def annotate_memo(memo: Any, served: list[dict]) -> None:
-    """Add the replay limitation to the memo (and its markdown) in place."""
-    if not served:
-        return
-    line = limitation_line(served)
-    if line not in memo.limitations:
-        memo.limitations.insert(0, line)
-    memo.stats["replayed"] = {"zetaris": sum(1 for x in served if x["kind"] == "zetaris"),
-                              "nightshift": sum(1 for x in served if x["kind"] == "nightshift"), "set": served[0]["set"]}
+def fallback_line(missed: list[dict]) -> str:
+    n = sum(1 for x in missed if x["kind"] == "nightshift")
+    return (f"{n} model call(s) had no recorded reply and no live model was reachable: those steps used the rule-based fallback "
+            "(deterministic scores, template narrative, no model claim check).")
+
+
+def annotate_memo(memo: Any, served: list[dict], missed: list[dict] | None = None) -> None:
+    """Add the replay limitation (and the model-free fallback note) to the memo and its markdown, in place."""
+    lines = []
+    if served:
+        lines.append(limitation_line(served))
+        memo.stats["replayed"] = {"zetaris": sum(1 for x in served if x["kind"] == "zetaris"),
+                                  "nightshift": sum(1 for x in served if x["kind"] == "nightshift"), "set": served[0]["set"]}
+    if missed and any(x["kind"] == "nightshift" for x in missed):
+        lines.append(fallback_line(missed))
+        memo.stats["model_free_fallback"] = sum(1 for x in missed if x["kind"] == "nightshift")
     md = memo.markdown or ""
-    if "## Limitations\n" in md:
-        memo.markdown = md.replace("## Limitations\n", f"## Limitations\n- {line}\n", 1)
-    else:
-        memo.markdown = md.rstrip("\n") + f"\n\n## Limitations\n- {line}\n"
+    for line in reversed(lines):
+        if line in memo.limitations:
+            continue
+        memo.limitations.insert(0, line)
+        if "## Limitations\n" in md:
+            md = md.replace("## Limitations\n", f"## Limitations\n- {line}\n", 1)
+        else:
+            md = md.rstrip("\n") + f"\n\n## Limitations\n- {line}\n"
+    memo.markdown = md
 
 
 # ---- recording -----------------------------------------------------------------

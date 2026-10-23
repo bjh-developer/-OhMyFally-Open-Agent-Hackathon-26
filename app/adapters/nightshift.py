@@ -282,6 +282,11 @@ def chat(
     Cap, client (4xx) and bad-JSON errors are never replayed."""
     from .. import replay
 
+    if replay.offline():  # SAMPLE_MODE without credentials: recordings only, no network
+        rec = replay.serve_chat(lane, messages, json_schema) if replay.enabled() else None
+        if rec is None:
+            raise NightshiftUnavailable("offline sample mode: no recorded model reply for this call")
+        return rec
     if replay.enabled() and replay.breaker_open("nightshift"):
         rec = replay.serve_chat(lane, messages, json_schema)
         if rec is not None:

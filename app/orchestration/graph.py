@@ -60,16 +60,27 @@ def build_graph(deps: Deps):
 def run_investigation(request: RunRequest, deps: Deps, *, llm_cap: int | None = None) -> RunState:
     """Run the whole graph. Returns final state (``memo`` is None when the gate rejected the request)."""
     deps.tracer.emit("Orchestrator", "start_run", input=request.model_dump_json(), output=f"run {deps.tracer.run_id}")
+    matched = replay.use_for(request)
+    if replay.offline():
+        if not matched:
+            sets = ", ".join(f"{s['request'].get('agency')} {s['request'].get('date_from')}..{s['request'].get('date_to')}" for s in replay.available_sets())
+            reason = ("SAMPLE_MODE is offline (no Zetaris key or Nightshift token), so only requests with recorded data can run. "
+                      f"Recorded: {sets or 'none'}. Set the Zetaris and Nightshift variables to run any other request.")
+            deps.tracer.emit("GateAgent", "scope_check", input=request.model_dump_json(), output=reason, status="failed")
+            deps.tracer.emit("Orchestrator", "end_run", output=f"rejected: {reason}", status="failed")
+            return {"run_id": deps.tracer.run_id, "request": request, "rejected_reason": reason, "memo": None}
+        deps.tracer.emit("Orchestrator", "offline_sample_mode", output=f"no network: Zetaris rows and model replies come from the recorded set '{replay.current_dir().name}'")
     graph = build_graph(deps)
-    replay_mark = replay.mark()
+    replay_mark, miss_mark = replay.mark(), replay.mark_missed()
     with budget_scope(llm_cap) as budget:
         final = graph.invoke({"run_id": deps.tracer.run_id, "request": request, "matches": {}, "retries": {}, "resolver_retry": 0},
                              config={"recursion_limit": 40})
     served = replay.served_since(replay_mark)
+    missed = replay.missed_since(miss_mark)
     if final.get("memo"):
         final["memo"].stats["llm_calls"] = budget.used
-        if served:  # some answers came from a recorded run: say so in the memo
-            replay.annotate_memo(final["memo"], served)
+        if served or missed:  # some answers came from a recorded run or a rule-based fallback: say so in the memo
+            replay.annotate_memo(final["memo"], served, missed)
             if deps.write_files:
                 (deps.tracer.dir / f"{final['memo'].run_id}.md").write_text(final["memo"].markdown, encoding="utf-8")
         if deps.write_files:

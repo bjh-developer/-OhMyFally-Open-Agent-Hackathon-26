@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from ..checks.rules import banned_hits, red_flags
 from ..checks.runner import available_checks
 from ..orchestration.state import Deps, RunState
-from .common import compact_finding, dumps, parallel_map
+from .common import compact_finding, dumps, merge_results, parallel_map
 
 NAME = "RiskAgent"
 ESCALATE_BELOW = 0.7
@@ -62,7 +62,7 @@ def make(deps: Deps):
         # scoring
         scores = {f.finding_id: _fallback_score(f) for f in live}
         base = dict(scores)
-        res = None
+        results: list = []
         ranked = sorted(live, key=lambda f: -base[f.finding_id])[:20]  # the model scores the top 20 by the deterministic score
         if live:
             # Score in small parallel batches: one 20-finding call ran long enough for Nightshift to abort it (HTTP 499).
@@ -80,7 +80,7 @@ def make(deps: Deps):
             for r in parallel_map(score, chunks, max_workers=PARALLEL):
                 if isinstance(r, BaseException):
                     continue  # this batch keeps its deterministic score
-                res = r
+                results.append(r)
                 for sc in r.parsed.scores:
                     if sc.finding_id in scores:  # blend so the model can reorder but not saturate the scale
                         scores[sc.finding_id] = round(0.6 * base[sc.finding_id] + 0.4 * max(0.0, min(100.0, sc.priority)), 1)
@@ -94,6 +94,7 @@ def make(deps: Deps):
         notes = f"missing must-have checks {missed_must}; failed checks {gaps}" if replan else ""
         out = dict(input=f"{len(live)} live findings", output=f"{len(escalated)} escalated, {len(violations)} wording violations, replan={replan}. {notes}",
                    target="PlannerAgent" if replan else "ReporterAgent", status="needs_revision" if replan or violations else "success")
+        res = merge_results(results)
         if res:
             deps.tracer.llm(NAME, "assess_risk", res, **out)
         else:
