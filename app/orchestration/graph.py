@@ -1,4 +1,4 @@
-"""LangGraph wiring: gate -> planner -> resolver -> analyst -> critic -(loops)-> risk -> reporter."""
+"""LangGraph wiring: gate -> planner -> resolver -> plan_review (-> planner once) -> analyst -> critic -(loops)-> risk -> reporter."""
 from __future__ import annotations
 
 import re
@@ -40,6 +40,7 @@ def build_graph(deps: Deps):
     g.add_node("gate", gate(deps))
     g.add_node("planner", planner.make(deps))
     g.add_node("resolver", resolver.make(deps))
+    g.add_node("plan_review", critic.make_plan_review(deps))
     g.add_node("analyst", analyst.make(deps))
     g.add_node("critic", critic.make(deps))
     g.add_node("risk", risk.make(deps))
@@ -47,7 +48,8 @@ def build_graph(deps: Deps):
     g.add_edge(START, "gate")
     g.add_conditional_edges("gate", lambda s: "end" if s.get("rejected_reason") else "planner", {"end": END, "planner": "planner"})
     g.add_edge("planner", "resolver")
-    g.add_edge("resolver", "analyst")
+    g.add_edge("resolver", "plan_review")
+    g.add_conditional_edges("plan_review", lambda s: "planner" if s.get("replan_requested") else "analyst", {"planner": "planner", "analyst": "analyst"})
     g.add_edge("analyst", "critic")
     g.add_conditional_edges("critic", lambda s: s["route"], {"analyst": "analyst", "resolver": "resolver", "risk": "risk"})
     g.add_conditional_edges("risk", lambda s: s["route"], {"planner": "planner", "reporter": "reporter"})
