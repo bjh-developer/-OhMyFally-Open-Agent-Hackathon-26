@@ -25,7 +25,7 @@ from ..replay import prompt_chars
 log = logging.getLogger("pi.nightshift")
 
 Lane = Literal["deep", "fast"]
-TIMEOUT_S = 180.0
+TIMEOUT_S = 90.0
 
 
 class NightshiftError(RuntimeError):

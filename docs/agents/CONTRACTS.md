@@ -92,7 +92,7 @@ LLM_CALL_CAP=40
 SOURCE_TIMEOUT_SECONDS=20
 ```
 
-**Nightshift binds one mode per app.** Requests are coerced to the app's mode in Console → Apps. So the deep lane (Planner, Risk, Reporter) sends `meterless-app: $METERLESS_APP_DEEP`, and the fast lane (Resolver tie-breaks, Critic) sends `$METERLESS_APP_FAST`. Every request also sends `meterless-scope: user` and `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`. Use a 180 s timeout. Each response carries a `meterless` receipt; the tracer keeps `receipt_id`, `routed_model`, `latency_ms` and `egress`.
+**Nightshift binds one mode per app.** Requests are coerced to the app's mode in Console → Apps. So the deep lane (Planner, Risk, Reporter) sends `meterless-app: $METERLESS_APP_DEEP`, and the fast lane (Resolver tie-breaks, Critic) sends `$METERLESS_APP_FAST`. Every request also sends `meterless-scope: user` and `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`. Use a 90 s timeout. Each response carries a `meterless` receipt; the tracer keeps `receipt_id`, `routed_model`, `latency_ms` and `egress`.
 
 ## 6. H-MEM service HTTP contract (TypeScript, `services/hmem/`)
 

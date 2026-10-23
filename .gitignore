@@ -1,8 +1,13 @@
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+secrets/
+credentials/
 
 # Python
+.venv
 .venv/
 __pycache__/
 *.pyc
