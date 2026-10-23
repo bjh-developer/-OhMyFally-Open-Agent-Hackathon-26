@@ -126,4 +126,6 @@ class TraceEvent(BaseModel):
     routed_model: str | None = None
     latency_ms: int | None = None
     egress: Any = None
+    memory_hits: int | None = None  # H-MEM memories recalled by this step (optional; set by Planner and Critic)
+    memory_ids: list[str] | None = None  # their ids
     replayed: bool | None = None  # true: served from a recorded run, not a live service (app/replay.py)

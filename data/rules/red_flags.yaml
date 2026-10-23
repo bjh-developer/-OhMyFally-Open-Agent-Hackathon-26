@@ -20,6 +20,7 @@
   name: Winning suppliers share an address
   logic: Two or more distinct winning suppliers at the same agency share an exact ACRA registered address
   params: {min_suppliers: 2, ignore_building_names: []}
+  address_density: {busy_min_entities: 25, busy_confidence_cap: 0.72}  # Critic: busy commercial address = probably benign
   priority: must
   limitation: Shared business centres and virtual offices produce benign matches. Address match is on postal code + block + street + level + unit.
   why_it_matters: Apparently independent bidders at one address can indicate common control or bid coordination.
@@ -60,6 +61,7 @@
   name: Local-looking supplier with no ACRA match
   logic: Supplier name has a local legal suffix (PTE LTD, PRIVATE LIMITED, LLP) but the Resolver found no ACRA entity above threshold. Foreign firms and government bodies are labelled "outside registry scope" instead.
   params: {min_confidence: 0.8}
+  plan_critique: {unresolved_min: 5}  # Critic: this many unresolved names makes R8 worth planning
   priority: must
   limitation: Our ACRA subset is a candidate set, and renamed or typo'd names may fail to match. Treat as a lead for manual lookup.
   why_it_matters: An award to an entity that cannot be found in the corporate registry needs identity verification.

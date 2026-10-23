@@ -72,6 +72,8 @@ class Tracer:
         latency_ms: int | None = None,
         egress: Any = None,
         replayed: bool = False,
+        memory_hits: int | None = None,
+        memory_ids: list[str] | None = None,
     ) -> TraceEvent:
         ids = [*(query_ids or []), *(receipt_ids or [])]
         replayed = replayed or any(str(i).startswith("replay:") for i in ids)
@@ -83,6 +85,7 @@ class Tracer:
             meterless_receipt_id=(receipt_ids[-1] if receipt_ids else None),
             meterless_receipt_ids=list(receipt_ids or []),
             routed_model=routed_model, latency_ms=latency_ms, egress=_egress(egress), replayed=True if replayed else None,
+            memory_hits=memory_hits, memory_ids=list(memory_ids) if memory_ids is not None else None,
         )
         with self._lock:
             self.events.append(ev)

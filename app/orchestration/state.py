@@ -52,6 +52,9 @@ class RunState(TypedDict, total=False):
     check_errors: dict[str, str]
     replan_requested: bool
     replan_notes: str
+    plan_reviewed: int                   # replan_count of the plan the Critic last reviewed
+    replan_required: list[str]           # checks the plan review wants added on the replan
+    plan_limitations: list[str]          # data-coverage limits found by the plan review (for the memo)
     wording_violations: list[str]        # finding_ids to rewrite
     scores: dict[str, float]
     memory_refs: list[str]
