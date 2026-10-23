@@ -60,8 +60,8 @@ function DecisionForm({ item, kind, restoreFocus }: { item: Item; kind: "confirm
       }
       const rec: DecisionRecord = { decision: kind, reason: finalReason, pattern_tag, scope, memoryId, at: new Date().toISOString() };
       recordDecision(item.members, rec);
-      if (isMock) notify("info", "Sample review: decisions aren't saved.");
-      else notify("success", "Decision saved. We'll remember it for next time.");
+      if (isMock) notify("info", "Sample review: not saved");
+      else notify("success", "Decision saved for next time");
       setTarget(null);
     } catch {
       setErr(true);
