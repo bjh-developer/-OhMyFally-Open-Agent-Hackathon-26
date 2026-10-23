@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from ..checks.rules import banned_hits, red_flags, sanitise, wording
 from ..orchestration.state import Deps, RunState
 from ..schemas import Finding, FindingGroup, Memo
+from .ago import refs_for, why_line
 from .common import compact_finding, dumps
 
 NAME = "ReporterAgent"
@@ -98,6 +99,7 @@ def _render_md(m: Memo, scores: dict[str, float], units: list[list[Finding]], gr
                   "| Supplier | UEN | Tender | Award date | Amount (S$) |", "|---|---|---|---|---|"]
             L += [f"| {x.supplier_name} | {x.uen or ''} | {x.tender_no} | {x.award_date} | {(x.awarded_amt or 0):,.0f} |" for x in u]
             L.append(_ev_line(f) or "")
+            L += [why_line(f.flag_id)] if why_line(f.flag_id) else []
             L += [f"- Note: {n}" for n in dict.fromkeys(n for x in u for n in x.notes)]
             L.append("")
             continue
@@ -106,6 +108,7 @@ def _render_md(m: Memo, scores: dict[str, float], units: list[list[Finding]], gr
               f"- Metric: {f.metric_name} = {f.metric_value} (threshold {f.threshold})"]
         if _ev_line(f):
             L.append(_ev_line(f))
+        L += [why_line(f.flag_id)] if why_line(f.flag_id) else []
         L += [f"- Note: {n}" for n in f.notes]
         if f.memory_refs:
             L.append(f"- Memory: {', '.join(f.memory_refs)}")
@@ -127,6 +130,7 @@ def make(deps: Deps):
                 f.summary = sanitise(f.summary)
                 f.notes.append("Reporter rewrote banned wording.")
             f.wording_checked = not banned_hits(f.summary)
+            f.ago_refs = list(dict.fromkeys([*f.ago_refs, *refs_for(f.flag_id)]))
         shown = [f for f in findings if f.status in ("accepted", "escalated")]
         shown, groups, units = build_units(shown, scores)
         suppressed = [f for f in findings if f.status == "suppressed"]
