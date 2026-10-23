@@ -116,7 +116,7 @@ export function BehaviourPanel({ runId, state, isMock }: { runId: string | null;
               </ChartContainer>
               <ul className="grid gap-1 text-sm text-muted-foreground" aria-label="Time per agent">
                 {agents.filter((a) => a.time > 0).map((a) => (
-                  <li key={a.label}>{a.label}: {formatDuration(a.time)} waiting on the model</li>
+                  <li key={a.label}>{a.label}: {a.time.toFixed(1)} s waiting on the model</li>
                 ))}
               </ul>
             </div>
