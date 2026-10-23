@@ -32,3 +32,7 @@ python scripts/fetch_acra.py minimise    # refresh the committed ACRA sample
 ```
 
 More detail, row counts and known weaknesses: `docs/handover/d1-data.md`.
+
+## Resolver evaluation (23 Oct 2026)
+
+`eval/entity_labels.csv` provides 100 agent-reviewed, source-supported labels plus 3 pending cases. The live Resolver run scored 100/100 on this selected in-sample set; at the Critic's unchanged confidence threshold, 94/99 correct UEN links qualify. No human-reviewed accuracy or fuzzy/LLM accuracy is established by this set. See `eval/README.md` for provenance, category counts, reproduction commands, and limitations, and `output_examples/resolver_metrics.json` for the actual report.

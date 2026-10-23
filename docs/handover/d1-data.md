@@ -108,3 +108,35 @@ Layers (`app/resolver/match.py`): pass 1 = exact then former_name on the normali
 10. `red_flags.yaml` `why_it_matters` lines are deliberately generic: I did not attach AGO claims I had not checked. Stream C's `data/ago/` excerpts can be cited there.
 11. `requirements.txt`: I appended `pandas` (used by the fetch/seed scripts). Everything else I use was already listed.
 12. Not done (D2 per plan): R5, R6, R9 SQL, `entity_labels.csv`, `eval.py`, USL model.
+
+## 8. D2 handover verification (23 Oct 2026, Inchara's Windows laptop)
+
+The first-hour handover is verified against live services, with replay disabled (`SAMPLE_MODE=false` in the verification processes only). `git pull --ff-only` reported already up to date. Docker Desktop, the existing Zetaris driver, and Nightshift were initially stopped; they were started without changing `.env`. Configuration supplies addresses and credentials; the local runtimes must also be running.
+
+- All seven Docker containers are healthy: the four Zetaris services plus `pi-postgres`, `pi-s3`, and `pi-hmem`. H-MEM's `/healthz` returns `ok: true`, `conformance: pass`.
+- Seed and registration succeeded using the committed ACRA sample: 2,474 awards, 1,233 entities, 9 rules, 11 AGO chunks; synthetic internal tables contain 2 bids, 4 evaluations, and 1 COI declaration.
+- Both Resolver passes succeeded. The 1,267 crosswalk entries have exactly the method counts in section 5, including two live Nightshift tie-breaks. Nightshift receipt: `rcpt_req_6u2qusst`, model `nvidia/nemotron-3.5-lightning-30b-a3b`.
+- All 15 combinations of R1/R2/R3/R4/R8 and the three agencies returned the counts in section 6 and exactly the required output columns. Every award in planted cases P1-P5 was found. P6 belongs to R9, which is still unimplemented and is outside this handover verification.
+- The USL model is now registered and queryable (`lightning.metastore.procurement.procurement_usl.award_profile`), superseding section 7's D1 TODO for the USL.
+- Resolver and check-runner unit tests: **10 passed**.
+
+Local evidence (gitignored; includes live Zetaris query IDs and no supplier rows): `logs/handover-2026-10-23/verification.json` and `logs/handover-2026-10-23/runtime.json`. The verification script is alongside them as `verify.py`.
+
+### Windows commands for the next handover restart
+
+Start Docker Desktop and the installed Nightshift application first. Wait for Docker to be ready. Existing Zetaris containers must be running before registration; on this laptop, `docker start zetaris-postgres-1 zetaris-driver-1 zetaris-api-1 zetaris-ui-1` starts the existing services. Inspect `docker ps` and wait for health checks.
+
+Use the repo's virtual environment and UTF-8 mode. Plain system `python` has none of the dependencies, and Windows' default text encoding caused the seed script to fail while reading the UTF-8 rule files.
+
+```powershell
+git pull --ff-only
+docker compose up -d
+.\.venv\Scripts\python.exe -X utf8 scripts/seed.py
+.\.venv\Scripts\python.exe -X utf8 scripts/register_zetaris.py
+.\.venv\Scripts\python.exe -X utf8 -m app.resolver.run --pass 1
+.\.venv\Scripts\python.exe -X utf8 -m app.resolver.run --pass 2
+```
+
+Remember that seeding empties `supplier_xwalk`; always complete both Resolver passes afterward. To repeat the live local verification, run `.\.venv\Scripts\python.exe -X utf8 logs/handover-2026-10-23/verify.py`. For the repository integration tests, use `.\.venv\Scripts\python.exe -X utf8 -m pytest tests/test_planted_checks.py -v -rs` and check that they pass rather than skip.
+
+The quote-escaping warning in section 4 is historical: the current `app/checks/runner.py` already escapes Spark SQL quotes correctly. The live checks for `People's Association` succeeded using that implementation without the old monkeypatch.

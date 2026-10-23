@@ -81,8 +81,9 @@ class EntityIndex:
                     self.by_first[fn.split()[0]].append((i, fn, "former"))
 
     @classmethod
-    def from_zetaris(cls) -> "EntityIndex":
-        headers, rows, _ = zetaris_query(ENTITY_SQL)
+    def from_zetaris(cls, query=None) -> "EntityIndex":
+        """Load the registry; an optional query function lets evaluation capture provenance."""
+        headers, rows, _ = (query or zetaris_query)(ENTITY_SQL)
         ix = {h: i for i, h in enumerate(headers)}
         out = []
         for r in rows:
