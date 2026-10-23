@@ -13,6 +13,7 @@ __pycache__/
 *.pyc
 
 # Node (H-MEM service)
+node_modules
 node_modules/
 
 # OS

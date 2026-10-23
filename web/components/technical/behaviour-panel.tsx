@@ -43,7 +43,7 @@ function PanelSkeleton() {
   return (
     <div className="grid gap-4" aria-busy="true" aria-label="Loading how the agents worked">
       <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
-        {Array.from({ length: 7 }, (_, i) => <Skeleton key={i} className="h-[76px]" />)}
+        {Array.from({ length: 1 }, (_, i) => <Skeleton key={i} className="h-[76px]" />)}
       </div>
       <Skeleton className="h-40" />
     </div>
@@ -84,14 +84,9 @@ export function BehaviourPanel({ runId, state, isMock }: { runId: string | null;
         running ? <p className="text-base text-muted-foreground">Ready when the review finishes.</p> : <PanelSkeleton />
       ) : (
         <>
+          {/* Model calls, critiques, retries, escalations, Zetaris queries and time are in Run facts above. */}
           <dl className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
-            <Tile label="Model calls" value={data.llm_calls} />
-            <Tile label="Critiques" value={data.critiques} />
-            <Tile label="Retries" value={data.retries} />
-            <Tile label="Escalations" value={data.escalations} />
             <Tile label="Memories used" value={data.memory_tracked ? (data.memory_hits ?? 0) : "–"} />
-            <Tile label="Zetaris queries" value={data.zetaris_queries} />
-            <Tile label="Time" value={data.duration_s > 0 ? formatDuration(data.duration_s) : "–"} />
           </dl>
 
           {cleared > 0 && (
@@ -137,6 +132,17 @@ export function BehaviourPanel({ runId, state, isMock }: { runId: string | null;
               </ul>
             )}
           </div>
+
+          {(data.plan_notes?.length ?? 0) > 0 && (
+            <div className="grid gap-2">
+              <h3 className="text-lg leading-7 font-semibold">Plan review</h3>
+              <ul className="grid gap-2">
+                {data.plan_notes!.map((n, i) => (
+                  <li key={i} className="rounded-lg border border-border bg-card p-3 text-base break-words">Plan review noted: {n}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
     </section>

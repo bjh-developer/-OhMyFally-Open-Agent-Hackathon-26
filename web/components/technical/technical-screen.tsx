@@ -93,7 +93,7 @@ export function TechnicalScreen() {
     const receipts = new Set(events.flatMap(ids));
     const queries = new Set(events.flatMap((e) => e.zetaris_query_ids ?? []));
     const t = events.map((e) => Date.parse(e.timestamp)).filter((n) => !Number.isNaN(n));
-    const calls = typeof memo?.stats?.llm_calls === "number" ? (memo.stats.llm_calls as number) : receipts.size;
+    const calls = receipts.size; // one per receipt id, the same count as GET /runs/{id}/summary
     return {
       time: t.length > 1 ? formatDuration((Math.max(...t) - Math.min(...t)) / 1000) : "–",
       calls,
@@ -134,7 +134,6 @@ export function TechnicalScreen() {
           {runId && <Fact label="Run ID" value={runId} copy={runId} />}
           <Fact label="Time taken" value={facts.time} />
           <Fact label="Model calls" value={facts.calls} />
-          <Fact label="Nemotron receipts" value={facts.receipts} />
           <Fact label="Zetaris queries" value={facts.queries} />
           <Fact label="Critiques" value={facts.critiques} />
           <Fact label="Retries" value={facts.retries} />

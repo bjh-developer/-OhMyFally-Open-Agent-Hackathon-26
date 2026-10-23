@@ -140,4 +140,5 @@ export interface RunSummary {
   cleared_by_memory?: number;
   zetaris_queries: number;
   loops: { from_agent: string; to_agent: string; reason: string; claims?: number }[];
+  plan_notes?: string[];
 }

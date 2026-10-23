@@ -16,6 +16,8 @@ _ORDER = ["gate", "planner", "resolver", "analyst", "critic", "risk", "reporter"
 _CLAIMS = re.compile(r"(\d+)\s+issues?")
 _SUPPRESSED = re.compile(r"(\d+)\s+suppressed")
 _REPLAN = re.compile(r"replan\s*=\s*true", re.I)
+# Only these statuses mean work was sent back. A partial_success plan review that merely notes limits is not a loop.
+_BACK = {"needs_revision", "retrying"}
 
 
 def _stage(name: str | None) -> str:
@@ -84,6 +86,7 @@ def summarise(events: Iterable[dict]) -> dict:
     queries: set[str] = set()
     per: dict[str, dict] = {}
     loops: list[dict] = []
+    plan_notes: list[str] = []
     prompt = completion = None
     hits = None
     cleared = 0
@@ -129,7 +132,10 @@ def summarise(events: Iterable[dict]) -> dict:
 
         tgt = e.get("target_agent")
         replan = bool(_REPLAN.search(out)) and _stage(agent) == "risk"
-        if tgt and _rank(agent) >= 0 and _rank(tgt) >= 0 and _rank(tgt) <= _rank(agent):
+        if e.get("action") == "plan_review" and status == "partial_success":
+            note = re.sub(r"^limitations:\s*", "", out.strip(), flags=re.I)
+            plan_notes += [n.strip() for n in note.split(";") if n.strip()]
+        if tgt and status in _BACK and _rank(agent) >= 0 and _rank(tgt) >= 0 and _rank(tgt) <= _rank(agent):
             m = _CLAIMS.search(out)
             claims = int(m.group(1)) if m else 0
             loops.append({"from_agent": agent, "to_agent": str(tgt), "reason": _reason(e, claims), "claims": claims})
@@ -157,6 +163,7 @@ def summarise(events: Iterable[dict]) -> dict:
         "cleared_by_memory": cleared if cleared_seen else 0,
         "zetaris_queries": len(queries),
         "loops": loops,
+        "plan_notes": plan_notes,
     }
 
 
