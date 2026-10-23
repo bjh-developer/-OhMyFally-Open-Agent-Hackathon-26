@@ -1,4 +1,4 @@
-import type { AuditorDecisionBody, RunRequest, RunView } from "./types";
+import type { AuditorDecisionBody, RunRequest, RunSummary, RunView } from "./types";
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 
@@ -25,6 +25,12 @@ export async function startRun(req: RunRequest): Promise<RunView> {
 
 export async function getRun(runId: string): Promise<RunView> {
   const res = await fetch(`${API_URL}/runs/${encodeURIComponent(runId)}`, { signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw new Error(await readError(res));
+  return res.json();
+}
+
+export async function getRunSummary(runId: string): Promise<RunSummary> {
+  const res = await fetch(`${API_URL}/runs/${encodeURIComponent(runId)}/summary`, { signal: AbortSignal.timeout(20_000) });
   if (!res.ok) throw new Error(await readError(res));
   return res.json();
 }

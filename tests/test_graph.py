@@ -42,7 +42,7 @@ def test_happy_path_r1_memo(tmp_path):
     agents = [e["agent_name"] for e in trace(tmp_path)]
     for a in ("GateAgent", "PlannerAgent", "ResolverAgent", "AnalystAgent", "CriticAgent", "RiskAgent", "ReporterAgent"):
         assert a in agents
-    crit = [e for e in trace(tmp_path) if e["agent_name"] == "CriticAgent"][0]
+    crit = [e for e in trace(tmp_path) if e["action"] == "validate_claims"][0]
     assert crit["zetaris_query_ids"] and crit["meterless_receipt_id"].startswith("rcpt_critic")
     assert [l for l, _ in llm.calls] == ["deep", "fast", "deep", "deep"]  # planner, critic, risk, reporter
     assert memo.stats["llm_calls"] == 4
@@ -58,7 +58,7 @@ def test_critic_retry_then_ok(tmp_path):
     final = run_investigation(REQ, deps(tmp_path, sql))
     assert final["memo"].findings[0].status == "accepted"
     ev = trace(tmp_path)
-    crit = [e for e in ev if e["agent_name"] == "CriticAgent"]
+    crit = [e for e in ev if e["action"] == "validate_claims"]
     assert crit[0]["status"] == "needs_revision" and crit[0]["target_agent"] == "AnalystAgent"
     assert crit[1]["status"] == "success"
     assert [e for e in ev if e["action"] == "run_check:R1"][-1]["retry_count"] == 1
@@ -150,7 +150,7 @@ def test_unverifiable_claim_escalates_after_retries(tmp_path):
     final = run_investigation(REQ, deps(tmp_path, sql, llm))
     f = final["memo"].findings[0]
     assert f.status == "escalated" and final["memo"].escalated == [fid]
-    assert sql.counts["R1"] == 6 and [e["status"] for e in trace(tmp_path) if e["agent_name"] == "CriticAgent"] == ["needs_revision", "needs_revision", "success"]
+    assert sql.counts["R1"] == 6 and [e["status"] for e in trace(tmp_path) if e["action"] == "validate_claims"] == ["needs_revision", "needs_revision", "success"]
 
 
 def test_requested_flag_without_sql_is_a_reported_gap(tmp_path):

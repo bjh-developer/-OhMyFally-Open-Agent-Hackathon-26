@@ -35,6 +35,7 @@ def make(deps: Deps):
                 recall = deps.hmem.recall(agency=req.agency, uen=None, flag_id=None, query=f"{req.agency} procurement review")
             except Exception:
                 recall = []
+        mem_ids = list(dict.fromkeys(str(m["id"]) for m in recall if m.get("id")))
         wanted = [f for f in req.flags if f in have] if req.flags else []
         notes = state.get("replan_notes") or ""
         msgs = [
@@ -60,6 +61,10 @@ def make(deps: Deps):
         for f in wanted:  # auditor's explicit asks always run
             if f not in checks:
                 checks.append(f)
+        required = [c for c in (state.get("replan_required") or []) if c in have and c not in checks]
+        checks += required  # checks the plan review asked for: added deterministically, whatever the model said
+        if required:
+            rationale = f"{rationale} Added {required} on the Critic's plan review.".strip()
         if not checks:
             checks = wanted or have
         plan = Plan(checks=checks, params={"agency": req.agency, "date_from": str(req.date_from), "date_to": str(req.date_to)},
@@ -67,10 +72,14 @@ def make(deps: Deps):
                     replan_count=(state.get("plan").replan_count + 1) if state.get("plan") and state.get("replan_requested") else 0)
         ev = dict(input=f"agency={req.agency} {req.date_from}..{req.date_to} flags={req.flags or 'auto'}",
                   output=f"checks={checks} {rationale}", target="ResolverAgent", status=status, query_ids=qids)
+        if deps.hmem:
+            ev["memory_hits"], ev["memory_ids"] = len(mem_ids), mem_ids
+            ev["output"] += f" [used {len(mem_ids)} past decision{'s' if len(mem_ids) != 1 else ''} from memory]"
+
         if res:
             deps.tracer.llm(NAME, "plan", res, **ev)
         else:
             deps.tracer.emit(NAME, "plan", **ev)
-        return {"plan": plan, "replan_requested": False, "coverage_gaps": [f for f in req.flags if f not in have], "check_errors": {}}
+        return {"plan": plan, "replan_requested": False, "replan_required": [], "coverage_gaps": [f for f in req.flags if f not in have], "check_errors": {}}
 
     return planner
