@@ -17,6 +17,7 @@ from fastapi.responses import StreamingResponse
 from .adapters.config import get_settings
 from .orchestration.factory import make_deps
 from .orchestration.graph import run_investigation
+from .run_summary import read_events, summarise
 from .privacy import PseudonymKeyMissing, mask_payload
 from .schemas import Memo, RunRequest
 from .tracing import Tracer, new_run_id
@@ -77,6 +78,28 @@ def get_run(run_id: str, view: Literal["full", "public"] = "full") -> dict:
     if view == "public":
         try:
             out["memo"] = mask_payload(out["memo"])
+        except PseudonymKeyMissing:
+            raise HTTPException(503, "public view unavailable: PSEUDONYM_KEY is not configured")
+    return out
+
+
+@app.get("/runs/{run_id}/summary")
+def get_run_summary(run_id: str, view: Literal["full", "public"] = "full") -> dict:
+    """How the agents worked, computed from the run's trace. Works for live, finished and replayed runs."""
+    if not _ID.match(run_id):
+        raise HTTPException(404, "unknown run")
+    rec = _RUNS.get(run_id)
+    path = get_settings().logs_dir / f"{run_id}.jsonl"
+    if rec:
+        events = [e.model_dump(mode="json", exclude_none=True) for e in list(rec["tracer"].events)]
+    elif path.is_file():
+        events = read_events(path)
+    else:
+        raise HTTPException(404, "unknown run")
+    out = {"run_id": run_id, **summarise(events)}
+    if view == "public":
+        try:
+            out = mask_payload(out)
         except PseudonymKeyMissing:
             raise HTTPException(503, "public view unavailable: PSEUDONYM_KEY is not configured")
     return out
