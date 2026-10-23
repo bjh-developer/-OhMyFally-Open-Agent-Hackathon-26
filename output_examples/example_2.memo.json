@@ -1,0 +1,536 @@
+{
+  "run_id": "run_20261023_190253_164465",
+  "agency": "People's Association",
+  "date_from": "2024-01-01",
+  "date_to": "2024-12-31",
+  "summary": "People's Association accepted seven anomalies for review in 2024 involving sub-S$90,000 awards to three suppliers whose combined 90-day totals exceeded the S$90,000 tender threshold. All seven accepted items are anomalies for review and may indicate a concern that requires auditor judgement. EFFECTS TECHNOLOGIES PTE. LTD. received two awards totaling S$131,600 within 90 days starting 2024-11-06; UNIVERSAL DISPLAYS PTE LTD received two awards totaling S$95,388.70 within 90 days starting 2024-08-27; and NEBULON TEST WORKS PTE. LTD. received three awards totaling S$105,000 within 90 days starting 2024-07-01. None of the findings were suppressed or rejected.",
+  "findings": [
+    {
+      "finding_id": "R4-b3c683b3",
+      "flag_id": "R4",
+      "tender_no": "PAS000ETT24000134",
+      "agency": "People's Association",
+      "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+      "uen": "200514297Z",
+      "summary": "Possible contract splitting: EFFECTS TECHNOLOGIES PTE. LTD. was awarded PAS000ETT24000134 by People's Association (S$67,800, 2024-12-04). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000134",
+              "agency": "People's Association",
+              "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+              "uen": "200514297Z",
+              "award_date": "2024-12-04",
+              "awarded_amt": 67800.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "131600.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000134",
+              "agency": "People's Association",
+              "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+              "uen": "200514297Z",
+              "award_date": "2024-12-04",
+              "awarded_amt": 67800.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "131600.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 67800.0,
+      "award_date": "2024-12-04",
+      "metric_name": "window_total_sgd",
+      "metric_value": "131600",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-aa48ec89",
+      "flag_id": "R4",
+      "tender_no": "PAS000ETT24000118",
+      "agency": "People's Association",
+      "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+      "uen": "200514297Z",
+      "summary": "Possible contract splitting: EFFECTS TECHNOLOGIES PTE. LTD. was awarded PAS000ETT24000118 by People's Association (S$63,800, 2024-11-06). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000118",
+              "agency": "People's Association",
+              "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+              "uen": "200514297Z",
+              "award_date": "2024-11-06",
+              "awarded_amt": 63800.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "131600.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000118",
+              "agency": "People's Association",
+              "supplier_name": "EFFECTS TECHNOLOGIES PTE. LTD.",
+              "uen": "200514297Z",
+              "award_date": "2024-11-06",
+              "awarded_amt": 63800.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "131600.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 63800.0,
+      "award_date": "2024-11-06",
+      "metric_name": "window_total_sgd",
+      "metric_value": "131600",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-e737d497",
+      "flag_id": "R4",
+      "tender_no": "PAS000ETT24000077",
+      "agency": "People's Association",
+      "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+      "uen": "199407101W",
+      "summary": "Possible contract splitting: UNIVERSAL DISPLAYS PTE LTD was awarded PAS000ETT24000077 by People's Association (S$67,300, 2024-09-11). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000077",
+              "agency": "People's Association",
+              "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+              "uen": "199407101W",
+              "award_date": "2024-09-11",
+              "awarded_amt": 67300.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "95388.700000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000077",
+              "agency": "People's Association",
+              "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+              "uen": "199407101W",
+              "award_date": "2024-09-11",
+              "awarded_amt": 67300.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "95388.700000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 67300.0,
+      "award_date": "2024-09-11",
+      "metric_name": "window_total_sgd",
+      "metric_value": "95388.7",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-c2c72879",
+      "flag_id": "R4",
+      "tender_no": "PLT000ETT24000004",
+      "agency": "People's Association",
+      "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+      "uen": "T99ZZ0004E",
+      "summary": "Possible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000004 by People's Association (S$40,000, 2024-07-01). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000004",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-07-01",
+              "awarded_amt": 40000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000004",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-07-01",
+              "awarded_amt": 40000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 40000.0,
+      "award_date": "2024-07-01",
+      "metric_name": "window_total_sgd",
+      "metric_value": "105000",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-5f22be37",
+      "flag_id": "R4",
+      "tender_no": "PLT000ETT24000014",
+      "agency": "People's Association",
+      "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+      "uen": "T99ZZ0004E",
+      "summary": "Possible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000014 by People's Association (S$35,000, 2024-07-20). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000014",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-07-20",
+              "awarded_amt": 35000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000014",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-07-20",
+              "awarded_amt": 35000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 35000.0,
+      "award_date": "2024-07-20",
+      "metric_name": "window_total_sgd",
+      "metric_value": "105000",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-290778ce",
+      "flag_id": "R4",
+      "tender_no": "PLT000ETT24000024",
+      "agency": "People's Association",
+      "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+      "uen": "T99ZZ0004E",
+      "summary": "Possible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000024 by People's Association (S$30,000, 2024-08-30). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000024",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-08-30",
+              "awarded_amt": 30000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PLT000ETT24000024",
+              "agency": "People's Association",
+              "supplier_name": "NEBULON TEST WORKS PTE. LTD.",
+              "uen": "T99ZZ0004E",
+              "award_date": "2024-08-30",
+              "awarded_amt": 30000.0,
+              "metric_name": "window_total_sgd",
+              "metric_value": "105000.000000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 30000.0,
+      "award_date": "2024-08-30",
+      "metric_name": "window_total_sgd",
+      "metric_value": "105000",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    },
+    {
+      "finding_id": "R4-483e8e5c",
+      "flag_id": "R4",
+      "tender_no": "PAS000ETT24000080",
+      "agency": "People's Association",
+      "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+      "uen": "199407101W",
+      "summary": "Possible contract splitting: UNIVERSAL DISPLAYS PTE LTD was awarded PAS000ETT24000080 by People's Association (S$28,089, 2024-08-27). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.",
+      "confidence": 1.0,
+      "status": "accepted",
+      "evidence": [
+        {
+          "query_id": "b9940de9-6246-49a8-9ff4-82cf56d8ab2f",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000080",
+              "agency": "People's Association",
+              "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+              "uen": "199407101W",
+              "award_date": "2024-08-27",
+              "awarded_amt": 28088.7,
+              "metric_name": "window_total_sgd",
+              "metric_value": "95388.700000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        },
+        {
+          "query_id": "faf4e2fb-0ce3-402f-ae3c-f20029f9525a",
+          "sql": "-- R4: possible contract splitting. Same agency and supplier: >= 2 awards, each below S$90,000, within a 90-day\n-- window, together above S$90,000. One row per award that sits in at least one qualifying window.\n-- GeBIZ data here has tender (ETT) awards only, so splitting below the quotation band is under-detected.\n-- Params: 'People\\'s Association' '2024-01-01' '2024-12-31'\nWITH s AS (\n  SELECT tender_no, agency, supplier_name, award_date, awarded_amt\n  FROM gebiz_pg.awards\n  WHERE agency = 'People\\'s Association' AND award_date BETWEEN '2024-01-01' AND '2024-12-31'\n    AND awarded_amt > 0 AND awarded_amt < 90000\n),\nwin AS (\n  SELECT s1.agency, s1.supplier_name, s1.award_date AS win_start,\n         count(DISTINCT s2.tender_no) AS n_awards, sum(s2.awarded_amt) AS total_amt\n  FROM s s1\n  JOIN s s2 ON s1.agency = s2.agency AND s1.supplier_name = s2.supplier_name\n           AND s2.award_date BETWEEN s1.award_date AND date_add(s1.award_date, 90)\n  GROUP BY s1.agency, s1.supplier_name, s1.award_date\n  HAVING count(DISTINCT s2.tender_no) >= 2 AND sum(s2.awarded_amt) > 90000\n)\nSELECT 'R4' AS flag_id,\n       m.tender_no,\n       m.agency,\n       m.supplier_name,\n       max(x.uen) AS uen,\n       m.award_date,\n       m.awarded_amt,\n       'window_total_sgd' AS metric_name,\n       max(w.total_amt) AS metric_value,\n       '90000' AS threshold,\n       concat('Anomaly for review: ', CAST(max(w.n_awards) AS STRING), ' sub-S$90k awards to this supplier within 90 days total S$',\n              CAST(round(max(w.total_amt), 2) AS STRING), ' (window starting ', CAST(min(w.win_start) AS STRING),\n              '), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.') AS detail\nFROM s m\nJOIN win w ON w.agency = m.agency AND w.supplier_name = m.supplier_name\n          AND m.award_date BETWEEN w.win_start AND date_add(w.win_start, 90)\nLEFT JOIN gebiz_pg.supplier_xwalk x ON x.supplier_name = m.supplier_name\nGROUP BY m.tender_no, m.agency, m.supplier_name, m.award_date, m.awarded_amt\nORDER BY max(w.total_amt) DESC, m.supplier_name, m.award_date",
+          "row_count": 7,
+          "rows": [
+            {
+              "flag_id": "R4",
+              "tender_no": "PAS000ETT24000080",
+              "agency": "People's Association",
+              "supplier_name": "UNIVERSAL DISPLAYS PTE LTD",
+              "uen": "199407101W",
+              "award_date": "2024-08-27",
+              "awarded_amt": 28088.7,
+              "metric_name": "window_total_sgd",
+              "metric_value": "95388.700000000000000000",
+              "threshold": "90000",
+              "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement."
+            }
+          ],
+          "source_objects": [
+            "gebiz_pg.awards"
+          ]
+        }
+      ],
+      "ago_refs": [
+        "ago-fy2324-sportsg-variation"
+      ],
+      "memory_refs": [],
+      "wording_checked": true,
+      "awarded_amt": 28088.7,
+      "award_date": "2024-08-27",
+      "metric_name": "window_total_sgd",
+      "metric_value": "95388.7",
+      "threshold": "90000",
+      "detail": "Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement.",
+      "notes": [
+        "Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row."
+      ]
+    }
+  ],
+  "groups": [],
+  "limitations": [
+    "R1: Needs a Resolver match (GeBIZ has no UEN). Unresolved names cannot be tested. Newly formed entities are legitimate for many reasons.",
+    "R4: GeBIZ here holds tender (ETT) awards only, no quotation (ETQ) records, so splitting below the quotation band is under-detected. Repeat call-offs under a framework can look like splitting."
+  ],
+  "disclaimer": "Automated screening output. Each item is an anomaly for review that may indicate a procurement-integrity concern, and requires auditor judgement. It is not a finding of wrongdoing.",
+  "escalated": [],
+  "stats": {
+    "candidates": 7,
+    "shown": 7,
+    "suppressed": 0,
+    "rejected": 0,
+    "llm_calls": 5,
+    "generated_at": "2026-10-23T11:03:58+00:00"
+  },
+  "markdown": "# Procurement review memo: People's Association\nPeriod 2024-01-01 to 2024-12-31. Run `run_20261023_190253_164465`.\n\n**People's Association accepted seven anomalies for review in 2024 involving sub-S$90,000 awards to three suppliers whose combined 90-day totals exceeded the S$90,000 tender threshold. All seven accepted items are anomalies for review and may indicate a concern that requires auditor judgement. EFFECTS TECHNOLOGIES PTE. LTD. received two awards totaling S$131,600 within 90 days starting 2024-11-06; UNIVERSAL DISPLAYS PTE LTD received two awards totaling S$95,388.70 within 90 days starting 2024-08-27; and NEBULON TEST WORKS PTE. LTD. received three awards totaling S$105,000 within 90 days starting 2024-07-01. None of the findings were suppressed or rejected.**\n\n> Automated screening output. Each item is an anomaly for review that may indicate a procurement-integrity concern, and requires auditor judgement. It is not a finding of wrongdoing.\n\n## Findings (7 awards in 7 entries)\n### 1. [R4] EFFECTS TECHNOLOGIES PTE. LTD.: PAS000ETT24000134 (accepted, priority 79)\nPossible contract splitting: EFFECTS TECHNOLOGIES PTE. LTD. was awarded PAS000ETT24000134 by People's Association (S$67,800, 2024-12-04). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN 200514297Z\n- Metric: window_total_sgd = 131600 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 2. [R4] EFFECTS TECHNOLOGIES PTE. LTD.: PAS000ETT24000118 (accepted, priority 77)\nPossible contract splitting: EFFECTS TECHNOLOGIES PTE. LTD. was awarded PAS000ETT24000118 by People's Association (S$63,800, 2024-11-06). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$131600.00 (window starting 2024-11-06), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN 200514297Z\n- Metric: window_total_sgd = 131600 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 3. [R4] UNIVERSAL DISPLAYS PTE LTD: PAS000ETT24000077 (accepted, priority 70)\nPossible contract splitting: UNIVERSAL DISPLAYS PTE LTD was awarded PAS000ETT24000077 by People's Association (S$67,300, 2024-09-11). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN 199407101W\n- Metric: window_total_sgd = 95388.7 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 4. [R4] NEBULON TEST WORKS PTE. LTD.: PLT000ETT24000004 (accepted, priority 66)\nPossible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000004 by People's Association (S$40,000, 2024-07-01). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN T99ZZ0004E\n- Metric: window_total_sgd = 105000 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 5. [R4] NEBULON TEST WORKS PTE. LTD.: PLT000ETT24000014 (accepted, priority 64)\nPossible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000014 by People's Association (S$35,000, 2024-07-20). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN T99ZZ0004E\n- Metric: window_total_sgd = 105000 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 6. [R4] NEBULON TEST WORKS PTE. LTD.: PLT000ETT24000024 (accepted, priority 61)\nPossible contract splitting: NEBULON TEST WORKS PTE. LTD. was awarded PLT000ETT24000024 by People's Association (S$30,000, 2024-08-30). Anomaly for review: 3 sub-S$90k awards to this supplier within 90 days total S$105000.00 (window starting 2024-07-01), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN T99ZZ0004E\n- Metric: window_total_sgd = 105000 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n### 7. [R4] UNIVERSAL DISPLAYS PTE LTD: PAS000ETT24000080 (accepted, priority 56)\nPossible contract splitting: UNIVERSAL DISPLAYS PTE LTD was awarded PAS000ETT24000080 by People's Association (S$28,089, 2024-08-27). Anomaly for review: 2 sub-S$90k awards to this supplier within 90 days total S$95388.70 (window starting 2024-08-27), above the S$90k tender threshold. May indicate splitting; requires auditor judgement. This is an anomaly for review and may indicate a concern that requires auditor judgement.\n- Confidence: 1.00; UEN 199407101W\n- Metric: window_total_sgd = 95388.7 (threshold 90000)\n- Evidence: Zetaris query `faf4e2fb-0ce3-402f-ae3c-f20029f9525a` over gebiz_pg.awards, 7 row(s)\n- Why it matters: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition. ([AGO FY2023/24, p. 31 (PDF p.42)](https://isomer-user-content.by.gov.sg/357/baf0b405-c14b-4621-a70e-f370d71bbd76/ar_fy2023_24.pdf#page=42))\n- Note: Critic re-ran the SQL (query faf4e2fb-0ce3-402f-ae3c-f20029f9525a) and confirmed the cited row.\n\n## Limitations\n- R1: Needs a Resolver match (GeBIZ has no UEN). Unresolved names cannot be tested. Newly formed entities are legitimate for many reasons.\n- R4: GeBIZ here holds tender (ETT) awards only, no quotation (ETQ) records, so splitting below the quotation band is under-detected. Repeat call-offs under a framework can look like splitting.\n"
+}

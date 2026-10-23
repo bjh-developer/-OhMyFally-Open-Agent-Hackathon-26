@@ -1,0 +1,19 @@
+{
+  "name": "pa-2024",
+  "request": {
+    "agency": "People's Association",
+    "date_from": "2024-01-01",
+    "date_to": "2024-12-31",
+    "flags": [
+      "R1",
+      "R4"
+    ]
+  },
+  "source_run_id": "run_20261023_185233_9c4bab",
+  "hmem_used": false,
+  "git_sha": "70acd2a",
+  "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
+  "recorded_at": "2026-10-23T18:54:24+0800",
+  "zetaris_queries": 7,
+  "nightshift_calls": 4
+}

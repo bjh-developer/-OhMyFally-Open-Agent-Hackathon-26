@@ -1,0 +1,72 @@
+{
+ "entries": [
+  {
+   "lane": "deep",
+   "agent": "You are the Planner of a procurement-integrity screening system for a government agency au",
+   "sys_key": "b5765ccb4f1d77d7",
+   "exact_key": "977687902dc753b4",
+   "prompt_chars": 1424,
+   "content": "{\"checks\": [\"R1\", \"R4\"], \"rationale\": \"The auditor explicitly requested R1 to screen for suppliers incorporated shortly before award and R4 to detect possible contract splitting in People's Association 2024 awards.\"}",
+   "receipt_id": "rcpt_req_5x41i0vc",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 2408,
+   "usage": {
+    "prompt_tokens": 685,
+    "completion_tokens": 226,
+    "total_tokens": 911
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "6336dc664472affc",
+   "prompt_chars": 3436,
+   "content": "{\"checks\":[{\"finding_id\":\"R4-483e8e5c\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric and threshold all match evidence.\"},{\"finding_id\":\"R4-e737d497\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, metric and threshold all match evidence.\"}]}",
+   "receipt_id": "rcpt_req_6kpp3p8l",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 13829,
+   "usage": {
+    "prompt_tokens": 2215,
+    "completion_tokens": 648,
+    "total_tokens": 2863
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "83dcd27bfe4206bf",
+   "prompt_chars": 7082,
+   "content": "{\"checks\":[{\"finding_id\":\"R4-aa48ec89\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R4-b3c683b3\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R4-c2c72879\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R4-5f22be37\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R4-290778ce\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"}]}",
+   "receipt_id": "rcpt_req_kup3hdrl",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 20386,
+   "usage": {
+    "prompt_tokens": 7715,
+    "completion_tokens": 2878,
+    "total_tokens": 10593
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You write the opening of an audit memo. Use only the facts given. Use the phrases 'anomaly",
+   "sys_key": "2c0af6dc82fe6d9b",
+   "exact_key": "7376bf7ec89163eb",
+   "prompt_chars": 5937,
+   "content": "{\"headline\":\"People's Association accepted seven anomalies for review in 2024 involving sub-S$90,000 awards to three suppliers whose combined 90-day totals exceeded the S$90,000 tender threshold.\",\"overview\":\"All seven accepted items are anomalies for review and may indicate a concern that requires auditor judgement. EFFECTS TECHNOLOGIES PTE. LTD. received two awards totaling S$131,600 within 90 days starting 2024-11-06; UNIVERSAL DISPLAYS PTE LTD received two awards totaling S$95,388.70 within 90 days starting 2024-08-27; and NEBULON TEST WORKS PTE. LTD. received three awards totaling S$105,000 within 90 days starting 2024-07-01. None of the findings were suppressed or rejected.\"}",
+   "receipt_id": "rcpt_req_xj30785e",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 33125,
+   "usage": {
+    "prompt_tokens": 6702,
+    "completion_tokens": 2028,
+    "total_tokens": 8730
+   },
+   "calls": 1
+  }
+ ]
+}

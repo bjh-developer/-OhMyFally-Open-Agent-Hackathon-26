@@ -14,6 +14,7 @@ pip install -r requirements.txt
 SAMPLE_MODE=true python run.py --input input_examples/example_1.json
 SAMPLE_MODE=true python run.py --input input_examples/example_2.json
 SAMPLE_MODE=true python run.py --input input_examples/example_3.json
+SAMPLE_MODE=true python run.py --input input_examples/example_remaining.json
 ```
 
 What you will see:
@@ -25,7 +26,7 @@ What you will see:
 
 Limits of sample mode:
 
-- Only the three recorded requests (the `input_examples/`) can run offline. Any other agency or period is refused with a
+- Only the four recorded requests (the files in `input_examples/`) can run offline. Any other agency or period is refused with a
   message that lists what is recorded. To run anything else, set the Zetaris and Nightshift variables (section 3).
 - If a recorded model reply is missing, that step uses its rule-based fallback (deterministic scores, template
   narrative) and the memo says how many.
@@ -67,6 +68,10 @@ Without Docker: `python run.py --serve` (port from `PORT`, default 8000), or run
 With keys set and `SAMPLE_MODE=true`, live services are tried first and the recording answers only if they are down.
 Set `SAMPLE_MODE=false` to never fall back.
 
+R5 (business-description similarity) needs no model at run time: the scores are precomputed into the Zetaris
+`rules` table by `scripts/prepare_r5.py`, and offline mode replays that query's recorded rows. Only a live setup runs
+`python scripts/prepare_r5.py --download-model` once (local MiniLM, cached in `.cache/embeddings`).
+
 ## 4. Tests
 
 ```bash
@@ -77,3 +82,14 @@ pytest -m "not live"
 
 `output_examples/example_N.memo.json`, `.memo.md` and `.trace.jsonl` are the outputs of live runs of
 `input_examples/example_N.json` (Zetaris and Nightshift up, H-MEM on). They are not read at runtime.
+
+## 6. Timings measured on 23 Oct
+
+Offline, `env -i PATH=$PATH HOME=$HOME SAMPLE_MODE=true python run.py --input ...`, no `.env`:
+example_1 2 s, example_2 1 s, example_3 2 s, example_remaining 1 s (all exit 0).
+
+Docker (`docker run -p 8001:8000 -e SAMPLE_MODE=true oah-submission`, `curl -X POST /run`): 0.5 s, 0.06 s, 0.1 s, 0.1 s
+for the same four; all `status: done`. A request with no recorded data returns `422 request_rejected` listing what is recorded.
+`docker build` takes about 1 minute.
+
+Live runs of the same inputs (H-MEM on) took about 4 min, 1 min and 5 min.
