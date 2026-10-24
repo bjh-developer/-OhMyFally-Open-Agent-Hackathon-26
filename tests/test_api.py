@@ -1,3 +1,4 @@
+import json
 from fastapi.testclient import TestClient
 
 from app import api
@@ -68,3 +69,42 @@ def test_bad_body_is_a_structured_error(monkeypatch, tmp_path):
     r = _client(monkeypatch, tmp_path).post("/run", json={"agency": "X"})
     b = r.json()
     assert r.status_code == 422 and b["status"] == "error" and b["error"]["type"] == "invalid_request" and b["run_id"] is None
+
+
+def _disk_client(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    monkeypatch.setattr(api, "get_settings", lambda: SimpleNamespace(logs_dir=tmp_path))
+    return TestClient(api.app)
+
+
+def _write_trace(tmp_path, run_id, actions):
+    lines = [json.dumps({"trace_id": run_id, "agent_name": "Orchestrator", "action": a, "status": "success",
+                         "output_summary": f"{a} done"}) for a in actions]
+    (tmp_path / f"{run_id}.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_finished_run_is_served_from_disk_after_restart(monkeypatch, tmp_path):
+    rid = "run_20261023_000000_disk01"
+    _write_trace(tmp_path, rid, ["start_run", "plan", "end_run"])
+    (tmp_path / f"{rid}.memo.json").write_text(json.dumps({"run_id": rid, "findings": []}), encoding="utf-8")
+    c = _disk_client(monkeypatch, tmp_path)
+    r = c.get(f"/runs/{rid}")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "done" and body["memo"]["run_id"] == rid and body["events"] == 3
+    with c.stream("GET", f"/runs/{rid}/events") as s:
+        text = "".join(s.iter_text())
+    assert text.count("data: {\"trace_id\"") == 3 and "event: end" in text and '"status": "done"' in text
+
+
+def test_cut_off_run_on_disk_reports_failed(monkeypatch, tmp_path):
+    rid = "run_20261023_000000_disk02"
+    _write_trace(tmp_path, rid, ["start_run", "plan"])
+    r = _disk_client(monkeypatch, tmp_path).get(f"/runs/{rid}")
+    assert r.json()["status"] == "failed" and r.json()["memo"] is None
+
+
+def test_unknown_run_still_404(monkeypatch, tmp_path):
+    c = _disk_client(monkeypatch, tmp_path)
+    assert c.get("/runs/run_20261023_000000_nope00").status_code == 404
+    assert c.get("/runs/run_20261023_000000_nope00/events").status_code == 404
