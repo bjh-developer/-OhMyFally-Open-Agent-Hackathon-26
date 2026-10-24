@@ -1,0 +1,16 @@
+{
+  "name": "pa-fy2125",
+  "request": {
+    "agency": "People's Association",
+    "date_from": "2021-04-01",
+    "date_to": "2026-03-31",
+    "flags": []
+  },
+  "source_run_id": "run_20261024_084508_0600ac",
+  "hmem_used": false,
+  "git_sha": "b1ae1da",
+  "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
+  "recorded_at": "2026-10-24T08:49:07+0800",
+  "zetaris_queries": 16,
+  "nightshift_calls": 18
+}
