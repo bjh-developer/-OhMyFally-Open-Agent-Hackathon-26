@@ -100,7 +100,8 @@ export function TechnicalScreen() {
       receipts: receipts.size,
       queries: queries.size,
       critiques: events.filter((e) => e.status === "needs_revision").length,
-      retries: events.filter((e) => e.status === "retrying").length,
+      // Agents record a re-run as retry_count on the step, not as a "retrying" status (same rule as app/run_summary.py).
+      retries: Math.max(0, ...events.map((e) => e.retry_count ?? 0)),
       escalations: events.filter((e) => e.status === "escalated").length,
     };
   }, [events, memo]);

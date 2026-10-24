@@ -430,7 +430,7 @@ and [data/eval/README.md](data/eval/README.md). The numbers below are quoted fro
 These are check-level, in-sample results. They do not measure final-memo accuracy or precision on real awards, and the files say so
 under `limitations`. One more caveat: `metrics.json` was generated from an earlier version of `input_examples/` (its three sample
 rows are HDB calendar 2025, People's Association 2024 and NParks 2023-2025; the hashes in its `provenance` block no longer match the current example files).
-The planted-case and Resolver numbers do not depend on those inputs. `metrics.json` also contains the machine paths of the laptop it was generated on.
+The planted-case and Resolver numbers do not depend on those inputs.
 
 Other saved outputs: [output_examples/remaining_flags_verification.json](output_examples/remaining_flags_verification.json) and
 [remaining_flags_memo.md](output_examples/remaining_flags_memo.md) (R5, R6, R9 on the synthetic agency),
