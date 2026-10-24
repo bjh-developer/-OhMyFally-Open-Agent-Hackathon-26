@@ -115,3 +115,13 @@ def test_review_queue_is_pending_private_and_preserves_existing_file(tmp_path):
 def test_expired_budget_stops_before_external_query():
     with pytest.raises(TimeoutError):
         LiveSQL(time.monotonic()-1)("SELECT 1")
+
+
+def test_follow_up_queue_skips_findings_already_reviewed(tmp_path):
+    def cand(fid, amt):
+        return SimpleNamespace(finding_id=fid, flag_id="R3", tender_no=f"T{fid}", agency="Test Agency", awarded_amt=amt,
+                               metric_name="m", metric_value=1, threshold=1, evidence=[])
+    path = tmp_path / "round2.csv"
+    assert create_review_queue(path, {"A": cand("A", 900), "B": cand("B", 500), "C": cand("C", 100)}, limit=2,
+                               exclude=frozenset({"A"}))
+    assert [row["finding_id"] for row in csv.DictReader(path.open())] == ["B", "C"]

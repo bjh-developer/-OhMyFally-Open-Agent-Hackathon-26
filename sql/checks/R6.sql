@@ -1,6 +1,7 @@
 -- R6: value concentration in ten deterministic keyword categories (first matching category wins).
 -- Denominator: all positive-value awards in the requested agency, period and category.
--- Supplier identity is the published name; aliases are not consolidated. At least five category awards.
+-- Supplier identity is the published name; aliases are not consolidated. At least five category awards, and the
+-- supplier must have won at least two of them: one large contract on its own is not concentration.
 WITH categorized AS (
   SELECT a.*,
     CASE
@@ -11,7 +12,7 @@ WITH categorized AS (
       WHEN lower(tender_description) RLIKE 'training|education|course|workshop|tuition' THEN 'education_and_training'
       WHEN lower(tender_description) RLIKE 'consultancy|consulting|audit|legal|valuation|survey' THEN 'professional_services'
       WHEN lower(tender_description) RLIKE 'event|festival|catering|exhibition|concert' THEN 'events_and_catering'
-      WHEN lower(tender_description) RLIKE 'transport|logistic|freight|vehicle|bus service|delivery' THEN 'transport_and_logistics'
+      WHEN lower(tender_description) RLIKE 'transport|logistic|freight|vehicle|bus service|courier|delivery service' THEN 'transport_and_logistics'
       WHEN lower(tender_description) RLIKE 'construction|building|renovation|civil|structural|engineering|repair|maintenance' THEN 'construction_and_maintenance'
       ELSE 'other'
     END AS category
@@ -22,13 +23,14 @@ WITH categorized AS (
   SELECT category, sum(awarded_amt) AS category_total, count(DISTINCT tender_no) AS category_awards
   FROM categorized GROUP BY category
 ), supplier_totals AS (
-  SELECT category, supplier_name, sum(awarded_amt) AS supplier_total
+  SELECT category, supplier_name, sum(awarded_amt) AS supplier_total, count(DISTINCT tender_no) AS supplier_awards
   FROM categorized GROUP BY category, supplier_name
 ), concentrated AS (
   SELECT s.*, t.category_total, t.category_awards,
          CAST(s.supplier_total AS DOUBLE) / CAST(t.category_total AS DOUBLE) AS value_share
   FROM supplier_totals s JOIN totals t ON t.category = s.category
   WHERE t.category_awards >= 5
+    AND s.supplier_awards >= 2
     AND CAST(s.supplier_total AS DOUBLE) / CAST(t.category_total AS DOUBLE) > 0.5
 )
 SELECT 'R6' AS flag_id,

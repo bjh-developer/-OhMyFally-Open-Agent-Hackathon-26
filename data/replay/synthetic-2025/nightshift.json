@@ -7,13 +7,13 @@
    "exact_key": "47fb49aab9939208",
    "prompt_chars": 1336,
    "content": "{\"checks\": [\"R5\", \"R6\"], \"rationale\": \"The auditor explicitly requested R5 and R6 to screen for suppliers whose line of business is far from the tender and for supplier concentration within a category.\"}",
-   "receipt_id": "rcpt_req_8wynm5tg",
+   "receipt_id": "rcpt_req_b66oq8o9",
    "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
-   "latency_ms": 7761,
+   "latency_ms": 4719,
    "usage": {
-    "prompt_tokens": 701,
-    "completion_tokens": 446,
-    "total_tokens": 1147
+    "prompt_tokens": 675,
+    "completion_tokens": 476,
+    "total_tokens": 1151
    },
    "calls": 1
   },
@@ -24,13 +24,13 @@
    "exact_key": "e2bb8deb26c198fa",
    "prompt_chars": 2389,
    "content": "{\"checks\":[{\"finding_id\":\"R6-0a341b55\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"}]}",
-   "receipt_id": "rcpt_req_v4anubh0",
+   "receipt_id": "rcpt_req_jq651enf",
    "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
-   "latency_ms": 9762,
+   "latency_ms": 6220,
    "usage": {
-    "prompt_tokens": 2612,
-    "completion_tokens": 969,
-    "total_tokens": 3581
+    "prompt_tokens": 2829,
+    "completion_tokens": 761,
+    "total_tokens": 3590
    },
    "calls": 1
   },
@@ -40,14 +40,14 @@
    "sys_key": "71a8859a1ae014a1",
    "exact_key": "44ec6b134f5ea0b9",
    "prompt_chars": 8027,
-   "content": "{\"checks\":[{\"finding_id\":\"R5-e2a465e8\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R6-92afe838\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R6-5f249da2\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R6-dfbab2a4\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"},{\"finding_id\":\"R6-610ab7e3\",\"supported\":true,\"reason\":\"All summary facts match the evidence row.\"}]}",
-   "receipt_id": "rcpt_req_7vzbs7s6",
+   "content": "{\"checks\":[{\"finding_id\":\"R5-e2a465e8\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"},{\"finding_id\":\"R6-92afe838\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"},{\"finding_id\":\"R6-5f249da2\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"},{\"finding_id\":\"R6-dfbab2a4\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"},{\"finding_id\":\"R6-610ab7e3\",\"supported\":true,\"reason\":\"All summary facts match the single evidence row.\"}]}",
+   "receipt_id": "rcpt_req_e45gocww",
    "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
-   "latency_ms": 26341,
+   "latency_ms": 8411,
    "usage": {
-    "prompt_tokens": 6831,
-    "completion_tokens": 1642,
-    "total_tokens": 8473
+    "prompt_tokens": 7053,
+    "completion_tokens": 791,
+    "total_tokens": 7844
    },
    "calls": 1
   },
@@ -57,14 +57,31 @@
    "sys_key": "6f80bcbad053d646",
    "exact_key": "3e961332068a82f1",
    "prompt_chars": 6067,
-   "content": "{\"scores\":[{\"finding_id\":\"R5-e2a465e8\",\"priority\":85,\"reason\":\"Largest award S$120k; metric far below threshold; moderate confidence.\"},{\"finding_id\":\"R6-92afe838\",\"priority\":55,\"reason\":\"Small award S$10k; metric well above threshold; high confidence.\"},{\"finding_id\":\"R6-5f249da2\",\"priority\":55,\"reason\":\"Small award S$10k; metric well above threshold; high confidence.\"},{\"finding_id\":\"R6-dfbab2a4\",\"priority\":55,\"reason\":\"Small award S$10k; metric well above threshold; high confidence.\"},{\"finding_id\":\"R6-610ab7e3\",\"priority\":55,\"reason\":\"Small award S$10k; metric well above threshold; high confidence.\"},{\"finding_id\":\"R6-0a341b55\",\"priority\":55,\"reason\":\"Small award S$10k; metric well above threshold; high confidence.\"}]}",
-   "receipt_id": "rcpt_req_2my4s6ev",
+   "content": "{\"scores\":[{\"finding_id\":\"R6-92afe838\",\"priority\":55,\"reason\":\"Small S$10k award; metric far above threshold; high confidence.\"},{\"finding_id\":\"R6-5f249da2\",\"priority\":55,\"reason\":\"Small S$10k award; metric far above threshold; high confidence.\"},{\"finding_id\":\"R6-dfbab2a4\",\"priority\":55,\"reason\":\"Small S$10k award; metric far above threshold; high confidence.\"},{\"finding_id\":\"R6-610ab7e3\",\"priority\":55,\"reason\":\"Small S$10k award; metric far above threshold; high confidence.\"},{\"finding_id\":\"R6-0a341b55\",\"priority\":55,\"reason\":\"Small S$10k award; metric far above threshold; high confidence.\"},{\"finding_id\":\"R5-e2a465e8\",\"priority\":85,\"reason\":\"Large S$120k award; metric far below threshold; moderate confidence.\"}]}",
+   "receipt_id": "rcpt_req_m9bihte6",
    "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
-   "latency_ms": 30861,
+   "latency_ms": 12648,
    "usage": {
-    "prompt_tokens": 8216,
-    "completion_tokens": 2128,
-    "total_tokens": 10344
+    "prompt_tokens": 6047,
+    "completion_tokens": 1760,
+    "total_tokens": 7807
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You write the opening of an audit memo. Use only the facts given. Use the phrases 'anomaly",
+   "sys_key": "2c0af6dc82fe6d9b",
+   "exact_key": "90375f34559b3247",
+   "prompt_chars": 5865,
+   "content": "{\"headline\":\"Six escalated findings were identified for Synthetic Review Agency during the 2025 review period.\",\"overview\":\"QUILLORA TEST BAKERY PTE. LTD. was awarded S$120,000 for software development and server support services despite a registered bakery activity, with cosine similarity 0.039395 below the 0.2 threshold; this is an anomaly for review and may indicate a concern requiring auditor judgement. VELORIN TEST LOGISTICS PTE. LTD. holds 83.33% of transport_and_logistics category value across six tenders, exceeding the 0.5 share threshold; each of the five related awards is an anomaly for review and may indicate a concern requiring auditor judgement.\"}",
+   "receipt_id": "rcpt_req_fpv6ger1",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 55006,
+   "usage": {
+    "prompt_tokens": 5652,
+    "completion_tokens": 1772,
+    "total_tokens": 7424
    },
    "calls": 1
   }

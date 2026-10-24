@@ -139,11 +139,13 @@ def precision_metrics(labels: list[dict], candidates: dict) -> dict:
             "review_coverage": len(human) / len(candidates) if candidates else None}
 
 
-def create_review_queue(path: Path, candidates: dict, limit: int = 30) -> bool:
-    """Create pending rows only; an existing review file is never overwritten."""
+def create_review_queue(path: Path, candidates: dict, limit: int = 30, exclude: frozenset = frozenset()) -> bool:
+    """Create pending rows only; an existing review file is never overwritten. `exclude` holds finding ids already
+    reviewed in an earlier round, so a follow-up sample is fresh."""
     if path.exists():
         return False
-    selected = sorted(candidates.values(), key=lambda f: (-(f.awarded_amt or 0), f.finding_id))[:limit]
+    fresh = [f for f in candidates.values() if f.finding_id not in exclude]
+    selected = sorted(fresh, key=lambda f: (-(f.awarded_amt or 0), f.finding_id))[:limit]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("x", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=PRECISION_FIELDS)
@@ -208,6 +210,8 @@ def main(argv=None) -> int:
     parser.add_argument("--output", type=Path, default=ROOT / "output_examples/metrics.json")
     parser.add_argument("--entity-labels", type=Path, default=ROOT / "data/eval/entity_labels.csv")
     parser.add_argument("--precision-labels", type=Path, default=ROOT / "data/eval/precision_review.csv")
+    parser.add_argument("--exclude-reviewed", type=Path, nargs="*", default=[],
+                        help="earlier review files whose findings a new queue must skip")
     parser.add_argument("--timeout", type=float, default=600)
     args = parser.parse_args(argv)
     if not 1 <= args.timeout <= 600:
@@ -245,10 +249,11 @@ def main(argv=None) -> int:
         planted_awards = {(case["agency"], award["tender_no"]) for case in cases for award in case["awards"]}
         candidates = {f.finding_id: f for run in runs if not run["supplemental"] for f in run["findings"]
                       if (f.agency, f.tender_no) not in planted_awards}
-        created = create_review_queue(args.precision_labels, candidates)
+        reviewed = frozenset(row["finding_id"] for path in args.exclude_reviewed for row in load_precision_labels(path))
+        created = create_review_queue(args.precision_labels, candidates, exclude=reviewed)
         precision_labels = load_precision_labels(args.precision_labels)
         report["precision"] = {**precision_metrics(precision_labels, candidates), "labels_path": rel(args.precision_labels),
-                               "queue_created": created, "queue_selection": "Top 30 nonplanted sample findings by award value; no supplier names or addresses"}
+                               "queue_created": created, "queue_selection": "Top 30 nonplanted sample findings by award value" + (" not in an earlier review" if reviewed else "") + "; no supplier names or addresses"}
         calls = resolver_report["llm_calls"]
         report["tokens"] = {"llm_calls": calls, "total_tokens": 0 if calls == 0 else None,
                             "provider_reported_total_tokens": None,

@@ -281,10 +281,10 @@ parameters are also loaded into the Zetaris-visible `rules` table.
 |---|---|---|---|
 | **R1** | must | Supplier incorporated less than 183 days before the award | Needs a Resolver match (GeBIZ has no UEN). Newly formed entities are legitimate for many reasons. |
 | **R2** | must | ACRA status is struck off, ceased, in liquidation or similar | ACRA publishes the current status only, so the entity may have been live when it won. |
-| **R3** | must | Two or more winning suppliers at one agency share an exact ACRA address | Shared business centres and virtual offices produce benign matches. The Critic's density check reduces this. |
+| **R3** | must | Two or more winning suppliers at one agency share an exact ACRA address, from at least two different name groups | Shared business centres produce benign matches; the Critic's density check reduces this. Group companies with unrelated names are not recognised. |
 | **R4** | must | Same agency and supplier: two or more awards under S$90,000 within 90 days that sum to over S$90,000 | **Partial.** GeBIZ here holds tender (ETT) awards only and **no quotation (ETQ) records** (0 of 18,464 rows), so splitting inside the quotation band cannot be seen. Framework call-offs can look like splitting. |
-| **R5** | should | Embedding similarity between the supplier's SSIC description and the tender description is below 0.2 | Uncalibrated; always escalated with confidence at most 0.6. Needs the one-time local model preparation. |
-| **R6** | should | One supplier holds 50% or more of an agency's award value in a tender category (at least five tenders) | Ten keyword categories, approximate. Specialised categories legitimately have few suppliers. |
+| **R5** | should | Embedding similarity between the supplier's SSIC description and the tender description is below 0.2, and the SSIC division is not a usual fit for the type of work | Uncalibrated; always escalated with confidence at most 0.6. Needs the one-time local model preparation. |
+| **R6** | should | One supplier holds 50% or more of an agency's award value in a tender category (at least five tenders), across at least two of its own awards | Ten keyword categories, approximate. Specialised categories legitimately have few suppliers. |
 | **R7** | stretch | Supplier has former names (informational) | **Not implemented**: it is defined in the rules file but has no SQL in `sql/checks/`. |
 | **R8** | must | Local-looking name (PTE LTD, PRIVATE LIMITED, LLP) with no ACRA match above threshold | Our ACRA subset is a candidate set; typos and renames can fail to match. A lead for manual lookup. |
 | **R9** | should | Awarded supplier is not rank 1 in the published evaluation scores | **Synthetic internal records only**; no real evaluation data is used. Ties are not flagged. |
@@ -449,10 +449,19 @@ and [data/eval/README.md](data/eval/README.md). The numbers below are quoted fro
 | Planted cases caught | 8 of 8 cases; 15 of 15 expected awards; negative controls passed | SQL candidate findings, **before** the Critic, Risk or memory. Fictional cases only. |
 | Resolver accuracy | 100 of 100 labelled names correct (99 links, 1 correct abstention) | In-sample, agent-reviewed labels. Human-reviewed accuracy: 0 labels, so not measured. |
 | Resolver links passing the Critic threshold (0.92) | 94 of 99 | Same set |
-| Precision on real awards | **null: not measured.** 30 findings queued for human review, 0 reviewed | |
+| Precision on real awards (SQL stage) | **28.6%** after the fixes below: 8 plausible, 20 explained, 2 unclear on a fresh sample of 30 ([round 2](data/eval/precision_review_round2.csv)). **9.5%** before them: 2 plausible, 19 explained, 9 unclear ([baseline](data/eval/precision_review.csv), [metrics_baseline.json](output_examples/metrics_baseline.json)) | Human review by Joon Hao, evidence prepared with an AI assistant. Findings before the Critic, Risk or memory; top 30 by award value |
 | LLM calls in the eval | 0 (SQL checks only) | So it says nothing about a full investigation's model use |
 
-These are check-level, in-sample results. They do not measure final-memo accuracy or precision on real awards, and the files say so
+**How precision was improved.** The baseline review showed three noise patterns: group companies sharing an office (R3),
+loose free-text business descriptions (R5), and single large contracts or mislabelled keyword categories (R6). Each fix is a
+general rule, not a list of the reviewed cases: R3 counts suppliers whose names start with the same word as one group; R5 also
+requires the SSIC division to be an unusual fit for the type of work; R6 needs at least two awards to the supplier and no longer
+treats "supply, delivery" wording as logistics. Candidates fell from 92 to 53 and all 8 planted cases are still caught. To avoid
+grading the fix on the cases it was built from, round 2 is a fresh sample that excludes every baseline finding. Precision
+counts "plausible" (worth an auditor's look) against "explained"; it is not a rate of wrongdoing. Round 2 also found two
+remaining patterns: R5 treats "managing agent and improvement works" tenders as administration, and R4 only sees tendered awards.
+
+These are check-level results on samples of 30. They do not measure final-memo accuracy, and the files say so
 under `limitations`. One more caveat: `metrics.json` was generated from an earlier version of `input_examples/` (its three sample
 rows are HDB calendar 2025, People's Association 2024 and NParks 2023-2025; the hashes in its `provenance` block no longer match the current example files).
 The planted-case and Resolver numbers do not depend on those inputs.
@@ -534,7 +543,7 @@ planted-case checks against real data. Web tests: `cd web && npm test`.
   Names with no local legal suffix that are absent from our ACRA subset become "out of scope", not R8. The ACRA data is a name-matched
   subset, so a renamed company whose old and new names share no first word can be missed.
 - **Noisy flags.** R3 produces many benign matches (shared buildings and business centres), R2 uses current status only, and R5 and R6 are uncalibrated.
-  The Critic and Risk agents reduce but do not remove this. Precision on real awards is unmeasured.
+  The Critic and Risk agents reduce but do not remove this. SQL-stage precision is 28.6% on a 30-finding human-reviewed sample (9.5% before the round-1 fixes).
 - **Offline mode covers only the five recorded inputs**, and a missing recording degrades to rule-based text.
 - **Nightshift 499 and 502 errors happen.** The agent retries, then falls back to rule-based text. The committed
   `output_examples/example_3` memo shows it: its Reporter narrative failed with HTTP 499, so the memo says "narrative unavailable"

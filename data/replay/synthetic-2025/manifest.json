@@ -9,11 +9,11 @@
       "R6"
     ]
   },
-  "source_run_id": "run_20261023_190938_131c63",
+  "source_run_id": "run_20261024_173557_b7b1af",
   "hmem_used": false,
-  "git_sha": "70acd2a",
+  "git_sha": "df8afd5",
   "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
-  "recorded_at": "2026-10-23T19:12:45+0800",
+  "recorded_at": "2026-10-24T17:38:52+0800",
   "zetaris_queries": 9,
-  "nightshift_calls": 4
+  "nightshift_calls": 5
 }

@@ -54,3 +54,23 @@ precision = plausible / (plausible + explained)
 ```
 
 48 focused tests passed. They cover missed/wrong-supplier awards, failed-check denominators, multi-flag cases, negative controls, supplemental dates and flags, precision exclusions and invalid labels, preserving existing files, excluding names from the review queue and deadline enforcement. The live harness also checks for replayed or truncated source results. Metrics include input/label/evaluator/SQL hashes and live query IDs for reproduction.
+
+## Precision rounds (24 Oct)
+
+Both rounds use the original three sample requests in `data/eval/precision_requests/` and were reviewed by Joon Hao
+(evidence prepared with an AI assistant; labels are his).
+
+| Round | Checks | Labels | Result | Report |
+|---|---|---|---|---|
+| Baseline | before the R3/R5/R6 fixes | `data/eval/precision_review.csv` | 2 plausible, 19 explained, 9 unclear: **9.5%** of 92 candidates' top 30 | `output_examples/metrics_baseline.json` |
+| Round 2 | after the fixes | `data/eval/precision_review_round2.csv` (fresh: excludes every baseline finding) | 8 plausible, 20 explained, 2 unclear: **28.6%** of 53 candidates' top 30 new findings | `output_examples/metrics.json` |
+
+Reproduce round 2 (an existing label file is never overwritten):
+
+```bash
+python -X utf8 scripts/eval.py --inputs data/eval/precision_requests/sample_{1,2,3}.json \
+  --precision-labels data/eval/precision_review_round2.csv --exclude-reviewed data/eval/precision_review.csv
+```
+
+The baseline report was produced with the pre-fix SQL (git history before the R3/R5/R6 change); rerunning it on the current
+checks counts the baseline findings the fixes removed as unmatched labels.
