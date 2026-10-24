@@ -29,6 +29,14 @@ from app.schemas import Plan, RunRequest
 from app.tracing import Tracer
 from scripts.eval_resolver import evaluate_live
 
+def rel(path) -> str:
+    """Repo-relative path for the report, so it never records a machine's home folder."""
+    try:
+        return Path(path).resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return Path(path).name
+
+
 PRECISION_FIELDS = ["finding_id", "flag_id", "tender_no", "agency", "awarded_amt", "metric_name", "metric_value",
                     "threshold", "evidence_query_id", "label", "review_status", "reviewer", "reason"]
 
@@ -182,7 +190,7 @@ def run_request(request: RunRequest, sql: LiveSQL, trace_dir: Path, index: int, 
     state.update(analyst.make(deps)(state))
     return {"request": request, "checks": checks, "findings": state["findings"],
             "coverage_gaps": state.get("coverage_gaps", []), "check_errors": state.get("check_errors", {}),
-            "runtime_seconds": round(time.monotonic() - started, 3), "trace_path": str(tracer.path),
+            "runtime_seconds": round(time.monotonic() - started, 3), "trace_path": rel(tracer.path),
             "supplemental": supplemental}
 
 
@@ -239,7 +247,7 @@ def main(argv=None) -> int:
                       if (f.agency, f.tender_no) not in planted_awards}
         created = create_review_queue(args.precision_labels, candidates)
         precision_labels = load_precision_labels(args.precision_labels)
-        report["precision"] = {**precision_metrics(precision_labels, candidates), "labels_path": str(args.precision_labels),
+        report["precision"] = {**precision_metrics(precision_labels, candidates), "labels_path": rel(args.precision_labels),
                                "queue_created": created, "queue_selection": "Top 30 nonplanted sample findings by award value; no supplier names or addresses"}
         calls = resolver_report["llm_calls"]
         report["tokens"] = {"llm_calls": calls, "total_tokens": 0 if calls == 0 else None,
@@ -263,7 +271,7 @@ def main(argv=None) -> int:
         "Precision is unmeasured until humans label findings; unclear, pending and agent reviews are excluded from the precision denominator.",
         "Resolver accuracy is an agent-reviewed, positive-heavy in-sample diagnostic; human-reviewed accuracy remains separate.",
         "R5 semantic scores and R6 keyword categories are uncalibrated screening heuristics."]
-    report["provenance"] = {"inputs": [{"file": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in args.inputs],
+    report["provenance"] = {"inputs": [{"file": rel(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in args.inputs],
         "evaluator_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "check_sql_sha256": {flag: hashlib.sha256((ROOT / "sql/checks" / f"{flag}.sql").read_bytes()).hexdigest() for flag in implemented},
         "planted_sha256": hashlib.sha256((ROOT / "data/eval/planted.json").read_bytes()).hexdigest(),
