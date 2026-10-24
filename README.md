@@ -589,6 +589,7 @@ Repository licence: there is no top-level `LICENSE` file yet; `services/hmem/` a
 
 - **Joon Hao** (lead): orchestration and agents, adapters, tracing, API, web UI, the H-MEM service, rules and wording, AGO excerpts, replay mode.
 - **Inchara**: data pipeline, entity Resolver, red-flag SQL, evaluation.
+- **Rae**: absent with apologies
 
 ## 16. Repository layout
 
