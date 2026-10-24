@@ -56,7 +56,7 @@
         "nvidia/nemotron-3.5-super-vl-120b-a12b": ["PlannerAgent", "CriticAgent", "RiskAgent", "ReporterAgent"]
       },
       "source": "routed_model in output_examples/example_{1,2,3,4}.trace.jsonl",
-      "resolver_tiebreak_model": "nvidia/nemotron-3.5-lightning-30b-a3b (one receipt recorded in docs/handover/d1-data.md section 8)"
+      "resolver_tiebreak_model": "routed per call by Nightshift: nvidia/nemotron-3.5-lightning-30b-a3b on 22 Oct (docs/handover/d1-data.md section 8), nvidia/nemotron-3.5-super-vl-120b-a12b on 24 Oct"
     },
     "cursor": "not used"
   },

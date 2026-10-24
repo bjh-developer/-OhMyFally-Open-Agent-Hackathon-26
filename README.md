@@ -390,11 +390,12 @@ timeouts, 429, 499 and 5xx are retried a bounded number of times. A failed call 
 
 ### NVIDIA: Nemotron through Nightshift
 
-In the three saved live traces, every model call was routed to **`nvidia/nemotron-3.5-super-vl-120b-a12b`**, on both lanes:
+In the four saved live traces, every model call was routed to **`nvidia/nemotron-3.5-super-vl-120b-a12b`**, on both lanes:
 the Planner (deep), Critic claim check (fast), Risk scoring (deep) and Reporter narrative (deep). The `routed_model` field on each
 trace line is the evidence. The Resolver's fast-lane tie-break is not in those traces because it runs in the setup passes; the
 handover note [docs/handover/d1-data.md](docs/handover/d1-data.md) (section 8) records one, receipt `rcpt_req_6u2qusst`, routed to
-`nvidia/nemotron-3.5-lightning-30b-a3b`. `meterless/auto` can route to a non-NVIDIA model, which is why we log the routed model on every call.
+`nvidia/nemotron-3.5-lightning-30b-a3b`; in our 24 Oct clean-setup test the same tie-break was routed to
+`nvidia/nemotron-3.5-super-vl-120b-a12b`, so Nightshift decides the model per call. `meterless/auto` can route to a non-NVIDIA model, which is why we log the routed model on every call.
 
 ### What was unique about our use
 
