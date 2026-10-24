@@ -318,7 +318,9 @@ escalations, replans, partial successes, model calls, prompt and completion toke
 cleared by memory, Zetaris query count, the loops (from, to, reason) and plan notes. It also works for a run that is no longer in
 memory, by reading `logs/<run_id>.jsonl`.
 
-**Real examples.** `output_examples/example_{1,2,3}.trace.jsonl` are traces of live runs, with their memos beside them. These two
+**Real examples.** `output_examples/example_{1,2,3,4}.trace.jsonl` are traces of live runs on 23 and 24 Oct, with their memos
+beside them. They were recorded before the R3, R5 and R6 precision fixes ([section 8](#8-evaluation)), so a run today raises
+fewer of those flags; the offline recordings in `data/replay/` match the current checks. These two
 lines are copied unedited from `example_1.trace.jsonl`. The first is the Planner's model call: a Zetaris query id, the Nemotron
 model that answered, and the Nightshift receipt. The second is the Critic escalating an R3 shared-address group to a human.
 
