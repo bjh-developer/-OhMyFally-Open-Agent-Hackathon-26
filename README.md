@@ -31,7 +31,7 @@ behind it, the red-flag rule that fired, and the AGO excerpt that says why that 
 | **Data layer** | Zetaris: GeBIZ awards and rules (Postgres), the ACRA registry (Parquet on S3) and synthetic internal records, queried as one federated SQL surface |
 | **Reasoning** | Nemotron models, reached only through Meterless Nightshift |
 | **Memory** | Meterless H-MEM: an auditor's *Dismiss* suppresses the same finding next time |
-| **Entry points** | CLI `run.py`, HTTP API `run.py --serve` (`POST /run`), optional web UI in `web/` |
+| **Entry points** | CLI `run.py`, HTTP API `run.py --serve` (`POST /run`), web UI in `web/` (port 3100) |
 
 ## 2. Quick start for judges
 
@@ -39,6 +39,30 @@ behind it, the red-flag rule that fired, and the AGO excerpt that says why that 
 
 This replays live-recorded Zetaris results and Nightshift replies for the five recorded inputs. The agents, rules, Critic and
 Reporter still run. Read [section 3](#3-how-sample_mode-really-works) for exactly what is and is not real.
+
+**Recommended: the web UI and the API together (Docker Compose).** No `.env` is needed.
+
+```bash
+docker compose up --build api web
+```
+
+The first build takes a few minutes. Then open **http://localhost:3100**, choose *Housing and Development Board*, keep
+*FY2024/25* and press **Start review**: the live agent timeline, the ranked results, the evidence for each item and the
+*Technical view* (trace, loops, model calls) all work offline. The page marks the run as **Recorded data**. Other requests
+with recordings (use *Custom* for the period):
+
+| Agency | Period | Same as |
+|---|---|---|
+| Housing and Development Board | 1 Apr 2024 to 31 Mar 2025 | `example_1.json` |
+| People's Association | 1 Jan 2024 to 31 Dec 2024, checks R1 and R4 | `example_2.json` |
+| National Parks Board | 1 Jan 2023 to 31 Dec 2025 | `example_3.json` |
+| People's Association | 1 Apr 2021 to 31 Mar 2026 | `example_4.json` (shows the Critic's retries) |
+| Synthetic Review Agency | 1 Jan 2025 to 31 Dec 2025, checks R5 and R6 | `example_remaining.json` |
+
+The same stack serves the API on port 8000, so the `curl` below works too. If 3100 or 8000 is taken, pick other host ports:
+`API_PORT=8001 WEB_PORT=3101 docker compose up --build api web`. `api` and `web` sit in a Compose profile, so they never need
+Zetaris's Docker network; a plain `docker compose up` still starts only the data services of Path B. Stop with
+`docker compose down`. Confirm and Dismiss need H-MEM, so offline they are not saved.
 
 **With Python 3.11:**
 
@@ -50,7 +74,7 @@ SAMPLE_MODE=true python run.py --input input_examples/example_1.json
 
 Try the other recorded inputs the same way: `example_2.json`, `example_3.json`, `example_4.json`, `example_remaining.json`.
 
-**With Docker:**
+**API only, with Docker:**
 
 ```bash
 docker build -t oah-submission .
@@ -140,10 +164,11 @@ docker run --rm -p 8000:8000 -v "$PWD/.env:/app/.env:ro" -v "$PWD/logs:/app/logs
 
 (`S3_ENDPOINT=http://pi-s3:8333` stays as is: it is the address Zetaris uses to reach our S3 container, not one the app uses.)
 
-### Web UI (optional)
+### Web UI
 
-`web/` is a Next.js 15 interface on **port 3100** (Zetaris owns 3000). It is not needed for the judge paths above and is left out
-of the Docker image. Start the API first, then:
+`web/` is a Next.js 15 interface on **port 3100** (Zetaris owns 3000). `docker compose up --build api web` runs it with the API
+(Path A above; with your `.env` keys the same command runs live, reaching Zetaris, Nightshift and H-MEM on the host through
+`host.docker.internal`). For development, start the API first, then:
 
 ```bash
 cd web
@@ -476,7 +501,9 @@ From [.env.example](.env.example). Secrets live only in `.env`, which is gitigno
 | `PORT` | `8000` | API port for `run.py --serve` |
 | `LOG_LEVEL` | `info` | API log level |
 | `SAMPLE_MODE` | `true` (also when unset) | See [section 3](#3-how-sample_mode-really-works) |
-| `REPLAY_SET` | `hdb-fy2425` | Recorded set used when no set matches the request (live-first fallback only) |
+| `REPLAY_SET` | `hdb-fy2425` | Default recorded set for scripts; a run only replays the set recorded for its own agency and dates |
+| `CORS_ORIGINS` | `http://127.0.0.1:3100,http://localhost:3100` | Web UI origins the API accepts |
+| `API_PORT`, `WEB_PORT` | `8000`, `3100` | Host ports for `docker compose up --build api web` |
 | `MAX_RETRIES` | `2` | Per-loop retry limit (capped at 2 in code) |
 | `LLM_CALL_CAP` | `40` | Model calls per run |
 | `SOURCE_TIMEOUT_SECONDS` | `20` | Zetaris timeout (checks use at least 60) |
@@ -568,7 +595,7 @@ services/hmem-upstream/ Meterless reference and the official conformance suite
 sql/                    register/ (Zetaris sources and USL), checks/ (R1-R6, R8, R9), critic/
 data/                   sample/ (committed samples), replay/ (5 recorded sets), rules/, ago/, eval/
 scripts/                seed, register_zetaris, prepare_r5, smoke_test, eval, eval_resolver, record_replay, token_baseline
-web/                    Next.js UI on port 3100 (optional)
+web/                    Next.js UI on port 3100 (web/Dockerfile; `docker compose up --build api web`)
 input_examples/         request files (example_1 to example_4, example_remaining)
 output_examples/        memos, traces and metrics from live runs
 logs/evidence/          H-MEM conformance output
