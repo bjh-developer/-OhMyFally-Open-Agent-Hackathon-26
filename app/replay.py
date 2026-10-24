@@ -8,9 +8,10 @@ Active only when ``SAMPLE_MODE=true`` and a recorded set exists (``data/replay/<
   touched, every call is answered from the recorded set.
 
 One set is recorded per request (``manifest.json`` ``request``); ``use_for(request)`` picks the set for the run
-(a contextvar), falling back to REPLAY_SET. The agents run unchanged on the recorded Zetaris rows; a model call with
-no recorded reply raises like an outage, so the agents' own rule-based fallbacks run. Every replayed response is labelled: ids start with ``replay:``, ``Result.replayed`` / ``ChatResult.replayed`` are set, trace
-response is labelled: ids start with ``replay:``, ``Result.replayed`` / ``ChatResult.replayed`` are set, trace
+(a contextvar). A run with no matching set gets no replay at all: it never borrows another request's recordings
+(REPLAY_SET is only the default for callers that don't go through use_for). The agents run unchanged on the recorded
+Zetaris rows; a model call with no recorded reply raises like an outage, so the agents' own rule-based fallbacks run.
+Every replayed response is labelled: ids start with ``replay:``, ``Result.replayed`` / ``ChatResult.replayed`` are set, trace
 events carry ``replayed: true`` and the memo gets a limitation line. A miss re-raises the original error.
 
 Fixture layout (written by scripts/record_replay.py):
@@ -43,6 +44,8 @@ _lock = threading.Lock()
 _served: list[dict] = []
 _missed: list[dict] = []
 _set_dir: contextvars.ContextVar[Path | None] = contextvars.ContextVar("replay_set_dir", default=None)
+# True after use_for() found no set for this run: replay is then off, so an outage never borrows another request's replies.
+_unmatched: contextvars.ContextVar[bool] = contextvars.ContextVar("replay_unmatched", default=False)
 _down_until: dict[str, float] = {}
 
 
@@ -83,7 +86,7 @@ def current_dir() -> Path:
 
 def enabled() -> bool:
     s = get_settings()
-    return bool(s.sample_mode and (current_dir() / "manifest.json").is_file())
+    return bool(s.sample_mode and not _unmatched.get() and (current_dir() / "manifest.json").is_file())
 
 
 def offline() -> bool:
@@ -105,18 +108,20 @@ def available_sets() -> list[dict]:
 
 def use_for(request: Any) -> bool:
     """Choose the recorded set that matches the request's agency and period for this run. Returns False when none
-    does (the default REPLAY_SET then applies, or the run is refused in offline mode)."""
+    does: replay is then disabled for the run (live failures surface as errors), and offline mode refuses it."""
     for s in available_sets():
         r = s["request"]
         if (str(r.get("agency", "")).strip().lower() == request.agency.strip().lower()
                 and r.get("date_from") == str(request.date_from) and r.get("date_to") == str(request.date_to)):
             _set_dir.set(s["dir"])
+            _unmatched.set(False)
             with _lock:
                 st = _load(str(s["dir"]))
                 st.used.clear()
                 st.cursor.clear()
             return True
     _set_dir.set(None)
+    _unmatched.set(True)
     return False
 
 

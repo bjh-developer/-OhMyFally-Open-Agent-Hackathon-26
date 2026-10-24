@@ -132,3 +132,22 @@ def test_committed_hdb_set_replays_a_full_memo_with_services_down(monkeypatch, t
     assert memo is not None and memo.findings
     assert memo.limitations[0].startswith(replay.MEMO_LINE) and replay.MEMO_LINE in memo.markdown
     assert any(e.replayed for e in tr.events) and all(e.status != "failed" for e in tr.events)
+
+
+def test_request_without_its_own_set_never_borrows_another(fixture_set, monkeypatch):
+    """A live run whose request has no recorded set must not fall back to the default REPLAY_SET (another request's
+    recordings) during an outage."""
+    import contextvars
+    from types import SimpleNamespace
+    _down(monkeypatch, fixture_set)
+    req = SimpleNamespace(agency="Nowhere Agency", date_from="2020-01-01", date_to="2020-12-31")
+
+    def run():
+        assert replay.use_for(req) is False
+        assert not replay.enabled()
+        with pytest.raises(ZetarisError):
+            run_sql("SELECT count(*) FROM t")
+        with pytest.raises(NightshiftError):
+            chat("fast", MSGS, Out)
+
+    contextvars.copy_context().run(run)
