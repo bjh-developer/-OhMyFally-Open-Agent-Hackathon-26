@@ -15,11 +15,22 @@ behind it, the red-flag rule that fired, and the AGO excerpt that says why that 
 
 ## Contents
 
-1. [What it is](#1-what-it-is) · 2. [Quick start](#2-quick-start-for-judges) · 3. [How SAMPLE_MODE works](#3-how-sample_mode-really-works) ·
-4. [Architecture](#4-architecture-and-agent-roles) · 5. [Red flags](#5-red-flags-r1-r9) · 6. [Traces and logs](#6-traces-and-logs) ·
-7. [Sponsor technology](#7-sponsor-technology-explanation) · 8. [Evaluation](#8-evaluation) · 9. [Data and licences](#9-data-sources-and-licences) ·
-10. [Configuration](#10-configuration) · 11. [Tests](#11-tests) · 12. [Limitations](#12-limitations) · 13. [Responsible AI](#13-responsible-ai) ·
-14. [Pre-existing components](#14-pre-existing-components-to-declare) · 15. [Team](#15-team) · 16. [Repository layout](#16-repository-layout)
+1. [What it is](#1-what-it-is)
+2. [Quick start](#2-quick-start-for-judges)
+3. [How SAMPLE_MODE works](#3-how-sample_mode-really-works)
+4. [Architecture](#4-architecture-and-agent-roles)
+5. [Red flags](#5-red-flags-r1-r9)
+6. [Traces and logs](#6-traces-and-logs)
+7. [Sponsor technology](#7-sponsor-technology-explanation)
+8. [Evaluation](#8-evaluation)
+9. [Data and licences](#9-data-sources-and-licences)
+10. [Configuration](#10-configuration)
+11. [Tests](#11-tests)
+12. [Limitations](#12-limitations)
+13. [Responsible AI](#13-responsible-ai)
+14. [Pre-existing components](#14-pre-existing-components-to-declare)
+15. [Team](#15-team)
+16. [Repository layout](#16-repository-layout)
 
 ## 1. What it is
 
