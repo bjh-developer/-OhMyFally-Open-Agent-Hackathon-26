@@ -37,7 +37,7 @@ behind it, the red-flag rule that fired, and the AGO excerpt that says why that 
 
 ### Path A: offline sample mode (no services, no credentials)
 
-This replays live-recorded Zetaris results and Nightshift replies for the four recorded inputs. The agents, rules, Critic and
+This replays live-recorded Zetaris results and Nightshift replies for the five recorded inputs. The agents, rules, Critic and
 Reporter still run. Read [section 3](#3-how-sample_mode-really-works) for exactly what is and is not real.
 
 **With Python 3.11:**
@@ -48,7 +48,7 @@ pip install -r requirements.txt
 SAMPLE_MODE=true python run.py --input input_examples/example_1.json
 ```
 
-Try the other recorded inputs the same way: `example_2.json`, `example_3.json`, `example_remaining.json`.
+Try the other recorded inputs the same way: `example_2.json`, `example_3.json`, `example_4.json`, `example_remaining.json`.
 
 **With Docker:**
 
@@ -172,8 +172,8 @@ So a real `.env` with credentials does **not** put you offline even with `SAMPLE
 URLs at a closed port with dummy credentials: the run tried the live services first (about 17 seconds of retries), then finished
 from the recordings and labelled them.
 
-**What is replayed.** Four recorded sets under `data/replay/`, one per file in `input_examples/`, captured from real runs on 23 Oct:
-`hdb-fy2425` (example 1), `pa-2024` (example 2), `nparks-2023-2025` (example 3) and `synthetic-2025` (`example_remaining`). Each holds
+**What is replayed.** Five recorded sets under `data/replay/`, one per file in `input_examples/`, captured from real runs on 23-24 Oct:
+`hdb-fy2425` (example 1), `pa-2024` (example 2), `nparks-2023-2025` (example 3), `pa-fy2125` (example 4) and `synthetic-2025` (`example_remaining`). Each holds
 the Zetaris result for every SQL statement (keyed by a hash of the statement) and every Nightshift reply, with the original
 receipt id and routed model.
 
@@ -304,8 +304,9 @@ model that answered, and the Nightshift receipt. The second is the Critic escala
 
 In the same file the Critic's `validate_claims` line reads "used 4 past decisions (recalled 11)" and the memo's `stats` record 6
 suppressed findings: those are H-MEM suppressions. Examples 1 to 3 contain no Critic-to-Analyst retry or replan
-(`revise=[]` in all three). `example_4` (People's Association, 2021-04-01 to 2026-03-31, a live run added to `output_examples/` after
-this README was written) is the one whose trace shows Critic `needs_revision` steps and retries. The loops are also exercised by
+(`revise=[]` in all three). `example_4` (People's Association, 2021-04-01 to 2026-03-31, live run `run_20261024_085112_e8457f`, no replayed data) is the one that shows
+the loops: its Critic `validate_claims` step returns `needs_revision` 3 times, the Analyst and Resolver re-run with
+`retry_count` up to 2, and the Critic escalates 26 shared addresses to human review. The loops are also exercised by
 `tests/test_graph.py` and `tests/test_behaviour.py`, and the web mock run plays one.
 
 ## 7. Sponsor technology explanation
@@ -493,7 +494,7 @@ Zetaris and `RUN_LIVE_SQL_TESTS=1`) and `tests/test_hmem_client.py` (needs the `
 registered, so this command selects every test; the live ones simply skip. With Zetaris and H-MEM up they run, including the
 planted-case checks against real data. Web tests: `cd web && npm test`.
 
-**CI.** `.github/workflows/ci.yml` runs a TruffleHog secret scan over the full git history and `pytest -m "not live"`; see the workflow file for its triggers.
+**CI.** `.github/workflows/ci.yml` runs a TruffleHog secret scan over the full git history and `pytest -m "not live"`; on every push to `main` and every pull request.
 
 **H-MEM conformance and tests:** see [section 7](#meterless-h-mem-auditor-memory) (13/13 conformance checks; `npm test` 21 passed).
 
@@ -506,13 +507,13 @@ planted-case checks against real data. Web tests: `cd web && npm test`.
   subset, so a renamed company whose old and new names share no first word can be missed.
 - **Noisy flags.** R3 produces many benign matches (shared buildings and business centres), R2 uses current status only, and R5 and R6 are uncalibrated.
   The Critic and Risk agents reduce but do not remove this. Precision on real awards is unmeasured.
-- **Offline mode covers only the four recorded inputs**, and a missing recording degrades to rule-based text.
+- **Offline mode covers only the five recorded inputs**, and a missing recording degrades to rule-based text.
 - **Nightshift 499 and 502 errors happen.** The agent retries, then falls back to rule-based text. The committed
   `output_examples/example_3` memo shows it: its Reporter narrative failed with HTTP 499, so the memo says "narrative unavailable"
   and lists findings straight from the SQL evidence.
 - **R5 needs the local model**, prepared once with `prepare_r5.py --download-model`, because Nightshift has no embeddings endpoint.
 - **Live runs are slow**: about 1 to 5 minutes for the examples.
-- **Not production-ready.** It is a hackathon prototype: no authentication on the API, runs held in memory, a local single-node setup.
+- **Not production-ready.** It is a hackathon prototype: no authentication on the API, an in-process run registry (finished runs are re-read from `logs/` after a restart), a local single-node setup.
 - **Human review is required.** Every output is a lead for an auditor to check, not a conclusion.
 
 ## 13. Responsible AI
@@ -564,10 +565,10 @@ app/                    Python 3.11 package
 services/hmem/          H-MEM service (TypeScript, Apache-2.0), with NOTICE
 services/hmem-upstream/ Meterless reference and the official conformance suite
 sql/                    register/ (Zetaris sources and USL), checks/ (R1-R6, R8, R9), critic/
-data/                   sample/ (committed samples), replay/ (4 recorded sets), rules/, ago/, eval/
+data/                   sample/ (committed samples), replay/ (5 recorded sets), rules/, ago/, eval/
 scripts/                seed, register_zetaris, prepare_r5, smoke_test, eval, eval_resolver, record_replay, token_baseline
 web/                    Next.js UI on port 3100 (optional)
-input_examples/         request files (example_1 to example_3, example_remaining; example_4 is added with its live output)
+input_examples/         request files (example_1 to example_4, example_remaining)
 output_examples/        memos, traces and metrics from live runs
 logs/evidence/          H-MEM conformance output
 tests/                  pytest suite

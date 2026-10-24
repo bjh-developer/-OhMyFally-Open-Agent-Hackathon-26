@@ -26,7 +26,7 @@ What you will see:
 
 Limits of sample mode:
 
-- Only the four recorded requests (the files in `input_examples/`) can run offline. Any other agency or period is refused with a
+- Only the five recorded requests (the files in `input_examples/`) can run offline. Any other agency or period is refused with a
   message that lists what is recorded. To run anything else, set the Zetaris and Nightshift variables (section 3).
 - If a recorded model reply is missing, that step uses its rule-based fallback (deterministic scores, template
   narrative) and the memo says how many.

@@ -23,7 +23,7 @@
     "variable": "SAMPLE_MODE",
     "offline_condition": "SAMPLE_MODE=true with no Zetaris key and no Nightshift token: answers come only from recorded sets in data/replay/, no network",
     "live_first_condition": "With at least one credential set, live services are tried first; recordings answer only after outage-type failures",
-    "recorded_sets": ["hdb-fy2425", "pa-2024", "nparks-2023-2025", "synthetic-2025"],
+    "recorded_sets": ["hdb-fy2425", "pa-2024", "nparks-2023-2025", "pa-fy2125", "synthetic-2025"],
     "labels": "ids prefixed replay:, model suffixed (replayed), memo limitation line",
     "h_mem_in_offline_mode": false
   },
@@ -55,7 +55,7 @@
       "models_in_traces": {
         "nvidia/nemotron-3.5-super-vl-120b-a12b": ["PlannerAgent", "CriticAgent", "RiskAgent", "ReporterAgent"]
       },
-      "source": "routed_model in output_examples/example_{1,2,3}.trace.jsonl",
+      "source": "routed_model in output_examples/example_{1,2,3,4}.trace.jsonl",
       "resolver_tiebreak_model": "nvidia/nemotron-3.5-lightning-30b-a3b (one receipt recorded in docs/handover/d1-data.md section 8)"
     },
     "cursor": "not used"
@@ -67,8 +67,8 @@
     {"name": "Planted cases and synthetic internal records", "origin": "written by the team, fictional suppliers only", "licence": "project-owned"}
   ],
   "red_flags": {"implemented": ["R1", "R2", "R3", "R4", "R5", "R6", "R8", "R9"], "defined_not_implemented": ["R7"], "r4_note": "partial: GeBIZ holds no quotation (ETQ) records"},
-  "input_examples": ["input_examples/example_1.json", "input_examples/example_2.json", "input_examples/example_3.json", "input_examples/example_remaining.json"],
-  "output_examples": ["output_examples/example_1.memo.json", "output_examples/example_2.memo.json", "output_examples/example_3.memo.json", "output_examples/example_1.trace.jsonl", "output_examples/example_2.trace.jsonl", "output_examples/example_3.trace.jsonl", "output_examples/metrics.json", "output_examples/resolver_metrics.json", "output_examples/token_savings.json"],
+  "input_examples": ["input_examples/example_1.json", "input_examples/example_2.json", "input_examples/example_3.json", "input_examples/example_4.json", "input_examples/example_remaining.json"],
+  "output_examples": ["output_examples/example_1.memo.json", "output_examples/example_2.memo.json", "output_examples/example_3.memo.json", "output_examples/example_1.trace.jsonl", "output_examples/example_2.trace.jsonl", "output_examples/example_3.trace.jsonl", "output_examples/example_4.memo.json", "output_examples/example_4.trace.jsonl", "output_examples/metrics.json", "output_examples/resolver_metrics.json", "output_examples/token_savings.json"],
   "tests": {
     "python": "pytest -m \"not live\"",
     "hmem_conformance": "cd services/hmem && npm install && HMEM_IMPL=\"$(pwd)/src/index.ts\" npx tsx ../hmem-upstream/conformance/runner.ts",
