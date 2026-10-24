@@ -6,11 +6,11 @@
     "date_to": "2026-03-31",
     "flags": []
   },
-  "source_run_id": "run_20261024_084508_0600ac",
+  "source_run_id": "run_20261024_175705_091b3d",
   "hmem_used": false,
-  "git_sha": "b1ae1da",
+  "git_sha": "2ce5d91",
   "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
-  "recorded_at": "2026-10-24T08:49:07+0800",
+  "recorded_at": "2026-10-24T18:07:20+0800",
   "zetaris_queries": 16,
-  "nightshift_calls": 18
+  "nightshift_calls": 16
 }
