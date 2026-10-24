@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import re
 import threading
 import time
@@ -25,7 +26,9 @@ from .schemas import Memo, RunRequest
 from .tracing import Tracer, format_event, new_run_id
 
 app = FastAPI(title="Procurement Integrity Investigator")
-app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:3100", "http://localhost:3100"],
+# The web UI's origin; CORS_ORIGINS (comma-separated) overrides it, e.g. when the UI runs on another port.
+_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://127.0.0.1:3100,http://localhost:3100").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=_ORIGINS,
                    allow_methods=["GET", "POST"], allow_headers=["*"])
 
 _RUNS: dict[str, dict[str, Any]] = {}
