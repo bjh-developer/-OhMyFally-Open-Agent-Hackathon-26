@@ -20,7 +20,7 @@
     "unmatched_labels": 0,
     "nonplanted_candidates": 92,
     "review_coverage": 0.0,
-    "labels_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\data\\eval\\precision_review.csv",
+    "labels_path": "data/eval/precision_review.csv",
     "queue_created": false,
     "queue_selection": "Top 30 nonplanted sample findings by award value; no supplier names or addresses"
   },
@@ -341,7 +341,7 @@
         "R9": 1
       },
       "runtime_seconds": 39.453,
-      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075819_1.jsonl",
+      "trace_path": "logs/eval_20261023_075819/run_eval_20261023_075819_1.jsonl",
       "supplemental": false
     },
     {
@@ -366,7 +366,7 @@
         "R4": 7
       },
       "runtime_seconds": 12.329,
-      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075859_2.jsonl",
+      "trace_path": "logs/eval_20261023_075819/run_eval_20261023_075859_2.jsonl",
       "supplemental": false
     },
     {
@@ -399,7 +399,7 @@
         "R8": 1
       },
       "runtime_seconds": 38.187,
-      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075911_3.jsonl",
+      "trace_path": "logs/eval_20261023_075819/run_eval_20261023_075911_3.jsonl",
       "supplemental": false
     }
   ],
@@ -424,7 +424,7 @@
         "R3": 212
       },
       "runtime_seconds": 9.516,
-      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075949_4.jsonl",
+      "trace_path": "logs/eval_20261023_075819/run_eval_20261023_075949_4.jsonl",
       "supplemental": true
     },
     {
@@ -450,7 +450,7 @@
         "R6": 5
       },
       "runtime_seconds": 19.281,
-      "trace_path": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\logs\\eval_20261023_075819\\run_eval_20261023_075959_5.jsonl",
+      "trace_path": "logs/eval_20261023_075819/run_eval_20261023_075959_5.jsonl",
       "supplemental": true
     }
   ],
@@ -701,15 +701,15 @@
   "provenance": {
     "inputs": [
       {
-        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_1.json",
+        "file": "input_examples/example_1.json",
         "sha256": "d61b750d5b8031f2c34ddff5c26e0c3217e70f0d8c2d63616b3a13f20ba018ae"
       },
       {
-        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_2.json",
+        "file": "input_examples/example_2.json",
         "sha256": "c0d8e22a0e68b5cb75eca2f2ca16d8c8ea48c067e07b712bf20c8998091e96bf"
       },
       {
-        "file": "C:\\Users\\incha\\ohMyFally\\-OhMyFally-Open-Agent-Hackathon-26\\input_examples\\example_3.json",
+        "file": "input_examples/example_3.json",
         "sha256": "1c9ef1bee1b1b99e2bf94f328ee34beafec1b34028d8ebd49965f7e843c34f62"
       }
     ],

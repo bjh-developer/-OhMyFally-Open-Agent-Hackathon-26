@@ -104,7 +104,7 @@ then:
    python scripts/prepare_r5.py --download-model   # once: R5 text-similarity scores (see below)
    ```
 
-   Nightshift does not serve `/embeddings` (we saw HTTP 404 on 23 Oct; the script also handles 405 and 501), so R5 uses a small
+   Nightshift does not serve `/embeddings` (it returned HTTP 501 when we checked on 23 Oct; the script also handles 404 and 405), so R5 uses a small
    local model, `sentence-transformers/all-MiniLM-L6-v2` through fastembed. `--download-model` fetches it once into the
    gitignored `.cache/embeddings/`. Investigation runs never download or load a model; they read the precomputed scores from
    Zetaris.
@@ -131,9 +131,8 @@ METERLESS_BASE_URL=http://host.docker.internal:8088/v1
 HMEM_URL=http://host.docker.internal:7070
 ```
 
-Mount the `.env` file instead of using `--env-file`: Docker does not strip the inline `# ...` comments that `.env.example`
-puts after `METERLESS_APP_DEEP` and `METERLESS_APP_FAST`, which would corrupt those two values. The app reads `/app/.env` with
-`python-dotenv`, which handles them. On Linux, add `--add-host=host.docker.internal:host-gateway`. Mount `logs/` to keep the traces.
+Mounting `.env` lets the app read it with `python-dotenv` exactly as on the host; `--env-file .env` also works, as long as
+comments stay on their own lines (Docker keeps an inline `# ...` as part of the value). On Linux, add `--add-host=host.docker.internal:host-gateway`. Mount `logs/` to keep the traces.
 
 ```bash
 docker run --rm -p 8000:8000 -v "$PWD/.env:/app/.env:ro" -v "$PWD/logs:/app/logs" oah-submission
