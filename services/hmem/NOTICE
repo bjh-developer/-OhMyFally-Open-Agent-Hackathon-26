@@ -9,3 +9,8 @@ Modifications: file-backed persistence under state/, an HTTP server
 (src/server.ts) implementing the Procurement Integrity Investigator memory
 contract, a Dockerfile, and HTTP tests. src/index.ts still exports HMEM so the
 official conformance suite runs unchanged.
+
+The vendored reference copy in services/hmem-upstream/reference is unchanged except
+for its development dependency: vitest was raised from ^2.1.0 to ^4.1.12 (26 Oct 2026)
+to clear security advisories in the old test toolchain. Its source and tests are as
+published upstream.
