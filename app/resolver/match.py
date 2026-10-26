@@ -47,7 +47,7 @@ def _compatible(supplier_name: str, e: Entity) -> bool:
 def _pick(idxs: list[int], index: EntityIndex, supplier_name: str) -> tuple[list[Entity], Entity | None]:
     """Candidates after the legal-form filter, and the single winner if one is clearly best."""
     cands = [index.entities[i] for i in idxs]
-    ok = [e for e in cands if _compatible(supplier_name, e)] or cands
+    ok = [e for e in cands if _compatible(supplier_name, e)]
     if len(ok) == 1:
         return ok, ok[0]
     live = [e for e in ok if e.live]
@@ -65,6 +65,8 @@ def _pass1_one(name: str, index: EntityIndex) -> Match | None:
         if not idxs:
             continue
         ok, winner = _pick(idxs, index, name)
+        if not ok:
+            continue  # Same spelling cannot override a conflicting legal form.
         cands = [e.brief(method) for e in ok]
         if winner is not None:
             conf = base if len(ok) == 1 else base - 0.05

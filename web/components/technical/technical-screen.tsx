@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/technical/copy-button";
+import { BehaviourPanel } from "@/components/technical/behaviour-panel";
 import { AgentDiagram } from "@/components/technical/agent-diagram";
 import { H1 } from "@/components/review/review-screen";
 import { formatDuration } from "@/lib/copy";
@@ -92,14 +93,15 @@ export function TechnicalScreen() {
     const receipts = new Set(events.flatMap(ids));
     const queries = new Set(events.flatMap((e) => e.zetaris_query_ids ?? []));
     const t = events.map((e) => Date.parse(e.timestamp)).filter((n) => !Number.isNaN(n));
-    const calls = typeof memo?.stats?.llm_calls === "number" ? (memo.stats.llm_calls as number) : receipts.size;
+    const calls = receipts.size; // one per receipt id, the same count as GET /runs/{id}/summary
     return {
       time: t.length > 1 ? formatDuration((Math.max(...t) - Math.min(...t)) / 1000) : "–",
       calls,
       receipts: receipts.size,
       queries: queries.size,
       critiques: events.filter((e) => e.status === "needs_revision").length,
-      retries: events.filter((e) => e.status === "retrying").length,
+      // Agents record a re-run as retry_count on the step, not as a "retrying" status (same rule as app/run_summary.py).
+      retries: Math.max(0, ...events.map((e) => e.retry_count ?? 0)),
       escalations: events.filter((e) => e.status === "escalated").length,
     };
   }, [events, memo]);
@@ -133,7 +135,6 @@ export function TechnicalScreen() {
           {runId && <Fact label="Run ID" value={runId} copy={runId} />}
           <Fact label="Time taken" value={facts.time} />
           <Fact label="Model calls" value={facts.calls} />
-          <Fact label="Nemotron receipts" value={facts.receipts} />
           <Fact label="Zetaris queries" value={facts.queries} />
           <Fact label="Critiques" value={facts.critiques} />
           <Fact label="Retries" value={facts.retries} />
@@ -152,6 +153,8 @@ export function TechnicalScreen() {
           </Button>
         </div>
       </section>
+
+      <BehaviourPanel runId={runId} state={state} isMock={isMock} />
 
       <section aria-labelledby="timeline" className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-4">

@@ -1,4 +1,6 @@
 """Unit tests for name normalisation and the deterministic/fuzzy Resolver layers (no network)."""
+import pytest
+
 from app.resolver.entities import Entity, EntityIndex
 from app.resolver.match import resolve
 from app.resolver.normalize import has_local_suffix, normalize
@@ -78,3 +80,28 @@ def test_llm_tiebreak_only_accepts_listed_candidates_and_caps_confidence():
     assert m.method == "llm_tiebreak" and m.uen == "A2" and m.confidence <= 0.85
     bad = lambda items: {it["id"]: {"uen": "NOT-A-CANDIDATE", "confidence": 0.9} for it in items}  # noqa: E731
     assert resolve(["SUNRISE LOGISTIC SVC PTE LTD"], idx, tiebreak=bad)[0].uen is None
+
+
+@pytest.mark.parametrize("supplier,entity_name,entity_type,formers", [
+    ("QUILLORA TEST TECH LLP", "QUILLORA TEST TECH PTE LTD", "Local Company", ()),
+    ("QUILLORA TEST TECH PTE LTD", "QUILLORA TEST TECH LLP", "Limited Liability Partnership", ()),
+    ("OLD QUILLORA TEST TECH LLP", "NEW QUILLORA TEST TECH PTE LTD", "Local Company", ("OLD QUILLORA TEST TECH",)),
+])
+def test_incompatible_legal_form_never_becomes_a_unique_name_match(supplier, entity_name, entity_type, formers):
+    index = EntityIndex([ent("TEST-ONLY", entity_name, etype=entity_type, formers=formers)])
+    match = resolve([supplier], index)[0]
+    assert match.uen is None
+    assert match.method == "unresolved"
+
+
+def test_expanded_legal_suffix_and_branch_name_use_the_same_identity():
+    index = EntityIndex([
+        ent("TEST-CO", "QUILLORA TEST ENGINEERING PTE. LTD."),
+        ent("TEST-BRANCH", "QUILLORA TEST INTERNATIONAL (SINGAPORE BRANCH)", etype="Foreign Company Branch"),
+    ])
+    company, branch = resolve([
+        "Quillora Test Engineering Private Limited",
+        "Quillora Test International (Singapore Branch)",
+    ], index)
+    assert company.uen == "TEST-CO"
+    assert branch.uen == "TEST-BRANCH"

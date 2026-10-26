@@ -1,0 +1,89 @@
+{
+ "entries": [
+  {
+   "lane": "deep",
+   "agent": "You are the Planner of a procurement-integrity screening system for a government agency au",
+   "sys_key": "b5765ccb4f1d77d7",
+   "exact_key": "977687902dc753b4",
+   "prompt_chars": 1424,
+   "content": "{\"checks\": [\"R1\", \"R4\"], \"rationale\": \"R1 screens for suppliers incorporated shortly before award to identify new suppliers, and R4 detects possible contract splitting across People's Association 2024 awards.\"}",
+   "receipt_id": "rcpt_req_nychrpuj",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 1674,
+   "usage": {
+    "prompt_tokens": 657,
+    "completion_tokens": 203,
+    "total_tokens": 860
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "6336dc664472affc",
+   "prompt_chars": 3436,
+   "content": "{\"checks\":[{\"finding_id\":\"R4-483e8e5c\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"},{\"finding_id\":\"R4-e737d497\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"}]}",
+   "receipt_id": "rcpt_req_1aehupg5",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 8775,
+   "usage": {
+    "prompt_tokens": 2123,
+    "completion_tokens": 546,
+    "total_tokens": 2669
+   },
+   "calls": 1
+  },
+  {
+   "lane": "fast",
+   "agent": "You are a strict verifier. For each finding decide whether the facts in its summary (names",
+   "sys_key": "71a8859a1ae014a1",
+   "exact_key": "83dcd27bfe4206bf",
+   "prompt_chars": 7082,
+   "content": "{\"checks\":[{\"finding_id\":\"R4-aa48ec89\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"},{\"finding_id\":\"R4-b3c683b3\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"},{\"finding_id\":\"R4-c2c72879\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"},{\"finding_id\":\"R4-5f22be37\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"},{\"finding_id\":\"R4-290778ce\",\"supported\":true,\"reason\":\"Supplier, tender, agency, amount, date, window total and threshold match evidence.\"}]}",
+   "receipt_id": "rcpt_req_opp36wzj",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 15109,
+   "usage": {
+    "prompt_tokens": 7702,
+    "completion_tokens": 1918,
+    "total_tokens": 9620
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You triage procurement anomalies for an agency auditor. Score each finding's review priori",
+   "sys_key": "6f80bcbad053d646",
+   "exact_key": "704944db7c1f7cff",
+   "prompt_chars": 6142,
+   "content": "{\"scores\":[{\"finding_id\":\"R4-b3c683b3\",\"priority\":85,\"reason\":\"Largest award; window well above threshold; high confidence.\"},{\"finding_id\":\"R4-aa48ec89\",\"priority\":80,\"reason\":\"Large award; window well above threshold; high confidence.\"},{\"finding_id\":\"R4-e737d497\",\"priority\":70,\"reason\":\"Large award; window slightly above threshold; high confidence.\"},{\"finding_id\":\"R4-c2c72879\",\"priority\":60,\"reason\":\"Moderate award; window above threshold; high confidence.\"},{\"finding_id\":\"R4-5f22be37\",\"priority\":55,\"reason\":\"Smaller award; window above threshold; high confidence.\"},{\"finding_id\":\"R4-290778ce\",\"priority\":50,\"reason\":\"Small award; window above threshold; high confidence.\"},{\"finding_id\":\"R4-483e8e5c\",\"priority\":40,\"reason\":\"Small award; window slightly above threshold; high confidence.\"}]}",
+   "receipt_id": "rcpt_req_5yvq6hyh",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 14365,
+   "usage": {
+    "prompt_tokens": 6601,
+    "completion_tokens": 1697,
+    "total_tokens": 8298
+   },
+   "calls": 1
+  },
+  {
+   "lane": "deep",
+   "agent": "You write the opening of an audit memo. Use only the facts given. Use the phrases 'anomaly",
+   "sys_key": "2c0af6dc82fe6d9b",
+   "exact_key": "7376bf7ec89163eb",
+   "prompt_chars": 5937,
+   "content": "{\"headline\":\"People's Association accepted seven anomalies for review in 2024 involving sub-S$90,000 awards to three suppliers whose combined 90-day totals exceeded the S$90,000 tender threshold.\",\"overview\":\"All seven accepted items are anomalies for review and may indicate a concern that requires auditor judgement. EFFECTS TECHNOLOGIES PTE. LTD. received two awards totaling S$131,600 within 90 days starting 2024-11-06; UNIVERSAL DISPLAYS PTE LTD received two awards totaling S$95,388.70 within 90 days starting 2024-08-27; and NEBULON TEST WORKS PTE. LTD. received three awards totaling S$105,000 within 90 days starting 2024-07-01. None of the findings were suppressed or rejected.\"}",
+   "receipt_id": "rcpt_req_wipx3f72",
+   "routed_model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+   "latency_ms": 14606,
+   "usage": {
+    "prompt_tokens": 6491,
+    "completion_tokens": 2008,
+    "total_tokens": 8499
+   },
+   "calls": 1
+  }
+ ]
+}

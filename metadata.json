@@ -1,0 +1,84 @@
+{
+  "project_name": "ProcureLens",
+  "alternate_name": "Procurement Integrity Investigator",
+  "hackathon": "Open Agent Hackathon 2026",
+  "track": "Track 02: The Agent That Can Explain Why",
+  "team": {
+    "name": "OhMyFally",
+    "members": [
+      {"name": "Joon Hao", "role": "lead"},
+      {"name": "Inchara", "role": "member"}
+    ]
+  },
+  "description": "Multi-agent screening of Singapore public-procurement awards for agency internal auditors: every item is an anomaly for review, with the Zetaris query, source rows and AGO context behind it.",
+  "wording_policy": "Findings are anomalies for review, never conclusions of fraud or wrongdoing; a human auditor decides.",
+  "entry_points": {
+    "cli": "python run.py --input input_examples/example_1.json",
+    "api": "python run.py --serve  (POST /run on 0.0.0.0:$PORT, default 8000; GET /runs/{id}, /runs/{id}/summary, /runs/{id}/events, /healthz)",
+    "docker": "docker build -t oah-submission . && docker run --rm -p 8000:8000 -e SAMPLE_MODE=true oah-submission",
+    "web": "cd web && npm install && npm run dev  (Next.js on http://127.0.0.1:3100, optional)"
+  },
+  "sample_mode": {
+    "supported": true,
+    "variable": "SAMPLE_MODE",
+    "offline_condition": "SAMPLE_MODE=true with no Zetaris key and no Nightshift token: answers come only from recorded sets in data/replay/, no network",
+    "live_first_condition": "With at least one credential set, live services are tried first; recordings answer only after outage-type failures",
+    "recorded_sets": ["hdb-fy2425", "pa-2024", "nparks-2023-2025", "pa-fy2125", "synthetic-2025"],
+    "labels": "ids prefixed replay:, model suffixed (replayed), memo limitation line",
+    "h_mem_in_offline_mode": false
+  },
+  "sponsor_usage": {
+    "zetaris": {
+      "role": "Data layer: all agent data access goes through Zetaris REST (app/adapters/zetaris.py)",
+      "sources": ["gebiz_pg (Postgres: awards, rules, ago_chunks, supplier_xwalk)", "internal_pg (Postgres, synthetic bids, evaluations, COI)", "ACRA_FILES.entities (Parquet on S3)"],
+      "usl_model": "procurement_usl (namespace lightning.metastore.procurement); registered and verified by scripts/register_zetaris.py, demonstrated in scripts/usl_demo.sql; agent checks query the registered sources directly",
+      "agents_using_it": ["PlannerAgent", "ResolverAgent", "AnalystAgent", "CriticAgent (re-runs check SQL, R3 address density, plan coverage)"],
+      "pushdown_token_saving": "output_examples/token_savings.json"
+    },
+    "meterless_hmem": {
+      "engine": "H-MEM",
+      "implementation": "services/hmem (TypeScript, adapted from the Meterless reference, Apache-2.0)",
+      "feature": "Auditor Confirm/Dismiss decisions are stored; the Critic suppresses an exactly dismissed finding (same UEN, flag, agency) or down-weights a dismissed pattern; the Planner recalls agency memory",
+      "agents_using_it": ["CriticAgent", "PlannerAgent"],
+      "conformance_command": "cd services/hmem && HMEM_IMPL=\"$(pwd)/src/index.ts\" npx tsx ../hmem-upstream/conformance/runner.ts",
+      "conformance_result": "13/13 checks passed (logs/evidence/hmem-conformance-d1-final.txt)"
+    },
+    "meterless_nightshift": {
+      "role": "Primary and only AI provider (OpenAI-compatible /v1/chat/completions); no NVIDIA key in the app",
+      "headers": ["Authorization: Bearer <runtime token>", "meterless-app", "meterless-scope: user"],
+      "lanes": {
+        "deep": {"app": "procurement-integrity", "model_name": "meterless/deep", "agents": ["PlannerAgent", "RiskAgent", "ReporterAgent"]},
+        "fast": {"app": "procurement-integrity-fast", "model_name": "meterless/fast", "agents": ["CriticAgent (claim check)", "ResolverAgent (tie-break)"]}
+      }
+    },
+    "nvidia": {
+      "models_in_traces": {
+        "nvidia/nemotron-3.5-super-vl-120b-a12b": ["PlannerAgent", "CriticAgent", "RiskAgent", "ReporterAgent"]
+      },
+      "source": "routed_model in output_examples/example_{1,2,3,4}.trace.jsonl",
+      "resolver_tiebreak_model": "routed per call by Nightshift: nvidia/nemotron-3.5-lightning-30b-a3b on 22 Oct (docs/handover/d1-data.md section 8), nvidia/nemotron-3.5-super-vl-120b-a12b on 24 Oct"
+    },
+    "cursor": "not used"
+  },
+  "data_sources": [
+    {"name": "GeBIZ awards", "origin": "data.gov.sg dataset d_acde1106003906a75c3fa052592f2fcb", "licence": "Singapore Open Data Licence v1.0"},
+    {"name": "ACRA Information on Corporate Entities", "origin": "data.gov.sg collection 2 (committed sample is privacy-minimised)", "licence": "Singapore Open Data Licence v1.0"},
+    {"name": "Auditor-General's Office annual report excerpts", "origin": "ago.gov.sg, verbatim excerpts in data/ago/", "licence": "quoted with attribution; see data/ago/README.md"},
+    {"name": "Planted cases and synthetic internal records", "origin": "written by the team, fictional suppliers only", "licence": "project-owned"}
+  ],
+  "red_flags": {"implemented": ["R1", "R2", "R3", "R4", "R5", "R6", "R8", "R9"], "defined_not_implemented": ["R7"], "r4_note": "partial: GeBIZ holds no quotation (ETQ) records"},
+  "input_examples": ["input_examples/example_1.json", "input_examples/example_2.json", "input_examples/example_3.json", "input_examples/example_4.json", "input_examples/example_remaining.json"],
+  "output_examples": ["output_examples/example_1.memo.json", "output_examples/example_2.memo.json", "output_examples/example_3.memo.json", "output_examples/example_1.trace.jsonl", "output_examples/example_2.trace.jsonl", "output_examples/example_3.trace.jsonl", "output_examples/example_4.memo.json", "output_examples/example_4.trace.jsonl", "output_examples/metrics.json", "output_examples/resolver_metrics.json", "output_examples/token_savings.json"],
+  "tests": {
+    "python": "pytest -m \"not live\"",
+    "hmem_conformance": "cd services/hmem && npm install && HMEM_IMPL=\"$(pwd)/src/index.ts\" npx tsx ../hmem-upstream/conformance/runner.ts",
+    "hmem_unit": "cd services/hmem && npm test",
+    "web": "cd web && npm test",
+    "live_evaluation": ["python scripts/eval.py", "python scripts/eval_resolver.py"]
+  },
+  "licence": {
+    "repository": "no top-level LICENSE file yet",
+    "services/hmem": "Apache-2.0 (adapted from Meterless H-MEM reference)"
+  },
+  "limitations": ["Not production-ready", "Human review required", "R4 partial", "Offline mode covers only the recorded inputs"]
+}

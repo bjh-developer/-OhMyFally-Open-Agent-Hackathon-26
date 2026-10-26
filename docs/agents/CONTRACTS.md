@@ -13,7 +13,7 @@ The team plan is the source of truth for *why*: https://claude.ai/code/artifact/
 ## 2. Hard rules (all owners, all agents)
 
 1. **No product code committed before 22 Oct 2026, 08:00 SGT** (00:00 UTC). Docs and config are fine.
-2. **Develop in Cursor.** This is required by the hackathon.
+2. **Any editor or coding agent.** Cursor is no longer required by the hackathon (confirmed 23 Oct).
 3. **Secrets live only in `.env`, which is gitignored.** Commit `.env.example` with placeholders. Never print, log, paste or put a key in a URL. The NVIDIA key lives only in Nightshift's Providers tab.
 4. **All LLM calls go through Nightshift.** Use the two app headers in §5, and never call build.nvidia.com directly except as the logged fallback.
 5. **All data access goes through Zetaris.** Do not query Postgres or S3 directly from agent code (setup and seed scripts are the exception).
@@ -60,7 +60,7 @@ docker-compose.yml  .env.example  run.py  README.md  metadata.json
 | Our Postgres | container `pi-postgres`; host `127.0.0.1:55432` | Joins Docker network `zetaris_default` |
 | Our S3 (SeaweedFS) | container `pi-s3:8333`; host `127.0.0.1:18333` | MinIO's image is no longer public |
 | H-MEM service | container `pi-hmem:7070`; host `127.0.0.1:7070` | TypeScript |
-| FastAPI | `127.0.0.1:8000` | `POST /run` |
+| FastAPI | `0.0.0.0:8000` (`python run.py --serve`, `PORT` overrides) | `POST /run` |
 | Web UI | `127.0.0.1:3100` | |
 
 All our containers join the **external** Docker network `zetaris_default`, so Zetaris can reach them by container name. This was verified on 21 Oct.
@@ -92,7 +92,7 @@ LLM_CALL_CAP=40
 SOURCE_TIMEOUT_SECONDS=20
 ```
 
-**Nightshift binds one mode per app.** Requests are coerced to the app's mode in Console → Apps. So the deep lane (Planner, Risk, Reporter) sends `meterless-app: $METERLESS_APP_DEEP`, and the fast lane (Resolver tie-breaks, Critic) sends `$METERLESS_APP_FAST`. Every request also sends `meterless-scope: user` and `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`. Use a 180 s timeout. Each response carries a `meterless` receipt; the tracer keeps `receipt_id`, `routed_model`, `latency_ms` and `egress`.
+**Nightshift binds one mode per app.** Requests are coerced to the app's mode in Console → Apps. So the deep lane (Planner, Risk, Reporter) sends `meterless-app: $METERLESS_APP_DEEP`, and the fast lane (Resolver tie-breaks, Critic) sends `$METERLESS_APP_FAST`. Every request also sends `meterless-scope: user` and `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`. Use a 90 s timeout. Each response carries a `meterless` receipt; the tracer keeps `receipt_id`, `routed_model`, `latency_ms` and `egress`.
 
 ## 6. H-MEM service HTTP contract (TypeScript, `services/hmem/`)
 
@@ -113,6 +113,15 @@ The service writes its trust ledger to `logs/hmem-ledger.jsonl`.
 - An exact match on (uen, flag_id, agency) with a `dismiss` decision suppresses the finding and cites the memory.
 - The same `pattern_tag` at the same agency down-weights the finding.
 - Memories never cross agencies unless `scope=global`.
+
+### 6.1 `POST /run` (changed 23 Oct, judge-ready)
+
+- Default (`?wait=true`): blocks and returns **200** with the run view: `{run_id, status:"done", memo, trace_path, events, trace_id, execution_time_seconds}`.
+- `?wait=false`: returns **202** at once with `{run_id, status:"running", ...}`; poll `GET /runs/{id}` or stream `GET /runs/{id}/events`. The web UI uses this.
+- A run that finishes after the 600 s wait budget also returns 202 so the caller can poll.
+- Errors never carry a stack trace: `{run_id, status:"error", error:{type, message, recoverable}, trace_id, execution_time_seconds}`. `request_rejected` (gate or offline sample mode with no recorded data) is 422 and recoverable, `invalid_request` (bad body) is 422 with `run_id: null`, `run_failed` is 500.
+- `GET /runs/{id}` keeps its previous shape (`error` is a string there).
+- `GET /runs/{id}` and `GET /runs/{id}/events` fall back to `logs/<id>.jsonl` and `logs/<id>.memo.json` for runs this process didn't start (an API restart, or a CLI run), so shared links keep working.
 
 ## 7. Data contracts
 

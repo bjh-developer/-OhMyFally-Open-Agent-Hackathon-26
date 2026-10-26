@@ -1,5 +1,5 @@
 
-H-MEM conformance: implementation = /Users/joonh/Coding/Open Agent Hackathon 2026/[OhMyFally] Open Agent Hackathon'26/services/hmem/src/index.ts
+H-MEM conformance: implementation = services/hmem/src/index.ts
 
   record-validation
     PASS rv-001 a record with no source is rejected by construction

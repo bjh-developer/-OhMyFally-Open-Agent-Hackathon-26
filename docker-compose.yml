@@ -56,6 +56,41 @@ services:
       retries: 10
     networks: [zetaris_default]
 
+  # The app itself: API on 8000, web UI on 3100. Profile "app" keeps these out of a plain `docker compose up`,
+  # so they never need the Zetaris network: run `docker compose up --build api web`.
+  # No .env (or no keys in it): offline sample mode on recorded data. With keys: live, reaching Zetaris,
+  # Nightshift and H-MEM on the host through host.docker.internal.
+  api:
+    build: .
+    profiles: ["app"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      SAMPLE_MODE: ${SAMPLE_MODE:-true}
+      ZETARIS_REST_URL: ${DOCKER_ZETARIS_REST_URL:-http://host.docker.internal:8888/api/v1.0}
+      METERLESS_BASE_URL: ${DOCKER_METERLESS_BASE_URL:-http://host.docker.internal:8088/v1}
+      HMEM_URL: ${DOCKER_HMEM_URL:-http://host.docker.internal:7070}
+      CORS_ORIGINS: http://localhost:${WEB_PORT:-3100},http://127.0.0.1:${WEB_PORT:-3100}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    volumes:
+      - ./logs:/app/logs
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-8000}
+    profiles: ["app"]
+    environment:
+      HMEM_URL: ${DOCKER_HMEM_URL:-http://host.docker.internal:7070}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3100}:3100"
+    depends_on: [api]
+
 volumes:
   pi_pgdata:
   pi_s3data:

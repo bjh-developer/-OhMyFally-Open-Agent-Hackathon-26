@@ -30,14 +30,14 @@ def red_flags() -> dict[str, dict]:
     p = RULES_DIR / "red_flags.yaml"
     out = {fid: {"flag_id": fid, "name": n, "priority": pr, "limitation": "", "why_it_matters": ""} for fid, (n, pr) in DEFAULT_FLAGS.items()}
     if p.exists():
-        for e in yaml.safe_load(p.read_text()) or []:
+        for e in yaml.safe_load(p.read_text(encoding="utf-8")) or []:
             out[e["flag_id"]] = {**out.get(e["flag_id"], {}), **e}
     return out
 
 
 @lru_cache(maxsize=1)
 def wording() -> dict:
-    return yaml.safe_load((RULES_DIR / "wording.yaml").read_text())
+    return yaml.safe_load((RULES_DIR / "wording.yaml").read_text(encoding="utf-8"))
 
 
 def banned_hits(text: str) -> list[str]:

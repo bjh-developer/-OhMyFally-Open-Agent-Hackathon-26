@@ -100,6 +100,7 @@ class Result:
     total: int | None = None
     attempts: int = 1
     meta: dict = field(default_factory=dict)
+    replayed: bool = False  # True when served from a recorded run (app/replay.py), not a live query
 
     def __len__(self) -> int:
         return len(self.rows)
@@ -122,7 +123,7 @@ class Result:
 
 # ---- client ----------------------------------------------------------------
 
-def run_sql(
+def _run_sql_live(
     sql: str,
     *,
     limit: int = 1000,
@@ -181,3 +182,38 @@ def run_sql(
     finally:
         if own:
             client.close()
+
+
+def run_sql(
+    sql: str,
+    *,
+    limit: int = 1000,
+    timeout: float | None = None,
+    retries: int | None = None,
+    client: httpx.Client | None = None,
+) -> Result:
+    """Live query. If Zetaris is unreachable (transport error, timeout, 5xx) and replay mode is on
+    (SAMPLE_MODE=true and a recorded set exists), serve the recorded result, labelled ``replayed``."""
+    from .. import replay
+
+    if replay.offline():  # SAMPLE_MODE without credentials: recordings only, no network
+        rec = replay.serve_sql(sql) if replay.enabled() else None
+        if rec is None:
+            raise ZetarisError("offline sample mode: no recorded Zetaris result for this query")
+        return rec
+    if replay.enabled() and replay.breaker_open("zetaris"):
+        rec = replay.serve_sql(sql)
+        if rec is not None:
+            return rec
+    try:
+        res = _run_sql_live(sql, limit=limit, timeout=timeout, retries=retries, client=client)
+    except ZetarisError as e:
+        if (e.status is None or e.status >= 500) and replay.enabled():
+            replay.trip("zetaris")
+            rec = replay.serve_sql(sql)
+            if rec is not None:
+                log.warning("zetaris unreachable (%s); served recorded result %s", e, rec.query_id)
+                return rec
+        raise
+    replay.record_sql(res)
+    return res

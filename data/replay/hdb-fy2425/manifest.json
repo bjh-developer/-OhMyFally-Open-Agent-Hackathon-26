@@ -1,0 +1,16 @@
+{
+  "name": "hdb-fy2425",
+  "request": {
+    "agency": "Housing and Development Board",
+    "date_from": "2024-04-01",
+    "date_to": "2025-03-31",
+    "flags": []
+  },
+  "source_run_id": "run_20261024_171956_eba092",
+  "hmem_used": false,
+  "git_sha": "df8afd5",
+  "note": "Recorded from one live run. Replayed output is NOT a live run; it is labelled as such.",
+  "recorded_at": "2026-10-24T17:22:44+0800",
+  "zetaris_queries": 16,
+  "nightshift_calls": 8
+}

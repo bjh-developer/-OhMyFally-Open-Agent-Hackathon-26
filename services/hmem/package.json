@@ -16,6 +16,6 @@
     "tsx": "^4.19.0"
   },
   "devDependencies": {
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   }
 }

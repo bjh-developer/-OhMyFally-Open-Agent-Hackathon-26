@@ -16,6 +16,12 @@ def load(name: str) -> dict:
     return json.loads((FIX / f"{name}.json").read_text())
 
 
+DEFAULTS = {  # not recorded from Zetaris: plausible Critic-side answers (a covered period, quotations present, no R3 addresses)
+    "coverage": {"headers": ["n_all", "min_date", "max_date", "n_period", "n_etq"], "data": [["100", "2021-04-01", "2026-03-31", "40", "5"]]},
+    "density": {"headers": ["uen", "level_no", "unit_no", "postal_code", "n_entities"], "data": []},
+}
+
+
 class FakeSQL:
     def __init__(self, overrides: dict[str, Callable[[int], dict]] | None = None):
         self.fx = load("zetaris")
@@ -24,6 +30,10 @@ class FakeSQL:
         self.counts: dict[str, int] = {}
 
     def _key(self, sql: str) -> str:
+        if "AS n_etq" in sql:
+            return "coverage"
+        if "AS n_entities" in sql:
+            return "density"
         if "FIXTURE_R1" in sql:
             return "R1"
         if "FIXTURE_R3" in sql:
@@ -39,7 +49,7 @@ class FakeSQL:
     def __call__(self, sql: str) -> Result:
         key = self._key(sql)
         self.counts[key] = self.counts.get(key, 0) + 1
-        body = self.overrides[key](self.counts[key]) if key in self.overrides else self.fx[key]
+        body = self.overrides[key](self.counts[key]) if key in self.overrides else self.fx.get(key) or DEFAULTS[key]
         qid = str(uuid.uuid4())
         self.calls.append((key, qid))
         return Result(headers=body["headers"], rows=[list(r) for r in body["data"]], query_id=qid, ms=3, sql=sql)

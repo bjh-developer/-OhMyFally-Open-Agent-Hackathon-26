@@ -71,15 +71,21 @@ class Tracer:
         routed_model: str | None = None,
         latency_ms: int | None = None,
         egress: Any = None,
+        replayed: bool = False,
+        memory_hits: int | None = None,
+        memory_ids: list[str] | None = None,
     ) -> TraceEvent:
+        ids = [*(query_ids or []), *(receipt_ids or [])]
+        replayed = replayed or any(str(i).startswith("replay:") for i in ids)
         ev = TraceEvent(
             trace_id=self.run_id, agent_name=agent, action=action,
-            input_summary=_short(input), output_summary=_short(output), target_agent=target,
+            input_summary=_short(input), output_summary=_short(output) + (" [replayed from recorded run]" if replayed else ""), target_agent=target,
             confidence=confidence, retry_count=retry, status=status,  # type: ignore[arg-type]
             zetaris_query_ids=list(query_ids or []),
             meterless_receipt_id=(receipt_ids[-1] if receipt_ids else None),
             meterless_receipt_ids=list(receipt_ids or []),
-            routed_model=routed_model, latency_ms=latency_ms, egress=_egress(egress),
+            routed_model=routed_model, latency_ms=latency_ms, egress=_egress(egress), replayed=True if replayed else None,
+            memory_hits=memory_hits, memory_ids=list(memory_ids) if memory_ids is not None else None,
         )
         with self._lock:
             self.events.append(ev)
@@ -96,3 +102,20 @@ class Tracer:
         """Emit with the receipt fields of a nightshift ChatResult."""
         return self.emit(agent, action, receipt_ids=res.receipt_ids, routed_model=res.routed_model,
                          latency_ms=res.latency_ms, egress=res.egress, **kw)
+
+
+def format_event(e: TraceEvent) -> str:
+    """One readable line per trace event: time, agent, action, status, model, ids."""
+    parts = [time.strftime("%H:%M:%S"), f"{e.agent_name:<15}", f"{e.action:<20}", f"{e.status:<15}"]
+    if e.target_agent:
+        parts.append(f"-> {e.target_agent}")
+    if e.routed_model:
+        parts.append(f"model={e.routed_model}")
+    if e.zetaris_query_ids:
+        parts.append(f"zetaris={len(e.zetaris_query_ids)}q[{e.zetaris_query_ids[0][:13]}]")
+    if e.meterless_receipt_ids:
+        parts.append(f"receipts={len(e.meterless_receipt_ids)}[{e.meterless_receipt_ids[0][:16]}]")
+    if e.retry_count:
+        parts.append(f"retry={e.retry_count}")
+    line = " ".join(parts)
+    return f"{line} | {e.output_summary[:110]}"

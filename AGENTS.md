@@ -1,4 +1,4 @@
-# Agent instructions (Cursor and other coding agents)
+# Agent instructions (coding agents)
 
 Read these before writing any code in this repo:
 

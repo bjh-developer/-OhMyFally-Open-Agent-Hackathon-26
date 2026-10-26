@@ -18,10 +18,11 @@
   source_url: https://data.gov.sg/collections/2/view
 - flag_id: R3
   name: Winning suppliers share an address
-  logic: Two or more distinct winning suppliers at the same agency share an exact ACRA registered address
+  logic: Two or more distinct winning suppliers at the same agency share an exact ACRA registered address, from at least two different name groups (suppliers whose registered names start with the same word count as one group)
   params: {min_suppliers: 2, ignore_building_names: []}
+  address_density: {busy_min_entities: 25, busy_confidence_cap: 0.72}  # Critic: busy commercial address = probably benign
   priority: must
-  limitation: Shared business centres and virtual offices produce benign matches. Address match is on postal code + block + street + level + unit.
+  limitation: Shared business centres and virtual offices produce benign matches. Address match is on postal code + block + street + level + unit. Group companies with unrelated names are not recognised (no officer data).
   why_it_matters: Apparently independent bidders at one address can indicate common control or bid coordination.
   source_url: https://data.gov.sg/collections/2/view
 - flag_id: R4
@@ -34,18 +35,18 @@
   source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
 - flag_id: R5
   name: Supplier line of business far from tender
-  logic: Embedding similarity between the supplier's SSIC description and the tender description is low
+  logic: Embedding similarity between the supplier's SSIC description and the tender description is low, and the SSIC division is not a usual fit for the tender's type of work
   params: {max_similarity: 0.2}
   priority: should
-  limitation: Embedding similarity is noisy; always escalated to human review at low confidence.
+  limitation: Embedding similarity is uncalibrated and business descriptions can be broad; always escalated at confidence at most 0.6. Only description pairs with a stored Resolver confidence of at least 0.92 and nonempty descriptions are scored. Run prepare_r5.py after seeding or source changes.
   why_it_matters: A winner whose registered activity does not match the work may be a pass-through.
   source_url: https://data.gov.sg/collections/2/view
 - flag_id: R6
   name: Supplier concentration within a category
-  logic: One supplier holds a large share of an agency's awards (by value) in a tender category
-  params: {share_threshold: 0.5, min_awards: 5}
+  logic: One supplier holds a large share of an agency's awards (by value) in a tender category, across at least two of its own awards
+  params: {share_threshold: 0.5, min_awards: 5, min_supplier_awards: 2}
   priority: should
-  limitation: Specialised categories legitimately have few suppliers.
+  limitation: Ten first-match keyword categories are approximate; specialised categories legitimately have few suppliers. Requires at least five distinct category tenders, compares positive award value within the requested agency and period, and groups by supplier name without consolidating aliases.
   why_it_matters: High concentration can signal weak competition.
   source_url: https://mof.gov.sg/policies/government-procurement/procurement-process
 - flag_id: R7
@@ -60,6 +61,7 @@
   name: Local-looking supplier with no ACRA match
   logic: Supplier name has a local legal suffix (PTE LTD, PRIVATE LIMITED, LLP) but the Resolver found no ACRA entity above threshold. Foreign firms and government bodies are labelled "outside registry scope" instead.
   params: {min_confidence: 0.8}
+  plan_critique: {unresolved_min: 5}  # Critic: this many unresolved names makes R8 worth planning
   priority: must
   limitation: Our ACRA subset is a candidate set, and renamed or typo'd names may fail to match. Treat as a lead for manual lookup.
   why_it_matters: An award to an entity that cannot be found in the corporate registry needs identity verification.
@@ -69,6 +71,6 @@
   logic: The awarded supplier is not rank 1 in the evaluation scores (synthetic internal data only)
   params: {}
   priority: should
-  limitation: Synthetic internal records for planted tenders only; no real evaluation data is used.
+  limitation: Synthetic internal records only; no real evaluation data is used. Compares weighted scores only when every bidder has the same complete criteria and weights, weights sum to one and scores are between 0 and 100. Tied best scores are not flagged; documented award exceptions still require review.
   why_it_matters: Departures from published evaluation criteria need documented justification.
   source_url: https://mof.gov.sg/policies/government-procurement/procurement-process

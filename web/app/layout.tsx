@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner";
+import { NotifyToaster } from "@/components/notify-toaster";
 import { RunProvider } from "@/components/run-provider";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </RunProvider>
           </Suspense>
         </TooltipProvider>
-        <Toaster />
+        <NotifyToaster />
       </body>
     </html>
   );

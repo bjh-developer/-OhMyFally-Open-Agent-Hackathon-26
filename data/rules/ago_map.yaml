@@ -1,0 +1,22 @@
+# Red flag -> Auditor-General (AGO) excerpts that genuinely relate to it (chunk ids from data/ago/index.csv).
+# Curated by hand and applied deterministically by app/agents/ago.py; nothing is picked by similarity.
+# A flag with an empty list gets no excerpt. Never add a chunk only to fill a slot: an unrelated excerpt is worse than none.
+# `rationale` is one line, shown in the memo as "why it matters"; it says how the AGO case relates, not that this award is the same.
+R1: []  # No excerpt is about newly formed suppliers. ago-fy2324-sportsg-evaluation only mentions a loss-making 2019 start-up in passing and opens on excluded bids.
+R2: []  # ago-fy2223-pa-debarred is about debarment, not registry status; the two are different things.
+R3: []  # ago-fy2122-irregular-quotations is about doubtful quotation records, not shared addresses or bid coordination.
+R4:
+  - chunk_id: ago-fy2324-sportsg-variation
+    rationale: AGO has found a contract grown well beyond its approved value without a fresh tender, which, like splitting, can avoid open competition.
+R5: []  # No excerpt is about supplier line of business.
+R6:
+  - chunk_id: ago-fy2122-wog-pcfa-spread
+    rationale: AGO has noted that agencies should watch how contracts are spread across vendors, since a good spread keeps prices competitive (one vendor held 38 per cent).
+R8: []  # No excerpt is about suppliers missing from the corporate registry.
+R9:
+  - chunk_id: ago-fy2425-mpa-scoring
+    rationale: AGO found evaluation scoring errors that could have changed which tenderer won, which is the kind of departure from published criteria this check looks for.
+  - chunk_id: ago-fy2223-mci-panel
+    rationale: AGO found tenderers appointed even though they did not reach the minimum score in the published evaluation criteria.
+  - chunk_id: ago-fy2425-edb-evaluation
+    rationale: AGO found an evaluation that did not use the bid price the tenderer committed to, so the recommended award was not well-founded.

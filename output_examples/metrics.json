@@ -1,0 +1,729 @@
+{
+  "generated_at": "2026-10-24T10:00:25.139253+00:00",
+  "mode": "live_checks",
+  "pipeline_agents": [
+    "Resolver crosswalk read",
+    "Analyst"
+  ],
+  "complete": true,
+  "precision": {
+    "status": "measured",
+    "definition": "plausible / (plausible + explained); unclear and pending excluded. Plausibility is not proof of wrongdoing.",
+    "precision": 0.2857142857142857,
+    "plausible": 8,
+    "explained": 20,
+    "unclear": 2,
+    "decided": 28,
+    "human_reviewed": 30,
+    "pending": 0,
+    "agent_reviewed_excluded": 0,
+    "unmatched_labels": 0,
+    "nonplanted_candidates": 53,
+    "review_coverage": 0.5660377358490566,
+    "labels_path": "data/eval/precision_review_round2.csv",
+    "queue_created": false,
+    "queue_selection": "Top 30 nonplanted sample findings by award value not in an earlier review; no supplier names or addresses"
+  },
+  "errors": [],
+  "planted": {
+    "stage": "SQL candidate findings; no Critic, Risk or memory suppression applied",
+    "cases": 8,
+    "cases_caught": 8,
+    "case_flag_pairs": 8,
+    "case_flags_evaluated": 8,
+    "case_flags_caught": 8,
+    "expected_awards": 15,
+    "found_awards": 15,
+    "award_recall": 1.0,
+    "case_flag_recall": 1.0,
+    "case_recall": 1.0,
+    "negative_controls_passed": true,
+    "results": [
+      {
+        "case_id": "P1",
+        "flag_id": "R1",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P2",
+        "flag_id": "R2",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P3",
+        "flag_id": "R3",
+        "evaluated": true,
+        "expected_awards": 2,
+        "found_awards": 2,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P4",
+        "flag_id": "R4",
+        "evaluated": true,
+        "expected_awards": 3,
+        "found_awards": 3,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P5",
+        "flag_id": "R8",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P6",
+        "flag_id": "R9",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P7",
+        "flag_id": "R5",
+        "evaluated": true,
+        "expected_awards": 1,
+        "found_awards": 1,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      },
+      {
+        "case_id": "P8",
+        "flag_id": "R6",
+        "evaluated": true,
+        "expected_awards": 5,
+        "found_awards": 5,
+        "missed_tenders": [],
+        "recall": 1.0,
+        "case_caught": true,
+        "negative_control_hits": []
+      }
+    ]
+  },
+  "resolver": {
+    "overall": {
+      "total": 100,
+      "correct": 100,
+      "accuracy": 1.0,
+      "linked": 99,
+      "positive_labels": 99,
+      "link_precision": 1.0,
+      "link_recall": 1.0,
+      "wrong_links": 0,
+      "missed_links": 0,
+      "correct_abstentions": 1,
+      "critic_accepted_links": 94,
+      "critic_link_precision": 1.0,
+      "critic_link_recall": 0.9494949494949495
+    },
+    "human_reviewed": {
+      "total": 0,
+      "correct": 0,
+      "accuracy": null,
+      "linked": 0,
+      "positive_labels": 0,
+      "link_precision": null,
+      "link_recall": null,
+      "wrong_links": 0,
+      "missed_links": 0,
+      "correct_abstentions": 0,
+      "critic_accepted_links": 0,
+      "critic_link_precision": null,
+      "critic_link_recall": null
+    },
+    "by_category": {
+      "current_name": {
+        "total": 50,
+        "correct": 50,
+        "accuracy": 1.0,
+        "linked": 50,
+        "positive_labels": 50,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 50,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "former_name": {
+        "total": 5,
+        "correct": 5,
+        "accuracy": 1.0,
+        "linked": 5,
+        "positive_labels": 5,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 0,
+        "critic_link_precision": null,
+        "critic_link_recall": 0.0
+      },
+      "llp": {
+        "total": 10,
+        "correct": 10,
+        "accuracy": 1.0,
+        "linked": 10,
+        "positive_labels": 10,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 10,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "placeholder": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0,
+        "linked": 0,
+        "positive_labels": 0,
+        "link_precision": null,
+        "link_recall": null,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 1,
+        "critic_accepted_links": 0,
+        "critic_link_precision": null,
+        "critic_link_recall": null
+      },
+      "private_limited": {
+        "total": 15,
+        "correct": 15,
+        "accuracy": 1.0,
+        "linked": 15,
+        "positive_labels": 15,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 15,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "punctuation_or_case": {
+        "total": 9,
+        "correct": 9,
+        "accuracy": 1.0,
+        "linked": 9,
+        "positive_labels": 9,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 9,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      },
+      "registered_foreign_branch": {
+        "total": 10,
+        "correct": 10,
+        "accuracy": 1.0,
+        "linked": 10,
+        "positive_labels": 10,
+        "link_precision": 1.0,
+        "link_recall": 1.0,
+        "wrong_links": 0,
+        "missed_links": 0,
+        "correct_abstentions": 0,
+        "critic_accepted_links": 10,
+        "critic_link_precision": 1.0,
+        "critic_link_recall": 1.0
+      }
+    },
+    "methods": {
+      "exact": 94,
+      "former_name": 5,
+      "out_of_scope": 1
+    },
+    "pending_excluded": 3,
+    "critic_threshold": 0.92,
+    "generated_at": "2026-10-24T10:04:11.402000+00:00",
+    "mode": "live",
+    "resolver_mode": "full",
+    "labels_sha256": "b7ad4c3fca881f6f65cc04b48821828725076f51c1e19173c61760cf0d6370c3",
+    "registry_entities": 1236,
+    "sources": {
+      "b85777b2-ab66-45c8-b420-4bcc9c097cb0": {
+        "sql": "SELECT uen, entity_name, entity_type_description, entity_status_description, registration_incorporation_date, postal_code, former_entity_name1, former_entity_name2, former_entity_name3, former_entity_name4, former_entity_name5, former_entity_name6, former_entity_name7, former_entity_name8, former_entity_name9, former_entity_name10, former_entity_name11, former_entity_name12, former_entity_name13, former_entity_name14, former_entity_name15 FROM ACRA_FILES.entities",
+        "rows": 1236
+      },
+      "766c25ae-118b-412b-a8be-8b6c3d70a6d7": {
+        "sql": "SELECT DISTINCT supplier_name FROM gebiz_pg.awards",
+        "rows": 1270
+      }
+    },
+    "runtime_seconds": 5.004,
+    "llm_calls": 0,
+    "llm_failed_batches": 0,
+    "meterless_receipt_ids": [],
+    "limitations": [
+      "Agent-reviewed labels are not human sign-off or independently verified legal identities.",
+      "The registry sample was previously minimised using Resolver candidates; this is an in-sample diagnostic, not a held-out benchmark.",
+      "Only source-supported corporate matches and a placeholder are scored; ambiguous cases remain pending.",
+      "No fuzzy or LLM tie-break accuracy claim is supported unless those methods appear in the results.",
+      "Former names have no change dates; historical ownership at award time is unverified."
+    ]
+  },
+  "tokens": {
+    "llm_calls": 0,
+    "total_tokens": 0,
+    "provider_reported_total_tokens": null,
+    "status": "no_llm_calls",
+    "note": "SQL checks use no LLM. Resolver tie-break usage is not estimated; unknown provider usage remains null."
+  },
+  "quality_checks_passed": true,
+  "samples": [
+    {
+      "request": {
+        "agency": "Housing and Development Board",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "flags": [],
+        "question": "Which of HDB's 2025 procurement awards need review, and why?"
+      },
+      "checks": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R8",
+        "R9"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 27,
+      "findings_by_flag": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 2,
+        "R4": 2,
+        "R5": 20,
+        "R9": 1
+      },
+      "runtime_seconds": 76.95,
+      "trace_path": "logs/eval_20261024_100025/run_eval_20261024_100025_1.jsonl",
+      "supplemental": false
+    },
+    {
+      "request": {
+        "agency": "People's Association",
+        "date_from": "2024-01-01",
+        "date_to": "2024-12-31",
+        "flags": [
+          "R1",
+          "R4"
+        ],
+        "question": "Check the People's Association 2024 awards for new suppliers and possible contract splitting."
+      },
+      "checks": [
+        "R1",
+        "R4"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 7,
+      "findings_by_flag": {
+        "R4": 7
+      },
+      "runtime_seconds": 22.528,
+      "trace_path": "logs/eval_20261024_100025/run_eval_20261024_100142_2.jsonl",
+      "supplemental": false
+    },
+    {
+      "request": {
+        "agency": "National Parks Board",
+        "date_from": "2023-01-01",
+        "date_to": "2025-12-31",
+        "flags": [],
+        "question": "Screen NParks awards from 2023 to 2025."
+      },
+      "checks": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R8",
+        "R9"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 29,
+      "findings_by_flag": {
+        "R2": 1,
+        "R3": 8,
+        "R4": 2,
+        "R5": 12,
+        "R6": 5,
+        "R8": 1
+      },
+      "runtime_seconds": 57.1,
+      "trace_path": "logs/eval_20261024_100025/run_eval_20261024_100204_3.jsonl",
+      "supplemental": false
+    }
+  ],
+  "supplemental_scopes": [
+    {
+      "request": {
+        "agency": "Housing and Development Board",
+        "date_from": "2021-04-01",
+        "date_to": "2026-03-31",
+        "flags": [
+          "R3"
+        ],
+        "question": null
+      },
+      "checks": [
+        "R3"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 144,
+      "findings_by_flag": {
+        "R3": 144
+      },
+      "runtime_seconds": 23.425,
+      "trace_path": "logs/eval_20261024_100025/run_eval_20261024_100301_4.jsonl",
+      "supplemental": true
+    },
+    {
+      "request": {
+        "agency": "Synthetic Review Agency",
+        "date_from": "2021-04-01",
+        "date_to": "2026-03-31",
+        "flags": [
+          "R5",
+          "R6"
+        ],
+        "question": null
+      },
+      "checks": [
+        "R5",
+        "R6"
+      ],
+      "status": "success",
+      "coverage_gaps": [],
+      "findings": 6,
+      "findings_by_flag": {
+        "R5": 1,
+        "R6": 5
+      },
+      "runtime_seconds": 41.178,
+      "trace_path": "logs/eval_20261024_100025/run_eval_20261024_100325_5.jsonl",
+      "supplemental": true
+    }
+  ],
+  "sql_calls": [
+    {
+      "scope": "sample_1",
+      "query_id": "ff448c11-79ed-47e9-8b23-4e66d7354f47",
+      "rows": 216,
+      "runtime_seconds": 2.182
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "d8b58ce8-1f55-4889-b87e-8a9f852842a1",
+      "rows": 216,
+      "runtime_seconds": 0.865
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "105d12d8-284c-4501-83b5-6fb786b66e42",
+      "rows": 1,
+      "runtime_seconds": 6.372
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "0632e7ef-15af-4d8e-bea2-27c83957e2a4",
+      "rows": 1,
+      "runtime_seconds": 1.013
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "cb40e42b-2483-4933-b1f4-c1210028774b",
+      "rows": 2,
+      "runtime_seconds": 13.328
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "6de50589-e92d-405d-9d16-d744448706d5",
+      "rows": 2,
+      "runtime_seconds": 6.539
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "4c5b9670-7145-490f-be4e-352d6958b2a1",
+      "rows": 1,
+      "runtime_seconds": 2.036
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "be7ab4d3-d9ee-44e6-9370-c3cfa3ee86ee",
+      "rows": 128,
+      "runtime_seconds": 2.692
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "1e3e2d47-8d8b-47f4-b752-1dbc8fa1af6a",
+      "rows": 20,
+      "runtime_seconds": 10.826
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "1ddcb66a-4cb6-45ad-a5a0-6d826a475798",
+      "rows": 0,
+      "runtime_seconds": 11.728
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "fb04c1f9-496b-46bd-9af1-b26a179fdddb",
+      "rows": 0,
+      "runtime_seconds": 8.557
+    },
+    {
+      "scope": "sample_1",
+      "query_id": "f1e8992a-4b8e-46be-8057-211e4b057824",
+      "rows": 1,
+      "runtime_seconds": 10.748
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "9fe0978b-28b4-403c-95ff-6c8cf5420fab",
+      "rows": 161,
+      "runtime_seconds": 3.267
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "b3d73300-6708-4e8c-bd07-150272e72ec3",
+      "rows": 161,
+      "runtime_seconds": 0.84
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "3cec2bc8-1fd5-4409-8cf8-2e69b619a90c",
+      "rows": 0,
+      "runtime_seconds": 7.898
+    },
+    {
+      "scope": "sample_2",
+      "query_id": "d6860e68-06f9-464e-87f5-6d4c1b3bb675",
+      "rows": 7,
+      "runtime_seconds": 10.491
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "9f29e003-dd7c-4f11-8262-0034d7ab1161",
+      "rows": 171,
+      "runtime_seconds": 3.92
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "eb96af81-6a22-4040-a0c6-99bb976a0670",
+      "rows": 171,
+      "runtime_seconds": 0.631
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "8adac975-ddfb-4f72-afc5-35d79dc7ce40",
+      "rows": 0,
+      "runtime_seconds": 5.344
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "a41c5011-45d4-4ade-b8cd-ceb813a48a7e",
+      "rows": 1,
+      "runtime_seconds": 1.678
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "908bfe40-77fd-4714-bdfa-adff7f5221ed",
+      "rows": 8,
+      "runtime_seconds": 15.101
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "67b3165c-5295-4fa1-bf00-3cd75bbb82d1",
+      "rows": 2,
+      "runtime_seconds": 4.797
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "1a4143a3-a53d-4c5d-8c19-0746e2ada8a3",
+      "rows": 1,
+      "runtime_seconds": 6.308
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "b1e24fec-a58d-457c-a09a-65edb4d8e16d",
+      "rows": 104,
+      "runtime_seconds": 2.534
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "d7f88531-1ee2-4629-9ec3-46b6489dd9e8",
+      "rows": 12,
+      "runtime_seconds": 3.225
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "7a14b2de-543f-4398-9ecc-e79beab8d4e4",
+      "rows": 5,
+      "runtime_seconds": 5.129
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "6399076c-7fae-49db-be74-9edd709cc9aa",
+      "rows": 1,
+      "runtime_seconds": 1.549
+    },
+    {
+      "scope": "sample_3",
+      "query_id": "0f83cdef-9fd6-4189-b35a-cfd9296d69b5",
+      "rows": 0,
+      "runtime_seconds": 6.808
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "7f3c1c39-102e-4744-8932-09499bc40427",
+      "rows": 619,
+      "runtime_seconds": 3.123
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "6b9e8972-06e1-4a27-90f4-dddfe8d9cdb9",
+      "rows": 619,
+      "runtime_seconds": 2.728
+    },
+    {
+      "scope": "supplemental_4",
+      "query_id": "32eb1b81-8386-447d-adf9-df1d6a48ba64",
+      "rows": 144,
+      "runtime_seconds": 17.484
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "63e4318f-3fa1-40c2-8ab1-6c90dc8ce5f9",
+      "rows": 3,
+      "runtime_seconds": 3.688
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "7239e582-1f7f-4172-ab81-76d5a7421558",
+      "rows": 3,
+      "runtime_seconds": 6.148
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "59f2c34c-8b5b-4b0a-8e1e-1d89fe6b41ac",
+      "rows": 1,
+      "runtime_seconds": 3.878
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "7742a579-5624-4440-a6ef-507f11a084fb",
+      "rows": 2,
+      "runtime_seconds": 9.914
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "80fbdbd2-0f57-40a8-8538-b901a64d3389",
+      "rows": 1,
+      "runtime_seconds": 7.23
+    },
+    {
+      "scope": "supplemental_5",
+      "query_id": "5bd28050-c3a9-4470-89cf-7d3fccb5a63d",
+      "rows": 5,
+      "runtime_seconds": 10.199
+    },
+    {
+      "scope": "resolver_accuracy",
+      "query_id": "b85777b2-ab66-45c8-b420-4bcc9c097cb0",
+      "rows": 1236,
+      "runtime_seconds": 3.65
+    },
+    {
+      "scope": "resolver_accuracy",
+      "query_id": "766c25ae-118b-412b-a8be-8b6c3d70a6d7",
+      "rows": 1270,
+      "runtime_seconds": 1.266
+    }
+  ],
+  "runtime_seconds": 226.265,
+  "limitations": [
+    "Check-level evaluation does not measure Critic acceptance, memory suppression, ranking or memo quality.",
+    "Planted recall uses fictional cases and does not establish precision on real awards.",
+    "Precision is unmeasured until humans label findings; unclear, pending and agent reviews are excluded from the precision denominator.",
+    "Resolver accuracy is an agent-reviewed, positive-heavy in-sample diagnostic; human-reviewed accuracy remains separate.",
+    "R5 semantic scores and R6 keyword categories are uncalibrated screening heuristics."
+  ],
+  "provenance": {
+    "inputs": [
+      {
+        "file": "data/eval/precision_requests/sample_1.json",
+        "sha256": "eab825d684e39a0c550bc06ab58ce6b799cefbd954410f29233609cf08ad9c26"
+      },
+      {
+        "file": "data/eval/precision_requests/sample_2.json",
+        "sha256": "4114c5bd27f1e708377cbb759e27ba9bbe9f9785118673dec05a6f508bc66922"
+      },
+      {
+        "file": "data/eval/precision_requests/sample_3.json",
+        "sha256": "40277f51d193ab95c7fb1844dfda7a25a11c784b708f79ee718277dc1e563c9a"
+      }
+    ],
+    "evaluator_sha256": "bd79ce97aa22c66018f3232f8288057246678069915323edd05d9b719d0cfc8e",
+    "check_sql_sha256": {
+      "R1": "be8124edb9e8c460023a670676cee8d3bb4026c114634ea9c5dc31a4e53acb85",
+      "R2": "3d932effaf9a81f1633d4e3eae46da6aa2d8f413b64d73b37dbd1e7e5f286612",
+      "R3": "4aade6eebb2cf17d083fa9a301840447b431bd97d07785807014594a52b26d5c",
+      "R4": "92a5d5799a0f2167c7519ddeb1aedea540e51fe5866e728db3c8e00ec0b4a8d1",
+      "R5": "2b697b83c19928227d4fdbd1e0673a9b028ffe541388db25e2d4f440e9e85d4b",
+      "R6": "5d4d992a50674231d95e3d9de29a8d12c2b6cc68d45c2a7c7346c0e821e99569",
+      "R8": "7404b11114c431c7c8c46c12ad0269e4de51985ec644101f9408c26d7e532dd2",
+      "R9": "da791e7ac5264f4301988524781bc536010ed21c3a06fb07d4e5d74adb203368"
+    },
+    "planted_sha256": "8a9c86a6a64b9661f992a6fccba8d02390c358e4f7bbc09cedb5d5c3f5ac8d72",
+    "precision_labels_sha256": "6e8c0948a844258be8742ac2f261241aa994c7457988eee14ad431bfdf30edea"
+  }
+}

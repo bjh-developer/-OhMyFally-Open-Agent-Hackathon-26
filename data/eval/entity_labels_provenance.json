@@ -1,0 +1,24 @@
+{
+  "prepared_on": "2026-10-23",
+  "reviewer": "codex",
+  "review_type": "agent_reviewed",
+  "sources": {
+    "suppliers": {
+      "query_id": "a21a5032-5c48-41cf-8bab-3298345853ef",
+      "rows": 1267
+    },
+    "entities": {
+      "query_id": "31777460-cb1e-443a-95de-9ca1ad46af9d",
+      "rows": 1233
+    }
+  },
+  "source_objects": {
+    "suppliers": "gebiz_pg.awards",
+    "entities": "ACRA_FILES.entities"
+  },
+  "copied_from_predictions": false,
+  "human_signoff": false,
+  "scored_rows": 100,
+  "pending_rows": 3,
+  "labels_sha256": "d02ec84087947f4c0babbf4859faf539de488f79733109e1c07a6f23f2709fbd"
+}
